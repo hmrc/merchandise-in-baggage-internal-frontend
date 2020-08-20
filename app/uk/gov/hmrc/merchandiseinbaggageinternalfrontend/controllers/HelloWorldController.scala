@@ -1,25 +1,35 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ */
+
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.actions.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.HelloWorldPage
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.StrideAuthConnector
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{ErrorTemplate, HelloWorldPage}
 
 import scala.concurrent.Future
 
 @Singleton
 class HelloWorldController @Inject()(
-  appConfig: AppConfig,
+                                    configuration: Configuration,
+                                    environment: Environment,
+                                    authConnector: StrideAuthConnector,
+  implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  helloWorldPage: HelloWorldPage)
-    extends FrontendController(mcc) {
+  helloWorldPage: HelloWorldPage, errorTemplate: ErrorTemplate)
+    extends StrideAuthAction(configuration, environment, authConnector, mcc, errorTemplate) {
 
-  implicit val config: AppConfig = appConfig
-
-  val helloWorld: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(helloWorldPage()))
-  }
+  val helloWorld: Action[AnyContent] =
+    asyncForAuthRequestWithDefaultBody(
+      adminRole
+    ) { implicit request =>
+      Future.successful(Ok(helloWorldPage()))
+    }
 
 }

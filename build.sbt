@@ -1,5 +1,6 @@
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import play.sbt.PlayImport.PlayKeys.playDefaultPort
 
 val appName = "merchandise-in-baggage-internal-frontend"
 
@@ -10,6 +11,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     majorVersion                     := 0,
     scalaVersion                     := "2.12.11",
+    playDefaultPort                  := 8282,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     TwirlKeys.templateImports ++= Seq(
       "uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig",
