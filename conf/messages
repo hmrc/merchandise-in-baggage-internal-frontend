@@ -10,3 +10,7 @@ footer.termsConditions.text = Terms and conditions
 footer.termsConditions.url = /help/terms-and-conditions
 footer.govukHelp.text = Help using GOV.UK
 footer.govukHelp.url = https://www.gov.uk/help
+
+error.auth.access.denied.title = Access Denied
+error.auth.access.denied.heading = Access Denied
+error.auth.access.denied.message = You are not authenticated to use this service.
