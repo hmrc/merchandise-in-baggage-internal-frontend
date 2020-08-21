@@ -36,7 +36,7 @@ class HelloWorldControllerSpec extends BaseSpecWithApplication {
     "return 401" in {
       AuthWireMockResponses.failsWith("Insufficient Role")
       val result = controller.helloWorld(buildGet(routes.HelloWorldController.helloWorld().url))
-      status(result) mustBe Status.UNAUTHORIZED
+      status(result) mustBe Status.FORBIDDEN
     }
   }
 }

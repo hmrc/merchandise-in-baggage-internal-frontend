@@ -7,10 +7,9 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config
 
 import javax.inject.{Inject, Singleton}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject()(val config: Configuration, val env: Environment, servicesConfig: ServicesConfig) {
+class AppConfig @Inject()(val config: Configuration, val env: Environment) {
 
   lazy val strideRole: String = config.get[String]("stride.role")
 

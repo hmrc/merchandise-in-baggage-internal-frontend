@@ -7,7 +7,7 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth
 
 import javax.inject.Inject
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.mvc.Results.Unauthorized
+import play.api.mvc.Results.{Unauthorized, Forbidden}
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
@@ -21,7 +21,14 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appConfig: AppConfig, mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends ActionBuilder[AuthRequest, AnyContent] with AuthorisedFunctions with AuthRedirects {
+class StrideAuthAction @Inject()(override val authConnector: AuthConnector,
+                                 appConfig: AppConfig,
+                                 mcc: MessagesControllerComponents
+                                )(implicit ec: ExecutionContext)
+  extends ActionBuilder[AuthRequest, AnyContent]
+    with AuthorisedFunctions
+    with AuthRedirects {
+
   override def parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
   override def config: Configuration = appConfig.config
@@ -49,7 +56,7 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appC
         toStrideLogin(uri)
       case e: AuthorisationException =>
         logger.warn(s"Unauthorised because of ${e.reason}, $e")
-        Unauthorized
+        Forbidden
     }
   }
 }
