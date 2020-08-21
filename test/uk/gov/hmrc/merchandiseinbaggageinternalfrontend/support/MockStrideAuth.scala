@@ -8,20 +8,18 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
-object AuthWireMockResponses {
-
+object MockStrideAuth {
   val expectedDetail = "SessionRecordNotFound"
 
-  def notAuthorised: StubMapping = {
+  def givenTheUserIsNotAuthenticated(): StubMapping =
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(aResponse()
         .withStatus(401)
         .withHeader("WWW-Authenticate", s"""MDTP detail="$expectedDetail"""")
       )
     )
-  }
 
-  def authorised(authProvider: String, strideUserId: String): StubMapping = {
+  def givenTheUserIsAuthenticatedAndAuthorised(): StubMapping =
     stubFor(post(urlEqualTo("/auth/authorise"))
       .withRequestBody(
         equalToJson(
@@ -35,7 +33,7 @@ object AuthWireMockResponses {
              |    },
              |    {
              |      "authProviders": [
-             |        "$authProvider"
+             |        "PrivilegedApplication"
              |      ]
              |    }
              |  ]
@@ -47,21 +45,42 @@ object AuthWireMockResponses {
           s"""
              |{
              |  "optionalCredentials":{
-             |    "providerId": "$strideUserId",
-             |    "providerType": "$authProvider"
+             |    "providerId": "userId",
+             |    "providerType": "PrivilegedApplication"
              |  }
              |}
        """.stripMargin)))
 
-  }
+  def givenTheUserHasNoCredentials(): StubMapping =
+    stubFor(post(urlEqualTo("/auth/authorise"))
+      .withRequestBody(
+        equalToJson(
+          s"""
+             |{
+             |  "authorise": [
+             |    {
+             |     "identifiers":[],
+             |     "state":"Activated",
+             |     "enrolment":"mib"
+             |    },
+             |    {
+             |      "authProviders": [
+             |        "PrivilegedApplication"
+             |      ]
+             |    }
+             |  ]
+             |}
+           """.stripMargin, true, true))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withBody("{}")))
 
-  def failsWith(error: String): StubMapping = {
+
+  def givenAuthFailsWith(error: String): StubMapping =
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(aResponse()
         .withStatus(401)
         .withHeader("WWW-Authenticate", s"""MDTP detail=\"$error\"""")
       )
     )
-  }
-
 }
