@@ -23,4 +23,20 @@ class HelloWorldControllerSpec extends BaseSpecWithApplication {
       status(result) mustBe Status.OK
     }
   }
+
+  "GET when not logged in" should {
+    "return 303" in {
+      AuthWireMockResponses.notAuthorised
+      val result = controller.helloWorld(buildGet(routes.HelloWorldController.helloWorld().url))
+      status(result) mustBe Status.SEE_OTHER
+    }
+  }
+
+  "GET when logged without mib role" should {
+    "return 401" in {
+      AuthWireMockResponses.failsWith("Insufficient Role")
+      val result = controller.helloWorld(buildGet(routes.HelloWorldController.helloWorld().url))
+      status(result) mustBe Status.UNAUTHORIZED
+    }
+  }
 }

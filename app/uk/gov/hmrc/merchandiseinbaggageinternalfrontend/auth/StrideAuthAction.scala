@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StrideAuthAction @Inject()(af: AuthorisedFunctions, appConfig: AppConfig, mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends ActionBuilder[AuthRequest, AnyContent] with AuthRedirects {
+class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appConfig: AppConfig, mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends ActionBuilder[AuthRequest, AnyContent] with AuthorisedFunctions with AuthRedirects {
   override def parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
   override def config: Configuration = appConfig.config
@@ -38,7 +38,7 @@ class StrideAuthAction @Inject()(af: AuthorisedFunctions, appConfig: AppConfig, 
 
     val strideEnrolment = Enrolment(appConfig.strideRole)
 
-    af.authorised(strideEnrolment and AuthProviders(PrivilegedApplication)).retrieve(credentials) {
+    authorised(strideEnrolment and AuthProviders(PrivilegedApplication)).retrieve(credentials) {
       case Some(c: Credentials) => block(new AuthRequest(request, c))
       case None =>
         logger.warn("User does not have credentials")
