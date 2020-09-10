@@ -1,0 +1,38 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ *@
+
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes._
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationData
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
+@import uk.gov.hmrc.play.views.html.helpers._
+@import helper._
+
+@this()
+
+@(form: Form[DeclarationData])(implicit request: Request[_])
+
+@helper.form(action = DeclarationTestOnlyController.onSubmit()) {
+
+    <div>
+        <h1 class="govuk-heading-xl">This is a test only merchandise-in-baggage declaration</h1>
+
+        <div class="form-field-group">
+
+            <fieldset>
+                <legend class="margin-top-0 margin-bottom-0">
+                    <h1 class="heading-xlarge">Declaration json</h1>
+                </legend>
+
+                <div class="form-group form-field-group">
+                    @helper.CSRF.formField
+                    <textarea id="@declarationFormIdentifier" rows="10" cols="50" name="@declarationFormIdentifier"></textarea>
+                </div>
+            </fieldset>
+        </div>
+        <br>
+        <input type="submit" value="Submit">
+    </div>
+}

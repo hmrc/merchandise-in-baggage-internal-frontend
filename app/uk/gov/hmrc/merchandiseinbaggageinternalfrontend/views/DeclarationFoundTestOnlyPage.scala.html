@@ -1,0 +1,26 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ *@
+
+@import uk.gov.hmrc.play.views.html.helpers._
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.Declaration
+@import helper._
+
+@this()
+
+@(declaration: Declaration)(implicit request: Request[_])
+
+<div>
+    <h1 class="govuk-heading-xl">This is a test only merchandise-in-baggage declaration</h1>
+
+    <div class="form-field-group">
+
+        <fieldset>
+            <legend class="margin-top-0 margin-bottom-0">
+                <h1 class="heading-xlarge">Declaration json</h1>
+                <p>@declaration</p>
+            </legend>
+        </fieldset>
+    </div>
+</div>
