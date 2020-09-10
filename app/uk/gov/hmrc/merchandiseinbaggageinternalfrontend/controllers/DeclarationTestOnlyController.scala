@@ -35,7 +35,7 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
   def findDeclaration(declarationId: String): Action[AnyContent] = Action.async { implicit request  =>
     declarationById(httpClient, DeclarationId(declarationId)).map(response =>
       Ok(declarationFoundView(Json.parse(response.body).as[Declaration]))
-    )
+    ).recover { case _ => NotFound }
   }
 
   def onSubmit(): Action[AnyContent] = Action.async { implicit request  =>
@@ -50,7 +50,7 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
 
     newDeclaration fold ({
       case InvalidDeclarationRequest => InternalServerError("Invalid Request")
-      case DeclarationNotFound       => NotFound
+      case _                         => InternalServerError("Error")
     }, declarationIdResponse => Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id.value))
     )
   }

@@ -5,6 +5,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -31,4 +32,13 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
 
   def buildGet(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+}
+
+trait BaseSpecWithWireMock extends BaseSpecWithApplication {
+
+  val mibBackendMockServer = new WireMockServer(8281)
+
+  override def beforeEach: Unit = mibBackendMockServer.start()
+
+  override def afterEach: Unit = mibBackendMockServer.stop()
 }

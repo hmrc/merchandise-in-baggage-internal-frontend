@@ -1,20 +1,32 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ */
+
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
+import com.github.tomakehurst.wiremock.client.WireMock.{status => _, _}
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.DeclarationTestOnlyPage
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.DeclarationIdResponse
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{Declaration, DeclarationId}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.MIBBackendService
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithWireMock
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{DeclarationFoundTestOnlyPage, DeclarationTestOnlyPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with CoreTestData {
+class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTestData {
 
   val view = injector.instanceOf[DeclarationTestOnlyPage]
-  val controller = new DeclarationTestOnlyController(component, view, repository)
+  val foundView = injector.instanceOf[DeclarationFoundTestOnlyPage]
+  val httpClient = injector.instanceOf[HttpClient]
+  val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView)
 
 
   "ready html page is served which contains copy showing it is a test-only page and a form with which I an enter and submit a declaration" in {
@@ -25,11 +37,18 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     contentAsString(result) mustBe view(controller.declarationForm(declarationFormIdentifier))(request).toString
   }
 
-  "on submit a declaration will be persisted and redirected to /declaration/:id" in {
+  "on submit a declaration will be persisted and redirected to /declaration/:id" in new MIBBackendService {
     val declarationRequest = aDeclarationRequest
     val requestBody = Json.toJson(declarationRequest)
     val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
-    val controller = new DeclarationTestOnlyController(component, view, repository) {
+
+    mibBackendMockServer
+      .stubFor(post(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations"))
+        .withRequestBody(equalToJson(Json.toJson(declarationRequest).toString, true, false))
+        .willReturn(okJson(Json.toJson(DeclarationIdResponse(DeclarationId("123"))).toString).withStatus(201))
+      )
+
+    val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView) {
       override protected def bindForm(implicit request: Request[_]): Form[DeclarationData] =
         new Forms{}.declarationForm(declarationFormIdentifier)
           .bind(Map(declarationFormIdentifier -> Json.toJson(requestBody).toString))
@@ -37,6 +56,21 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     val result = controller.onSubmit()(postRequest)
 
     status(result) mustBe 303
-    redirectLocation(result).get must include("/merchandise-in-baggage/declarations/")
+    redirectLocation(result).get mustBe "/merchandise-in-baggage/test-only/declarations/123"
+  }
+
+  "on findDeclaration a declaration will be retrieved from MIB backend and show data result" in new MIBBackendService {
+    val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
+    val stubbedDeclaration: Declaration = aDeclaration
+
+    mibBackendMockServer
+      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
+        .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200))
+      )
+
+    val result = controller.findDeclaration("123")(getRequest)
+
+    status(result) mustBe 200
+    contentAsString(result) mustBe foundView(stubbedDeclaration)(getRequest).toString
   }
 }
