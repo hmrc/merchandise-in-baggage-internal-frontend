@@ -73,4 +73,18 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     status(result) mustBe 200
     contentAsString(result) mustBe foundView(stubbedDeclaration)(getRequest).toString
   }
+
+  "I navigate or am redirected to /test-only/declarations/123. Then: A 'not found' message is served." in new MIBBackendService {
+    val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
+
+    mibBackendMockServer
+      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
+        .willReturn(aResponse().withStatus(404))
+      )
+
+    val result = controller.findDeclaration("123")(getRequest)
+
+    status(result) mustBe 404
+    contentAsString(result) must include("Declaration Not Found")
+  }
 }
