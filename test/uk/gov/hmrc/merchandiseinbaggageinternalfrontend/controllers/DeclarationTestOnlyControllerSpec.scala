@@ -37,7 +37,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     contentAsString(result) mustBe view(controller.declarationForm(declarationFormIdentifier))(request).toString
   }
 
-  "on submit a declaration will be persisted and redirected to /declaration/:id" in new MIBBackendService {
+  "on submit a declaration will be persisted and redirected to /test-only/declaration/:id" in new MIBBackendService {
     val declarationRequest = aDeclarationRequest
     val requestBody = Json.toJson(declarationRequest)
     val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
@@ -56,7 +56,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     val result = controller.onSubmit()(postRequest)
 
     status(result) mustBe 303
-    redirectLocation(result).get mustBe "/merchandise-in-baggage/test-only/declarations/123"
+    redirectLocation(result).get mustBe s"${routes.DeclarationTestOnlyController.findDeclaration("123").url}"
   }
 
   "on findDeclaration a declaration will be retrieved from MIB backend and show data result" in new MIBBackendService {
