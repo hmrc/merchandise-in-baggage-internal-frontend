@@ -53,11 +53,11 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
         declarationResponse <- EitherT.fromOptionF[Future, BusinessError, DeclarationIdResponse](eventualResponse, InvalidDeclarationRequest)
       } yield declarationResponse
 
-    newDeclaration fold ({
+    newDeclaration.fold ({
       case InvalidDeclarationRequest => InternalServerError("Invalid Request")
-      case _                         => InternalServerError("Error")
+      case err                       => InternalServerError(s"$err")
     }, declarationIdResponse => Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id.value))
-    )
+    ).recover({case err => InternalServerError(s"$err") })
   }
 
   protected def bindForm(implicit request: Request[_]): Form[DeclarationData] =

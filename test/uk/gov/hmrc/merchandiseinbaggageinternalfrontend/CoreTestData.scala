@@ -8,7 +8,7 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend
 import java.util.UUID
 
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.DeclarationRequest
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{AmountInPence, ChargeReference, CsgTpsProviderId, Declaration, DeclarationId, Outstanding, Paid, TraderName}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 
 trait CoreTestData {
 
