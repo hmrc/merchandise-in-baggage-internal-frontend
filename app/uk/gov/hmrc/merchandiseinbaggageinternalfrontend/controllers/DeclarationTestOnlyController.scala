@@ -54,9 +54,12 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
       } yield declarationResponse
 
     newDeclaration.fold ({
-      case InvalidDeclarationRequest => InternalServerError("Invalid Request")
-      case err                       => InternalServerError(s"$err")
-    }, declarationIdResponse => Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id.value))
+      case InvalidDeclarationRequest =>
+        InternalServerError("Invalid Request")
+      case err                       =>
+        InternalServerError(s"$err")
+    }, declarationIdResponse =>
+      Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id.value))
     ).recover({case err => InternalServerError(s"$err") })
   }
 

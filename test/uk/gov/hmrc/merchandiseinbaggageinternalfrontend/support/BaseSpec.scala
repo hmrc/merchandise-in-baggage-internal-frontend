@@ -36,7 +36,7 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
 
 trait BaseSpecWithWireMock extends BaseSpecWithApplication {
 
-  val mibBackendMockServer = new WireMockServer(8281)
+  val mibBackendMockServer = new WireMockServer(8280)
 
   override def beforeEach: Unit = mibBackendMockServer.start()
 
