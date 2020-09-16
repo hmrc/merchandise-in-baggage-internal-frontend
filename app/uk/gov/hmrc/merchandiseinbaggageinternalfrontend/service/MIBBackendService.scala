@@ -16,9 +16,9 @@ trait MIBBackendService extends MIBBackendServiceConf {
 
   def addDeclaration(httpClient: HttpClient, requestBody: DeclarationRequest)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DeclarationIdResponse] =
-    httpClient.POST[DeclarationRequest, DeclarationIdResponse](s"$mibBackendBaseUri${mibBackendServiceConf.url}/declarations", requestBody)
+    httpClient.POST[DeclarationRequest, DeclarationIdResponse](s"$mibBackendBaseUri${mibBackendServiceConf.url}", requestBody)
 
   def declarationById(httpClient: HttpClient, declarationId: DeclarationId)
                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Declaration] =
-    httpClient.GET[Declaration](s"$mibBackendBaseUri${mibBackendServiceConf.url}/declarations/${declarationId.value}")
+    httpClient.GET[Declaration](s"$mibBackendBaseUri${mibBackendServiceConf.url}/${declarationId.value}")
 }

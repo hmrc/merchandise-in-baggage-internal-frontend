@@ -43,7 +43,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     private val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
 
     mibBackendMockServer
-      .stubFor(post(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations"))
+      .stubFor(post(urlPathEqualTo(s"${mibBackendServiceConf.url}"))
         .withRequestBody(equalToJson(Json.toJson(declarationRequest).toString, true, false))
         .willReturn(okJson(Json.toJson(DeclarationIdResponse(DeclarationId("123"))).toString).withStatus(201))
       )
@@ -64,7 +64,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     private val stubbedDeclaration: Declaration = aDeclaration
 
     mibBackendMockServer
-      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
+      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/123"))
         .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200))
       )
 
@@ -78,7 +78,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
     private val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
 
     mibBackendMockServer
-      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
+      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/123"))
         .willReturn(aResponse().withStatus(404))
       )
 
