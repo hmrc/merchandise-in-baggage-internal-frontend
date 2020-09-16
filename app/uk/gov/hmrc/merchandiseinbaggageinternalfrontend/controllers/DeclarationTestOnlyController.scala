@@ -46,8 +46,7 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
       for {
         declarationRequest  <- EitherT.fromOption(Json.parse(bindForm.data(declarationFormIdentifier))
           .asOpt[DeclarationRequest], InvalidDeclarationRequest)
-        eventualResponse = addDeclaration(httpClient, declarationRequest).map(res => Json.parse(res.body).asOpt[DeclarationIdResponse])
-        declarationResponse <- EitherT.fromOptionF[Future, BusinessError, DeclarationIdResponse](eventualResponse, InvalidDeclarationRequest)
+        declarationResponse <- EitherT.liftF(addDeclaration(httpClient, declarationRequest))
       } yield declarationResponse
 
     newDeclaration.fold ({
