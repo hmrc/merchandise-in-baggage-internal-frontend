@@ -1,13 +1,13 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service
 
-import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, okJson, post, urlPathEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Milliseconds, Seconds, Span}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.DeclarationIdResponse
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationId
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{Declaration, DeclarationId}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithWireMock
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,6 +29,18 @@ class MIBBackendServiceSpec extends BaseSpecWithWireMock with CoreTestData with 
       )
 
     addDeclaration(httpClient, declarationRequest).futureValue mustBe DeclarationIdResponse(DeclarationId("123"))
+  }
+
+  "makes a http Declaration request to MIB-BE to find by id" in new MIBBackendService {
+    val declarationId = DeclarationId("123")
+    val stubbedDeclaration: Declaration = aDeclaration.copy(declarationId = declarationId)
+
+    mibBackendMockServer
+      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/123"))
+        .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200))
+      )
+
+    declarationById(httpClient, declarationId).futureValue mustBe stubbedDeclaration
   }
 
 }
