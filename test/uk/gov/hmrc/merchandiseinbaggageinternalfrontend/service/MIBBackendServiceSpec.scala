@@ -42,5 +42,4 @@ class MIBBackendServiceSpec extends BaseSpecWithWireMock with CoreTestData with 
 
     declarationById(httpClient, declarationId).futureValue mustBe stubbedDeclaration
   }
-
 }
