@@ -5,7 +5,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend
 
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.DeclarationRequest
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
@@ -18,8 +18,7 @@ trait CoreTestData {
   val aChargeReference: ChargeReference = ChargeReference("ref")
 
   def aDeclaration: Declaration =
-    Declaration(DeclarationId(UUID.randomUUID().toString),
-      aTraderName, anAmount, aCsgTpsProviderId, aChargeReference, Outstanding, None, None)
+    Declaration(DeclarationId(randomUUID().toString), aTraderName, anAmount, aCsgTpsProviderId, aChargeReference)
 
   def aDeclarationRequest: DeclarationRequest = DeclarationRequest(aTraderName, anAmount, aCsgTpsProviderId, aChargeReference)
 }

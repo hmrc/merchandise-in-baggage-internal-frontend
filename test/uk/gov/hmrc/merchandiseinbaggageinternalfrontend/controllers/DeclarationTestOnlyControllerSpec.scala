@@ -23,10 +23,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTestData {
 
-  val view = injector.instanceOf[DeclarationTestOnlyPage]
-  val foundView = injector.instanceOf[DeclarationFoundTestOnlyPage]
-  val httpClient = injector.instanceOf[HttpClient]
-  val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView)
+  private val view = injector.instanceOf[DeclarationTestOnlyPage]
+  private val foundView = injector.instanceOf[DeclarationFoundTestOnlyPage]
+  private val httpClient = injector.instanceOf[HttpClient]
+  private val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView)
 
 
   "ready html page is served which contains copy showing it is a test-only page and a form with which I an enter and submit a declaration" in {
@@ -38,9 +38,9 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
   }
 
   "on submit a declaration will be persisted and redirected to /test-only/declaration/:id" in new MIBBackendService {
-    val declarationRequest = aDeclarationRequest
-    val requestBody = Json.toJson(declarationRequest)
-    val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
+    private val declarationRequest = aDeclarationRequest
+    private val requestBody = Json.toJson(declarationRequest)
+    private val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
 
     mibBackendMockServer
       .stubFor(post(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations"))
@@ -48,41 +48,41 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithWireMock with CoreTe
         .willReturn(okJson(Json.toJson(DeclarationIdResponse(DeclarationId("123"))).toString).withStatus(201))
       )
 
-    val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView) {
+    private val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView) {
       override protected def bindForm(implicit request: Request[_]): Form[DeclarationData] =
         new Forms{}.declarationForm(declarationFormIdentifier)
           .bind(Map(declarationFormIdentifier -> Json.toJson(requestBody).toString))
     }
-    val result = controller.onSubmit()(postRequest)
+    private val result = controller.onSubmit()(postRequest)
 
     status(result) mustBe 303
     redirectLocation(result).get mustBe s"${routes.DeclarationTestOnlyController.findDeclaration("123").url}"
   }
 
   "on findDeclaration a declaration will be retrieved from MIB backend and show data result" in new MIBBackendService {
-    val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
-    val stubbedDeclaration: Declaration = aDeclaration
+    private val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
+    private val stubbedDeclaration: Declaration = aDeclaration
 
     mibBackendMockServer
       .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
         .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200))
       )
 
-    val result = controller.findDeclaration("123")(getRequest)
+    private val result = controller.findDeclaration("123")(getRequest)
 
     status(result) mustBe 200
     contentAsString(result) mustBe foundView(stubbedDeclaration)(getRequest).toString
   }
 
   "I navigate or am redirected to /test-only/declarations/123. Then: A 'not found' message is served." in new MIBBackendService {
-    val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
+    private val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration("123").url)
 
     mibBackendMockServer
       .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/declarations/123"))
         .willReturn(aResponse().withStatus(404))
       )
 
-    val result = controller.findDeclaration("123")(getRequest)
+    private val result = controller.findDeclaration("123")(getRequest)
 
     status(result) mustBe 404
     contentAsString(result) must include("Declaration Not Found")

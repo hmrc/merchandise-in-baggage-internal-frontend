@@ -5,8 +5,6 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
-import java.time.LocalDateTime
-
 import play.api.libs.json._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.util.ValueClassFormat
 
@@ -38,38 +36,8 @@ object DeclarationId {
   implicit val format: Format[DeclarationId] = ValueClassFormat.format(value => DeclarationId.apply(value))(_.value)
 }
 
-sealed trait PaymentStatus
-case object Outstanding extends PaymentStatus
-case object Paid extends PaymentStatus
-case object Reconciled extends PaymentStatus
-case object Failed extends PaymentStatus
-
-object PaymentStatus {
-  implicit val write = new Writes[PaymentStatus] {
-    override def writes(status: PaymentStatus): JsValue = status match {
-      case Outstanding => Json.toJson("OUTSTANDING")
-      case Paid        => Json.toJson("PAID")
-      case Reconciled  => Json.toJson("RECONCILED")
-      case Failed      => Json.toJson("FAILED")
-    }
-  }
-
-  implicit val read = new Reads[PaymentStatus] {
-    override def reads(value: JsValue): JsResult[PaymentStatus] = value match {
-      case JsString("OUTSTANDING") => JsSuccess(Outstanding)
-      case JsString("PAID")        => JsSuccess(Paid)
-      case JsString("RECONCILED")  => JsSuccess(Reconciled)
-      case JsString("FAILED")      => JsSuccess(Failed)
-      case _                       => JsError("invalid value")
-    }
-  }
-}
-
-
 case class Declaration(declarationId: DeclarationId, name: TraderName, amount: AmountInPence,
-                       csgTpsProviderId: CsgTpsProviderId, reference: ChargeReference, paymentStatus: PaymentStatus,
-                       paid: Option[LocalDateTime], reconciled: Option[LocalDateTime]
-                      )
+                       csgTpsProviderId: CsgTpsProviderId, reference: ChargeReference)
 
 object Declaration {
   val id = "declarationId"

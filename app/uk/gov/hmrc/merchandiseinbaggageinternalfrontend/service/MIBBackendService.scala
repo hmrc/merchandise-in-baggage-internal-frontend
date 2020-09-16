@@ -10,6 +10,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.MIBBackendServiceConf
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.DeclarationRequest
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationId
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 
 import scala.concurrent.{ExecutionContext, Future}
 

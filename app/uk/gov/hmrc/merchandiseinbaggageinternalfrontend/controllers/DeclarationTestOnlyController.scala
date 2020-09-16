@@ -38,9 +38,11 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
       eval        <- EitherT.liftF(declarationById(httpClient, DeclarationId(declarationId)).map(res => Json.parse(res.body).asOpt[Declaration]))
       declaration <- EitherT.fromOption(eval, DeclarationNotFound)
     } yield declaration).fold( {
-        case e: BusinessError => InternalServerError(s"$e")
+        e: BusinessError => InternalServerError(s"$e")
       }, dec   => Ok(declarationFoundView(dec)))
-      .recover({ case _ => NotFound("Declaration Not Found") })
+      .recover({
+        case _ => NotFound("Declaration Not Found")
+      })
   }
 
   def onSubmit(): Action[AnyContent] = Action.async { implicit request  =>

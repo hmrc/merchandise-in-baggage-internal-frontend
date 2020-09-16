@@ -22,7 +22,7 @@ trait BaseSpec extends AnyWordSpec with Matchers
 
 trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with WireMockSupport {
   lazy val injector: Injector = fakeApplication().injector
-  lazy val component = injector.instanceOf[MessagesControllerComponents]
+  lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 
