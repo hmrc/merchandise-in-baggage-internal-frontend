@@ -17,6 +17,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{GET, POST}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.MIBBackendServiceConf
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationId
 
 trait BaseSpec extends AnyWordSpec with Matchers
 
@@ -31,8 +33,13 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
   def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
-  def buildGet(url: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+  def findDeclarationRequestGET(declarationId: DeclarationId): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, routes.DeclarationTestOnlyController.findDeclaration(declarationId.value).url)
+      .withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def declarationRequestGET(): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, routes.DeclarationTestOnlyController.declarations().url)
+      .withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 }
 
 trait BaseSpecWithWireMock extends BaseSpecWithApplication with MIBBackendServiceConf {

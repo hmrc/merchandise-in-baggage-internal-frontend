@@ -29,7 +29,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
   private val httpClient = injector.instanceOf[HttpClient]
 
   "ready html page is served which contains copy showing it is a test-only page and a form with which I an enter and submit a declaration" in {
-    val request = buildGet(routes.DeclarationTestOnlyController.declarations().url)
+    val request = declarationRequestGET()
     val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView)
     val result = controller.declarations()(request)
 
@@ -50,7 +50,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
 
   "on findDeclaration a declaration will be retrieved from MIB backend and show data result" in new MIBBackendService {
     setUp { (stubbedDeclaration, _, idResponse, _) =>
-      val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration(idResponse.id.value).url)
+      val getRequest = findDeclarationRequestGET(idResponse.id)
       val controller = stubController(Future.successful(stubbedDeclaration), Json.obj(), idResponse)
       val result = controller.findDeclaration(idResponse.id.value)(getRequest)
 
@@ -61,7 +61,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
 
   "I navigate or am redirected to /test-only/declarations/123. Then: A 'not found' message is served." in new MIBBackendService {
     setUp { (_, _, idResponse, _) =>
-      val getRequest = buildGet(routes.DeclarationTestOnlyController.findDeclaration(idResponse.id.value).url)
+      val getRequest = findDeclarationRequestGET(idResponse.id)
       val controller = stubController(Future.failed(DeclarationNotFound), Json.obj(), idResponse)
       val result = controller.findDeclaration(idResponse.id.value)(getRequest)
 
