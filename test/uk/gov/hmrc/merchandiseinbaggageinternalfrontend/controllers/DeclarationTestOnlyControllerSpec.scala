@@ -44,7 +44,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
       val result = controller.onSubmit()(postRequest)
 
       status(result) mustBe 303
-      redirectLocation(result).get mustBe s"${routes.DeclarationTestOnlyController.findDeclaration("123").url}"
+      redirectLocation(result).get mustBe s"${routes.DeclarationTestOnlyController.findDeclaration(DeclarationId("123")).url}"
     }
   }
 
@@ -52,7 +52,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     setUp { (stubbedDeclaration, _, idResponse, _) =>
       val getRequest = findDeclarationRequestGET(idResponse.id)
       val controller = stubController(Future.successful(stubbedDeclaration), Json.obj(), idResponse)
-      val result = controller.findDeclaration(idResponse.id.value)(getRequest)
+      val result = controller.findDeclaration(idResponse.id)(getRequest)
 
       status(result) mustBe 200
       contentAsString(result) mustBe foundView(stubbedDeclaration)(getRequest).toString
@@ -63,7 +63,7 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     setUp { (_, _, idResponse, _) =>
       val getRequest = findDeclarationRequestGET(idResponse.id)
       val controller = stubController(Future.failed(DeclarationNotFound), Json.obj(), idResponse)
-      val result = controller.findDeclaration(idResponse.id.value)(getRequest)
+      val result = controller.findDeclaration(idResponse.id)(getRequest)
 
       status(result) mustBe 404
       contentAsString(result) must include("Declaration Not Found")

@@ -5,35 +5,39 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.util.ValueClassFormat
+import play.api.mvc.{PathBindable, QueryStringBindable}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.util.ValueClassBinder.{bindableA, valueClassBinder}
 
 
 case class TraderName(value: String)
 object TraderName {
-  implicit val format: Format[TraderName] = ValueClassFormat.format(value => TraderName.apply(value))(_.value)
+  implicit val format: Format[TraderName] = implicitly[Format[String]].inmap(TraderName(_), _.value)
 }
 
 
 case class AmountInPence(value: Double)
 object AmountInPence {
-  implicit val format: Format[AmountInPence] = ValueClassFormat.formatDouble(value => AmountInPence.apply(value))(_.value)
+  implicit val format: Format[AmountInPence] = implicitly[Format[Double]].inmap(AmountInPence(_), _.value)
 }
 
 
 case class CsgTpsProviderId(value: String)
 object CsgTpsProviderId {
-  implicit val format: Format[CsgTpsProviderId] = ValueClassFormat.format(value => CsgTpsProviderId.apply(value))(_.value)
+  implicit val format: Format[CsgTpsProviderId] = implicitly[Format[String]].inmap(CsgTpsProviderId(_), _.value)
 }
 
 case class ChargeReference(value: String)
 object ChargeReference {
-  implicit val format: Format[ChargeReference] = ValueClassFormat.format(value => ChargeReference.apply(value))(_.value)
+  implicit val format: Format[ChargeReference] = implicitly[Format[String]].inmap(ChargeReference(_), _.value)
 }
 
 case class DeclarationId(value: String)
 object DeclarationId {
-  implicit val format: Format[DeclarationId] = ValueClassFormat.format(value => DeclarationId.apply(value))(_.value)
+  implicit val format: Format[DeclarationId] = implicitly[Format[String]].inmap(DeclarationId(_), _.value)
+  implicit val binder: PathBindable[DeclarationId] = valueClassBinder(_.value)
+  implicit val pathBinder: QueryStringBindable[DeclarationId] = bindableA(_.toString)
 }
 
 case class Declaration(declarationId: DeclarationId, name: TraderName, amount: AmountInPence,

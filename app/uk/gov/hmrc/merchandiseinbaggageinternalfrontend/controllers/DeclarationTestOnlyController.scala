@@ -32,8 +32,8 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
     Future.successful(Ok(views(declarationForm(declarationFormIdentifier))))
   }
 
-  def findDeclaration(declarationId: String): Action[AnyContent] = Action.async { implicit request =>
-    declarationById(httpClient, DeclarationId(declarationId)).map(declaration =>
+  def findDeclaration(declarationId: DeclarationId): Action[AnyContent] = Action.async { implicit request =>
+    declarationById(httpClient,declarationId).map(declaration =>
       Ok(declarationFoundView(declaration))
     ).recover({
       case _ => NotFound("Declaration Not Found")
@@ -55,7 +55,7 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
       case err                       =>
         InternalServerError(s"$err")
     }, declarationIdResponse =>
-      Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id.value))
+      Redirect(routes.DeclarationTestOnlyController.findDeclaration(declarationIdResponse.id))
     ).recover({case err => InternalServerError(s"$err") })
   }
 

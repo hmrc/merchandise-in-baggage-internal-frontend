@@ -3,9 +3,3 @@
 ->         /govuk-frontend          govuk.Routes
 ->         /hmrc-frontend           hmrcfrontend.Routes
 GET        /assets/*file            controllers.Assets.versioned(path = "/public", file: Asset)
-
-
-GET        /test-only/declarations      uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationTestOnlyController.declarations
-GET        /test-only/declarations/:id  uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationTestOnlyController.findDeclaration(id: String)
-POST       /test-only/declarations      uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationTestOnlyController.onSubmit
-

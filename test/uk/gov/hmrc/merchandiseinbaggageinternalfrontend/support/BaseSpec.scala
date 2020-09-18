@@ -28,13 +28,16 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 
-  private val configMap = Map("microservice.services.auth.port" -> WireMockSupport.port)
+  private val configMap: Map[String, Any] = Map[String, Any](
+    "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
+    "microservice.services.auth.port" -> WireMockSupport.port
+  )
 
   def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   def findDeclarationRequestGET(declarationId: DeclarationId): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, routes.DeclarationTestOnlyController.findDeclaration(declarationId.value).url)
+    FakeRequest(GET, routes.DeclarationTestOnlyController.findDeclaration(declarationId).url)
       .withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   def declarationRequestGET(): FakeRequest[AnyContentAsEmpty.type] =
