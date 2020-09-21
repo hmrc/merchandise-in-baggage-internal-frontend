@@ -16,7 +16,7 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{DeclarationIdResponse, DeclarationRequest}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{Declaration, DeclarationId, DeclarationNotFound}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.MIBBackendService
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.{BaseSpecWithApplication, MockStrideAuth}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{DeclarationFoundTestOnlyPage, DeclarationTestOnlyPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,8 +29,9 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
   private val httpClient = injector.instanceOf[HttpClient]
 
   "ready html page is served which contains copy showing it is a test-only page and a form with which I an enter and submit a declaration" in {
+    MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised()
     val request = declarationRequestGET()
-    val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView)
+    val controller = new DeclarationTestOnlyController(component, httpClient, view, foundView, strideAuth)
     val result = controller.declarations()(request)
 
     status(result) mustBe 200
@@ -77,12 +78,14 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     val stubbedDeclaration: Declaration = aDeclaration
     val requestBody = Json.toJson(declarationRequest)
 
+    MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised()
+
     fn(stubbedDeclaration, declarationRequest, declarationIdResponse, requestBody)
   }
 
   private def stubController(stub: Future[Declaration], requestBody: JsValue,
                              declarationIdResponse: DeclarationIdResponse): DeclarationTestOnlyController =
-    new DeclarationTestOnlyController(component, httpClient, view, foundView) {
+    new DeclarationTestOnlyController(component, httpClient, view, foundView, strideAuth) {
       override def declarationById(httpClient: HttpClient, declarationId: DeclarationId)
                                 (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Declaration] = stub
 

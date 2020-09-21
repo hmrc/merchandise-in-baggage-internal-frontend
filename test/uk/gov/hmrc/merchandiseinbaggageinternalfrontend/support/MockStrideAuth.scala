@@ -29,7 +29,7 @@ object MockStrideAuth {
              |    {
              |     "identifiers":[],
              |     "state":"Activated",
-             |     "enrolment":"mib"
+             |     "enrolment":"digital_tps_payment_taker_call_handler"
              |    },
              |    {
              |      "authProviders": [
@@ -61,7 +61,7 @@ object MockStrideAuth {
              |    {
              |     "identifiers":[],
              |     "state":"Activated",
-             |     "enrolment":"mib"
+             |     "enrolment":"digital_tps_payment_taker_call_handler"
              |    },
              |    {
              |      "authProviders": [

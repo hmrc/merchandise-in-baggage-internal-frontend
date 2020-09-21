@@ -11,6 +11,7 @@ import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{DeclarationIdResponse, DeclarationRequest}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
@@ -24,15 +25,16 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
                                               httpClient: HttpClient,
                                               views: DeclarationTestOnlyPage,
                                               declarationFoundView: DeclarationFoundTestOnlyPage,
+                                              strideAuth: StrideAuthAction
                                              )
                                              (implicit val ec: ExecutionContext)
   extends FrontendController(mcc) with Forms with MIBBackendService {
 
-  def declarations(): Action[AnyContent] = Action.async { implicit request  =>
+  def declarations(): Action[AnyContent] = strideAuth.async { implicit request  =>
     Future.successful(Ok(views(declarationForm(declarationFormIdentifier))))
   }
 
-  def findDeclaration(declarationId: DeclarationId): Action[AnyContent] = Action.async { implicit request =>
+  def findDeclaration(declarationId: DeclarationId): Action[AnyContent] = strideAuth.async { implicit request =>
     declarationById(httpClient,declarationId).map(declaration =>
       Ok(declarationFoundView(declaration))
     ).recover({
@@ -40,7 +42,7 @@ class DeclarationTestOnlyController @Inject()(mcc: MessagesControllerComponents,
     })
   }
 
-  def onSubmit(): Action[AnyContent] = Action.async { implicit request  =>
+  def onSubmit(): Action[AnyContent] = strideAuth.async { implicit request  =>
     import cats.instances.future._
     val newDeclaration: EitherT[Future, BusinessError, DeclarationIdResponse] =
       for {
