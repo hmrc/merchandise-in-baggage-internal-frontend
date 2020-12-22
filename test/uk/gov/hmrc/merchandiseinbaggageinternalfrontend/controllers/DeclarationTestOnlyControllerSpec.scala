@@ -24,6 +24,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.testonly.DeclarationTestOnlyController
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{DeclarationIdResponse, DeclarationRequest}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{Declaration, DeclarationId, DeclarationNotFound}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.MIBBackendService
@@ -51,12 +52,12 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
 
   "on submit a declaration will be persisted and redirected to /test-only/declaration/:id" in new MIBBackendService {
     setUp { (declaration, _, declarationIdResponse, requestBody) =>
-      val postRequest = buildPost(routes.DeclarationTestOnlyController.onSubmit().url)
+      val postRequest = buildPost(testonly.routes.DeclarationTestOnlyController.onSubmit().url)
       val controller = stubController(Future.successful(declaration), requestBody, declarationIdResponse)
       val result = controller.onSubmit()(postRequest)
 
       status(result) mustBe 303
-      redirectLocation(result).get mustBe s"${routes.DeclarationTestOnlyController.findDeclaration(DeclarationId("123")).url}"
+      redirectLocation(result).get mustBe s"${testonly.routes.DeclarationTestOnlyController.findDeclaration(DeclarationId("123")).url}"
     }
   }
 

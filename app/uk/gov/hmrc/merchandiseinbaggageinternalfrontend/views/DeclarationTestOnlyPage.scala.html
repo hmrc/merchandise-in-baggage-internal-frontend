@@ -14,15 +14,15 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes._
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationData
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.testonly
 
 @this()
 
 @(form: Form[DeclarationData])(implicit request: Request[_])
 
-@helper.form(action = DeclarationTestOnlyController.onSubmit()) {
+@helper.form(action = testonly.routes.DeclarationTestOnlyController.onSubmit()) {
 
     <div>
         <h1 class="govuk-heading-xl">This is a test only merchandise-in-baggage declaration</h1>

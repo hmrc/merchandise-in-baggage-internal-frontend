@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.testonly
 
 import cats.data.EitherT
 import javax.inject.Inject
@@ -24,6 +24,7 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.Forms._
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.{DeclarationData, Forms}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{DeclarationIdResponse, DeclarationRequest}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.MIBBackendService
