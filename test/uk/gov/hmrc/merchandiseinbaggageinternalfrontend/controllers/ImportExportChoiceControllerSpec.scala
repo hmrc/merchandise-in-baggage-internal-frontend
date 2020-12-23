@@ -22,10 +22,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportChoice
 
 class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
 
-  val controller = new ImportExportChoiceController(component)
+  val view = app.injector.instanceOf[ImportExportChoice]
+  val controller = new ImportExportChoiceController(component, view)
 
   "return 200 with radio button" in {
     val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url).withSession((SessionKeys.sessionId, "123"))

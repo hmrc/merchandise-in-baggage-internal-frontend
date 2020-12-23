@@ -28,7 +28,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{GET, POST}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.MIBBackendServiceConf
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.{AppConfig, MIBBackendServiceConf}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.testonly
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationId
 
@@ -38,6 +38,7 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
   lazy val injector: Injector = fakeApplication().injector
   lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val strideAuth: StrideAuthAction = injector.instanceOf[StrideAuthAction]
+  implicit lazy val appConf: AppConfig = injector.instanceOf[AppConfig]
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 
