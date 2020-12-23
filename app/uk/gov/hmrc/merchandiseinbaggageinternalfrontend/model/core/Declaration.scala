@@ -28,12 +28,6 @@ object TraderName {
 }
 
 
-case class AmountInPence(value: Double)
-object AmountInPence {
-  implicit val format: Format[AmountInPence] = implicitly[Format[Double]].inmap(AmountInPence(_), _.value)
-}
-
-
 case class CsgTpsProviderId(value: String)
 object CsgTpsProviderId {
   implicit val format: Format[CsgTpsProviderId] = implicitly[Format[String]].inmap(CsgTpsProviderId(_), _.value)

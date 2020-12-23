@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
-import play.api.data.Form
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings.Mappings
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationType, DeclarationTypes}
+import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJourney
 
-object ImportExportChoiceForm extends Mappings {
 
-  val form: Form[DeclarationType] =
-    Form(
-      "value" -> enum[DeclarationType](DeclarationTypes, "importExportChoice.error.required")
-    )
+final class DeclarationJourneyRequest[A](val declarationJourney: DeclarationJourney, val request: Request[A])
+  extends WrappedRequest[A](request) {
+
+  def declarationType = declarationJourney.declarationType
 }

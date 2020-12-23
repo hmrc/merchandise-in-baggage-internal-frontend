@@ -4,6 +4,8 @@
 ->         /hmrc-frontend           hmrcfrontend.Routes
 GET        /assets/*file            controllers.Assets.versioned(path = "/public", file: Asset)
 
+GET       /invalid-request          uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.InvalidRequestController.onPageLoad
+
 
 GET       /import-export-choice     uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.ImportExportChoiceController.onPageLoad
 POST      /import-export-choice     uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.ImportExportChoiceController.onSubmit

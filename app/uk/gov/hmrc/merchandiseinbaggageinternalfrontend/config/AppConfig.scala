@@ -23,7 +23,7 @@ import pureconfig.generic.auto._ // Do not remove this
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfigSource.configSource
 
 @Singleton
-class AppConfig @Inject()(val config: Configuration, val env: Environment) {
+class AppConfig @Inject()(val config: Configuration, val env: Environment) extends MIBBackendServiceConf with MongoConfiguration {
 
   val serviceIdentifier = "mib"
 
@@ -47,6 +47,13 @@ trait MIBBackendServiceConf {
 
 case class MIBBackEndServiceConfiguration(protocol: String, port: Int, host: String, url: String)
 
+trait MongoConfiguration {
+  lazy val mongoConf: MongoConf = configSource("mongodb").loadOrThrow[MongoConf]
+}
+
+final case class MongoConf(uri: String, host: String = "localhost", port: Int = 27017, collectionName: String = "declaration")
+
 object AppConfigSource {
   val configSource: String => ConfigSource = ConfigSource.default.at
 }
+

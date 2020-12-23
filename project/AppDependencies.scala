@@ -10,6 +10,7 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "play-frontend-hmrc"         % "0.31.0-play-27",
     "uk.gov.hmrc"             %% "play-frontend-govuk"        % "0.54.0-play-27",
     "uk.gov.hmrc"             %% "play-ui"                    % "8.3.0-play-26",
+    "uk.gov.hmrc"             %% "simple-reactivemongo"       % "7.30.0-play-27",
     "com.beachape"            %% "enumeratum-play"            % "1.5.13",
     "org.typelevel"           %% "cats-core"                  % "2.0.0",
     "com.github.pureconfig"   %% "pureconfig"                 % "0.13.0"

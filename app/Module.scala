@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
+import com.google.inject.{AbstractModule, Provides}
+import javax.inject.Singleton
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DB
 
-import play.api.data.Form
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings.Mappings
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationType, DeclarationTypes}
+class Module extends AbstractModule {
 
-object ImportExportChoiceForm extends Mappings {
-
-  val form: Form[DeclarationType] =
-    Form(
-      "value" -> enum[DeclarationType](DeclarationTypes, "importExportChoice.error.required")
-    )
+  @Provides
+  @Singleton
+  def mongoDB(reactiveMongoComponent: ReactiveMongoComponent): () => DB = reactiveMongoComponent.mongoConnector.db
 }

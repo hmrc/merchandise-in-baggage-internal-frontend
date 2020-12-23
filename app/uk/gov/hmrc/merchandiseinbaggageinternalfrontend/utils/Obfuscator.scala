@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.utils
 
-import play.api.data.Form
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings.Mappings
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationType, DeclarationTypes}
+object Obfuscator {
+  def obfuscate(string: String): String = string.flatMap(_=> "*")
 
-object ImportExportChoiceForm extends Mappings {
-
-  val form: Form[DeclarationType] =
-    Form(
-      "value" -> enum[DeclarationType](DeclarationTypes, "importExportChoice.error.required")
-    )
+  def maybeObfuscate(maybeString: Option[String]): Option[String] = maybeString.map(string => obfuscate(string))
 }

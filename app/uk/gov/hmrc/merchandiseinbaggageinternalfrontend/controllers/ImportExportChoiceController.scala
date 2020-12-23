@@ -18,22 +18,38 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.ImportExportChoiceForm._
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, SessionId}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportChoice
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ImportExportChoiceController @Inject()(override val controllerComponents: MessagesControllerComponents,
-                                             view: ImportExportChoice
-                                            )(implicit appConf: AppConfig)
+                                             view: ImportExportChoice,
+                                             repo: DeclarationJourneyRepository
+                                            )(implicit ec: ExecutionContext, appConf: AppConfig)
   extends FrontendBaseController {
 
+  val backButtonUrl = routes.ImportExportChoiceController.onPageLoad //TODO do we need back button to start with?
   val onPageLoad = Action { implicit request =>
-    Ok(view(form, routes.ImportExportChoiceController.onPageLoad))
+    Ok(view(form, backButtonUrl))
   }
 
-  val onSubmit = Action { implicit request =>
-    Ok("xxx")
+  val onSubmit = Action.async { implicit request =>
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future successful BadRequest(view(formWithErrors, backButtonUrl)),
+        importExport =>
+          repo.upsert(DeclarationJourney(SessionId(request.session(SessionKeys.sessionId)), importExport)).map { _ =>
+            Ok(view(form, backButtonUrl))
+          }.recoverWith { case _ => Future successful BadRequest(view(form, backButtonUrl)) } //TODO
+      )
+
   }
 }
