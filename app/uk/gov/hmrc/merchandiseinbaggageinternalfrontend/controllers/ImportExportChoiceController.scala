@@ -18,14 +18,22 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.ImportExportChoiceForm._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportChoice
 
 @Singleton
-class ImportExportChoiceController @Inject()(override val controllerComponents: MessagesControllerComponents)
+class ImportExportChoiceController @Inject()(override val controllerComponents: MessagesControllerComponents,
+                                             view: ImportExportChoice
+                                            )(implicit appConf: AppConfig)
   extends FrontendBaseController {
 
   val onPageLoad = Action { implicit request =>
-    Ok("xxx")
+    Ok(view(form, routes.ImportExportChoiceController.onPageLoad))
   }
 
+  val onSubmit = Action { implicit request =>
+    Ok("xxx")
+  }
 }

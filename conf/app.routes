@@ -6,3 +6,4 @@ GET        /assets/*file            controllers.Assets.versioned(path = "/public
 
 
 GET       /import-export-choice     uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.ImportExportChoiceController.onPageLoad
+POST      /import-export-choice     uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.ImportExportChoiceController.onSubmit

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
 
-@this(layout: Layout)
+import play.api.data.Form
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings.Mappings
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.YesNo
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+object ImportExportChoiceForm extends Mappings {
 
-@layout(pageTitle = Some(pageTitle), maybeBackButtonUrl = None) {
-    <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-    <p class="govuk-body">@{Text(message).asHtml}</p>
+  val form: Form[YesNo] =
+    Form(
+      "value" -> yesNo("importExportChoice.error.required")
+    )
 }

@@ -14,13 +14,27 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+@this(govukDetails: GovukDetails)
 
-@this(layout: Layout)
+@(
+        summaryText: String,
+        id: Option[String] = None,
+        open: Boolean = false,
+        classes: Option[String] = None
+)(content: Html)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@layout(pageTitle = Some("merchandise-in-baggage-internal-frontend")) {
-    <h1 class="govuk-heading-xl">merchandise-in-baggage-internal-frontend</h1>
-    <p class="govuk-body">@{messages("service.text")}</p>
-}
+<div class="form-group">
+    <details
+    @if(open){ open}
+    @if(id.isDefined){ id="@{id.get}"}
+        class="govuk-details @if(classes){@classes}">
+    <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+        @summaryText
+        </span>
+    </summary>
+    <div class="govuk-details__text">
+    @content
+</div>
+    </details>
+</div>

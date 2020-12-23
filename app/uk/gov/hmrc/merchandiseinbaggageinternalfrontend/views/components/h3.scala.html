@@ -14,13 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+@this()
 
-@this(layout: Layout)
+@(msg: String, classes: Option[String] = None)(implicit messages: Messages)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@layout(pageTitle = Some(pageTitle), maybeBackButtonUrl = None) {
-    <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-    <p class="govuk-body">@{Text(message).asHtml}</p>
-}
+<h3 class="@classes.getOrElse("govuk-heading-m")">@messages(msg)</h3>

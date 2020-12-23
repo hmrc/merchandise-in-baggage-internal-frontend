@@ -10,3 +10,9 @@ footer.termsConditions.text = Terms and conditions
 footer.termsConditions.url = /help/terms-and-conditions
 footer.govukHelp.text = Help using GOV.UK
 footer.govukHelp.url = https://www.gov.uk/help
+
+
+importExportChoice.header = What do you want to do?
+importExportChoice.title = What do you want to do?
+importExportChoice.error.required = You must enter value
+

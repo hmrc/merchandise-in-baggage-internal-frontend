@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
-@this(layout: Layout)
+import enumeratum.EnumEntry
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+import scala.collection.immutable
 
-@layout(pageTitle = Some(pageTitle), maybeBackButtonUrl = None) {
-    <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-    <p class="govuk-body">@{Text(message).asHtml}</p>
+sealed trait DeclarationType extends EnumEntry {
+  val messageKey = s"${DeclarationType.baseMessageKey}.${entryName.toLowerCase}"
+}
+
+object DeclarationType extends Enum[DeclarationType] {
+  override val baseMessageKey: String = "declarationType"
+  override val values: immutable.IndexedSeq[DeclarationType] = findValues
+
+  case object Import extends DeclarationType
+  case object Export extends DeclarationType
 }
