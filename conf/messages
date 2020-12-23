@@ -14,5 +14,8 @@ footer.govukHelp.url = https://www.gov.uk/help
 
 importExportChoice.header = What do you want to do?
 importExportChoice.title = What do you want to do?
+importExportChoice.MakeImport = Make an import declaration
+importExportChoice.MakeExport = Make an export declaration
 importExportChoice.error.required = You must enter value
 
+site.continue = Continue

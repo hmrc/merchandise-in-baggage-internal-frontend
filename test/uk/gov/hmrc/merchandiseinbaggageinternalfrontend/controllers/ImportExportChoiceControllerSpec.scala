@@ -33,6 +33,11 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
     val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url).withSession((SessionKeys.sessionId, "123"))
       .withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
-    status(controller.onPageLoad(request)) mustBe 200
+    val eventualResult = controller.onPageLoad(request)
+    status(eventualResult) mustBe 200
+    contentAsString(eventualResult) must include(messageApi("importExportChoice.header"))
+    contentAsString(eventualResult) must include(messageApi("importExportChoice.MakeExport"))
+    contentAsString(eventualResult) must include(messageApi("importExportChoice.MakeImport"))
+    contentAsString(eventualResult) must include(messageApi("site.continue"))
   }
 }

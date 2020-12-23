@@ -17,11 +17,13 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
 import enumeratum.EnumEntry
+import play.api.libs.json.Format
 
 import scala.collection.immutable
 
-sealed trait DeclarationType extends EnumEntry {
+sealed trait DeclarationType extends EnumEntry with EnumEntryRadioItemSupport {
   val messageKey = s"${DeclarationType.baseMessageKey}.${entryName.toLowerCase}"
+  implicit val format: Format[DeclarationType] = EnumFormat(DeclarationType)
 }
 
 object DeclarationType extends Enum[DeclarationType] {
@@ -30,4 +32,13 @@ object DeclarationType extends Enum[DeclarationType] {
 
   case object Import extends DeclarationType
   case object Export extends DeclarationType
+}
+
+object DeclarationTypes extends Enum[DeclarationType] with RadioSupport[DeclarationType]{
+  override val baseMessageKey: String = "importExportChoice"
+  override val values: immutable.IndexedSeq[DeclarationType] = findValues
+
+  case object MakeImport extends DeclarationType
+
+  case object MakeExport extends DeclarationType
 }

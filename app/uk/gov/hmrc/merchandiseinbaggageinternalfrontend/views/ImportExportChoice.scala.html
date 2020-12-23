@@ -17,12 +17,13 @@
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.components
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes._
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.YesNo
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 
 @this(
     layout: Layout,
     formHelper: FormWithCSRF,
     errorSummary: components.errorSummary,
-    inputYesNo: components.inputYesNo,
+    inputRadio: components.inputRadio,
     button: components.button
 )
 
@@ -31,12 +32,13 @@
 @layout(pageTitle = Some(messages("importExportChoice.title")), maybeBackButtonUrl = None) {
     @formHelper(action = ImportExportChoiceController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
 
-        @errorSummary(form.errors, YesNo.values.headOption.map(_.entryName))
+        @errorSummary(form.errors, DeclarationType.values.headOption.map(_.entryName))
 
-        @inputYesNo(
+        @inputRadio(
             form = form,
             legend = messages("importExportChoice.header"),
-            legendAsHeading = true
+            legendAsHeading = true,
+            items = DeclarationTypes.options(form)
         )
 
         @button("site.continue", name = Some("continue"))

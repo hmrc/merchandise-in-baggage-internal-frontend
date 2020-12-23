@@ -21,6 +21,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
+import play.api.i18n.MessagesApi
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
@@ -39,6 +40,7 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
   lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val strideAuth: StrideAuthAction = injector.instanceOf[StrideAuthAction]
   implicit lazy val appConf: AppConfig = injector.instanceOf[AppConfig]
+  lazy val messageApi: Map[String, String] = app.injector.instanceOf[MessagesApi].messages("default")
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 
