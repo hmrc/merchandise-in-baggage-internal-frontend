@@ -27,8 +27,8 @@ class MerchandiseInBaggageInternalFrontendConfigModule(unused: Environment, conf
   def bindBaseUrl(name: String, service: String): Unit =
     bindConstant().annotatedWith(named(name)).to(servicesConfig.baseUrl(service))
 
-  override def configure(): Unit = {
-    bindConstant().annotatedWith(named("declarationJourneyTimeToLiveInSeconds"))
+  override def configure(): Unit =
+    bindConstant()
+      .annotatedWith(named("declarationJourneyTimeToLiveInSeconds"))
       .to(configuration.get[Int]("declarationJourneyTimeToLiveInSeconds"))
-  }
 }

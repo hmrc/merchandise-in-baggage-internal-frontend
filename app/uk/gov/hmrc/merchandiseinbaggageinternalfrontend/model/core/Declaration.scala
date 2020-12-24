@@ -21,12 +21,10 @@ import play.api.libs.json._
 import play.api.mvc.{PathBindable, QueryStringBindable}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.util.ValueClassBinder.{bindableA, valueClassBinder}
 
-
 case class TraderName(value: String)
 object TraderName {
   implicit val format: Format[TraderName] = implicitly[Format[String]].inmap(TraderName(_), _.value)
 }
-
 
 case class CsgTpsProviderId(value: String)
 object CsgTpsProviderId {
@@ -45,8 +43,12 @@ object DeclarationId {
   implicit val pathBinder: QueryStringBindable[DeclarationId] = bindableA(_.toString)
 }
 
-case class Declaration(declarationId: DeclarationId, name: TraderName, amount: AmountInPence,
-                       csgTpsProviderId: CsgTpsProviderId, reference: ChargeReference)
+case class Declaration(
+  declarationId: DeclarationId,
+  name: TraderName,
+  amount: AmountInPence,
+  csgTpsProviderId: CsgTpsProviderId,
+  reference: ChargeReference)
 
 object Declaration {
   val id = "declarationId"

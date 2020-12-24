@@ -27,7 +27,7 @@ object ValueClassBinder {
     def parseString(str: String) =
       JsString(str).validate[A] match {
         case JsSuccess(a, _) => Right(a)
-        case JsError(error) => Left(s"No valid value in path: $str. Error: $error")
+        case JsError(error)  => Left(s"No valid value in path: $str. Error: $error")
       }
 
     new PathBindable[A] {
@@ -39,10 +39,9 @@ object ValueClassBinder {
     }
   }
 
-  def bindableA[A: TypeTag : Reads](fromAtoString: A => String): QueryStringBindable[A] = new QueryStringBindable.Parsing[A](
+  def bindableA[A: TypeTag: Reads](fromAtoString: A => String): QueryStringBindable[A] = new QueryStringBindable.Parsing[A](
     parse = JsString(_).as[A],
-    fromAtoString,
-    {
+    fromAtoString, {
       case (key: String, e: Exception) => s"Cannot parse param $key as ${typeOf[A].typeSymbol.name.toString}"
     }
   )

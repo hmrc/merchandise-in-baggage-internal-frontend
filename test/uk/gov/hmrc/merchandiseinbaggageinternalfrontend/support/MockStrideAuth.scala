@@ -23,17 +23,17 @@ object MockStrideAuth {
   val expectedDetail = "SessionRecordNotFound"
 
   def givenTheUserIsNotAuthenticated(): StubMapping =
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(aResponse()
-        .withStatus(401)
-        .withHeader("WWW-Authenticate", s"""MDTP detail="$expectedDetail"""")
-      )
-    )
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(401)
+            .withHeader("WWW-Authenticate", s"""MDTP detail="$expectedDetail"""")))
 
   def givenTheUserIsAuthenticatedAndAuthorised(): StubMapping =
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .withRequestBody(
-        equalToJson(
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(equalToJson(
           s"""
              |{
              |  "authorise": [
@@ -49,23 +49,25 @@ object MockStrideAuth {
              |    }
              |  ]
              |}
-           """.stripMargin, true, true))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(
-          s"""
-             |{
-             |  "optionalCredentials":{
-             |    "providerId": "userId",
-             |    "providerType": "PrivilegedApplication"
-             |  }
-             |}
+           """.stripMargin,
+          true,
+          true
+        ))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(s"""
+                       |{
+                       |  "optionalCredentials":{
+                       |    "providerId": "userId",
+                       |    "providerType": "PrivilegedApplication"
+                       |  }
+                       |}
        """.stripMargin)))
 
   def givenTheUserHasNoCredentials(): StubMapping =
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .withRequestBody(
-        equalToJson(
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(equalToJson(
           s"""
              |{
              |  "authorise": [
@@ -81,17 +83,19 @@ object MockStrideAuth {
              |    }
              |  ]
              |}
-           """.stripMargin, true, true))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody("{}")))
-
+           """.stripMargin,
+          true,
+          true
+        ))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody("{}")))
 
   def givenAuthFailsWith(error: String): StubMapping =
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(aResponse()
-        .withStatus(401)
-        .withHeader("WWW-Authenticate", s"""MDTP detail=\"$error\"""")
-      )
-    )
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(401)
+            .withHeader("WWW-Authenticate", s"""MDTP detail=\"$error\"""")))
 }

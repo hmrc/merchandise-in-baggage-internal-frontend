@@ -34,7 +34,7 @@ object DeclarationType extends Enum[DeclarationType] {
   case object Export extends DeclarationType
 }
 
-object DeclarationTypes extends Enum[DeclarationType] with RadioSupport[DeclarationType]{
+object DeclarationTypes extends Enum[DeclarationType] with RadioSupport[DeclarationType] {
   override val baseMessageKey: String = "importExportChoice"
   override val values: immutable.IndexedSeq[DeclarationType] = findValues
 

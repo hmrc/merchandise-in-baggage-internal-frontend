@@ -32,7 +32,6 @@ object SessionId {
   def apply(): SessionId = SessionId(randomUUID().toString)
 }
 
-
 case class CategoryQuantityOfGoods(category: String, quantity: String)
 
 object CategoryQuantityOfGoods {
@@ -51,15 +50,13 @@ object AmountInPence {
   def fromBigDecimal(in: BigDecimal): AmountInPence = AmountInPence((in * 100).toLong)
 }
 
-
-case class DeclarationJourney(sessionId: SessionId,
-                              declarationType: DeclarationType,
-                              createdAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-                             )
+case class DeclarationJourney(
+  sessionId: SessionId,
+  declarationType: DeclarationType,
+  createdAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC))
 
 object DeclarationJourney extends MongoDateTimeFormats {
   implicit val format: OFormat[DeclarationJourney] = Json.format[DeclarationJourney]
 
   val id = "sessionId"
 }
-

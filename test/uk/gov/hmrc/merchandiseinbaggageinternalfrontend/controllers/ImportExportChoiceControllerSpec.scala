@@ -33,8 +33,10 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
   val controller = new ImportExportChoiceController(component, view, repo)
 
   "return 200 with radio button" in {
-    val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url).withSession((SessionKeys.sessionId, "123"))
-      .withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+    val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url)
+      .withSession((SessionKeys.sessionId, "123"))
+      .withCSRFToken
+      .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
     val eventualResult = controller.onPageLoad(request)
     status(eventualResult) mustBe 200

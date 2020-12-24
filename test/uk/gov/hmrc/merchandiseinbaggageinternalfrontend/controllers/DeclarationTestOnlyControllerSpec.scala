@@ -83,7 +83,6 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     }
   }
 
-
   private def setUp(fn: (Declaration, DeclarationRequest, DeclarationIdResponse, JsValue) => Any): Any = {
     val declarationRequest = aDeclarationRequest
     val declarationIdResponse: DeclarationIdResponse = DeclarationIdResponse(DeclarationId("123"))
@@ -95,18 +94,23 @@ class DeclarationTestOnlyControllerSpec extends BaseSpecWithApplication with Cor
     fn(stubbedDeclaration, declarationRequest, declarationIdResponse, requestBody)
   }
 
-  private def stubController(stub: Future[Declaration], requestBody: JsValue,
-                             declarationIdResponse: DeclarationIdResponse): DeclarationTestOnlyController =
+  private def stubController(
+    stub: Future[Declaration],
+    requestBody: JsValue,
+    declarationIdResponse: DeclarationIdResponse): DeclarationTestOnlyController =
     new DeclarationTestOnlyController(component, httpClient, view, foundView, strideAuth) {
-      override def declarationById(httpClient: HttpClient, declarationId: DeclarationId)
-                                (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Declaration] = stub
+      override def declarationById(httpClient: HttpClient, declarationId: DeclarationId)(
+        implicit hc: HeaderCarrier,
+        ec: ExecutionContext): Future[Declaration] = stub
 
       override protected def bindForm(implicit request: Request[_]): Form[DeclarationData] =
-        new Forms {}.declarationForm(declarationFormIdentifier)
+        new Forms {}
+          .declarationForm(declarationFormIdentifier)
           .bind(Map(declarationFormIdentifier -> requestBody.toString))
 
-      override def addDeclaration(httpClient: HttpClient, requestBody: DeclarationRequest)
-                                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DeclarationIdResponse] =
+      override def addDeclaration(httpClient: HttpClient, requestBody: DeclarationRequest)(
+        implicit hc: HeaderCarrier,
+        ec: ExecutionContext): Future[DeclarationIdResponse] =
         Future.successful(declarationIdResponse)
     }
 }

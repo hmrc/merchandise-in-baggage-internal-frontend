@@ -29,11 +29,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ImportExportChoiceController @Inject()(override val controllerComponents: MessagesControllerComponents,
-                                             view: ImportExportChoice,
-                                             repo: DeclarationJourneyRepository
-                                            )(implicit ec: ExecutionContext, appConf: AppConfig)
-  extends FrontendBaseController {
+class ImportExportChoiceController @Inject()(
+  override val controllerComponents: MessagesControllerComponents,
+  view: ImportExportChoice,
+  repo: DeclarationJourneyRepository)(implicit ec: ExecutionContext, appConf: AppConfig)
+    extends FrontendBaseController {
 
   val backButtonUrl = routes.ImportExportChoiceController.onPageLoad //TODO do we need back button to start with?
   val onPageLoad = Action { implicit request =>
@@ -48,9 +48,12 @@ class ImportExportChoiceController @Inject()(override val controllerComponents: 
         formWithErrors => Future successful BadRequest(view(formWithErrors, backButtonUrl)),
         importExport => {
           request.headers
-          repo.upsert(DeclarationJourney(SessionId(request.session(SessionKeys.sessionId)), importExport)).map { _ =>
-            Ok(view(form, backButtonUrl)) //TODO redirect to next page
-          }.recoverWith { case _ => Future successful BadRequest(view(form, backButtonUrl)) } //TODO
+          repo
+            .upsert(DeclarationJourney(SessionId(request.session(SessionKeys.sessionId)), importExport))
+            .map { _ =>
+              Ok(view(form, backButtonUrl)) //TODO redirect to next page
+            }
+            .recoverWith { case _ => Future successful BadRequest(view(form, backButtonUrl)) } //TODO
         }
       )
 

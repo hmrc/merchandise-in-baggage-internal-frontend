@@ -39,10 +39,10 @@ class MIBBackendServiceSpec extends BaseSpecWithWireMock with CoreTestData with 
     val declarationIdResponse: DeclarationIdResponse = DeclarationIdResponse(DeclarationId("123"))
 
     mibBackendMockServer
-      .stubFor(post(urlPathEqualTo(s"${mibBackendServiceConf.url}"))
-        .withRequestBody(equalToJson(Json.toJson(declarationRequest).toString, true, false))
-        .willReturn(okJson(Json.toJson(declarationIdResponse).toString).withStatus(201))
-      )
+      .stubFor(
+        post(urlPathEqualTo(s"${mibBackendServiceConf.url}"))
+          .withRequestBody(equalToJson(Json.toJson(declarationRequest).toString, true, false))
+          .willReturn(okJson(Json.toJson(declarationIdResponse).toString).withStatus(201)))
 
     addDeclaration(httpClient, declarationRequest).futureValue mustBe DeclarationIdResponse(DeclarationId("123"))
   }
@@ -52,9 +52,9 @@ class MIBBackendServiceSpec extends BaseSpecWithWireMock with CoreTestData with 
     val stubbedDeclaration: Declaration = aDeclaration.copy(declarationId = declarationId)
 
     mibBackendMockServer
-      .stubFor(get(urlPathEqualTo(s"${mibBackendServiceConf.url}/123"))
-        .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200))
-      )
+      .stubFor(
+        get(urlPathEqualTo(s"${mibBackendServiceConf.url}/123"))
+          .willReturn(okJson(Json.toJson(stubbedDeclaration).toString).withStatus(200)))
 
     declarationById(httpClient, declarationId).futureValue mustBe stubbedDeclaration
   }

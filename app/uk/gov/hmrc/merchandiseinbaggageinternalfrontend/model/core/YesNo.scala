@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
-
 import enumeratum.EnumEntry
 
 import scala.collection.immutable
@@ -33,7 +32,7 @@ object YesNo extends Enum[YesNo] {
 
   def to(yesNo: YesNo): Boolean = yesNo match {
     case Yes => true
-    case No => false
+    case No  => false
   }
 
   case object Yes extends YesNo

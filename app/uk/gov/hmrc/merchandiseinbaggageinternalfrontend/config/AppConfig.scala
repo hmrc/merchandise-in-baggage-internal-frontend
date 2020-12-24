@@ -37,7 +37,6 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
   }
 }
 
-
 trait MIBBackendServiceConf {
   lazy val mibBackendServiceConf: MIBBackEndServiceConfiguration =
     ConfigSource.default.at("declaration").loadOrThrow[MIBBackEndServiceConfiguration]
@@ -56,4 +55,3 @@ final case class MongoConf(uri: String, host: String = "localhost", port: Int = 
 object AppConfigSource {
   val configSource: String => ConfigSource = ConfigSource.default.at
 }
-

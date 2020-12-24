@@ -32,13 +32,9 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StrideAuthAction @Inject()(override val authConnector: AuthConnector,
-                                 appConfig: AppConfig,
-                                 mcc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
-  extends ActionBuilder[AuthRequest, AnyContent]
-    with AuthorisedFunctions
-    with AuthRedirects {
+class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appConfig: AppConfig, mcc: MessagesControllerComponents)(
+  implicit ec: ExecutionContext)
+    extends ActionBuilder[AuthRequest, AnyContent] with AuthorisedFunctions with AuthRedirects {
 
   override def parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
@@ -61,18 +57,20 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector,
       toStrideLogin(uri)
     }
 
-    authorised(strideEnrolment and AuthProviders(PrivilegedApplication)).retrieve(credentials) {
-      case Some(c: Credentials) => block(new AuthRequest(request, c))
-      case None =>
-        Future successful redirectToStrideLogin("User does not have credentials")
-    }.recover {
-      case e: NoActiveSession =>
-        redirectToStrideLogin(e.getMessage)
-      case e: InternalError =>
-        redirectToStrideLogin(e.getMessage)
-      case e: AuthorisationException =>
-        logger.warn(s"User is forbidden because of ${e.reason}, $e")
-        Forbidden
-    }
+    authorised(strideEnrolment and AuthProviders(PrivilegedApplication))
+      .retrieve(credentials) {
+        case Some(c: Credentials) => block(new AuthRequest(request, c))
+        case None =>
+          Future successful redirectToStrideLogin("User does not have credentials")
+      }
+      .recover {
+        case e: NoActiveSession =>
+          redirectToStrideLogin(e.getMessage)
+        case e: InternalError =>
+          redirectToStrideLogin(e.getMessage)
+        case e: AuthorisationException =>
+          logger.warn(s"User is forbidden because of ${e.reason}, $e")
+          Forbidden
+      }
   }
 }

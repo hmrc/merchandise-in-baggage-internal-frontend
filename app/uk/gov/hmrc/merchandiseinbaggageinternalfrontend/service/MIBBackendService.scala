@@ -26,11 +26,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait MIBBackendService extends MIBBackendServiceConf {
 
-  def addDeclaration(httpClient: HttpClient, requestBody: DeclarationRequest)
-                    (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DeclarationIdResponse] =
+  def addDeclaration(httpClient: HttpClient, requestBody: DeclarationRequest)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[DeclarationIdResponse] =
     httpClient.POST[DeclarationRequest, DeclarationIdResponse](s"$mibBackendBaseUri${mibBackendServiceConf.url}", requestBody)
 
-  def declarationById(httpClient: HttpClient, declarationId: DeclarationId)
-                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Declaration] =
+  def declarationById(httpClient: HttpClient, declarationId: DeclarationId)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Declaration] =
     httpClient.GET[Declaration](s"$mibBackendBaseUri${mibBackendServiceConf.url}/${declarationId.value}")
 }
