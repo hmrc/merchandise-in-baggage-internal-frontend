@@ -32,7 +32,7 @@ class CannotUseServiceController @Inject()(
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
     request.declarationJourney.maybeGoodsDestination
       .fold(actionProvider.invalidRequest(goodsDestinationUnansweredMessage)) { goodsDestination =>
-        Ok(view(request.declarationJourney.declarationType, goodsDestination))
+        Ok(view(request.declarationJourney.declarationType, goodsDestination, routes.GoodsDestinationController.onPageLoad()))
       }
   }
 }
