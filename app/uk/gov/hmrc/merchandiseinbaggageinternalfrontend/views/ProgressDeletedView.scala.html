@@ -16,10 +16,6 @@
 
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.components
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes._
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.CountryService
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType._
-@import play.api.libs.json.Json
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
 
 @this(
@@ -42,7 +38,6 @@ button: components.button
 @p(Html(messages("progressDeleted.restart.p")), Some("expiredRestartId"))
 
 <ul class="govuk-list govuk-list--bullet">
-    <li id="expiredUlIdOne">@link(StartImportController.onPageLoad().url, messages("progressDeleted.Import.restart"), true)</li>
-    <li id="expiredUlIdTwo">@link(StartExportController.onPageLoad().url, messages("progressDeleted.Export.restart"), true)</li>
+    <li id="expiredUlIdOne">@link(ImportExportChoiceController.onPageLoad().url, messages("progressDeleted.restart"), true)</li>
 </ul>
 }

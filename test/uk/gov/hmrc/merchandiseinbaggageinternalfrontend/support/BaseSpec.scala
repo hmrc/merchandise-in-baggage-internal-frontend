@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support
 
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -29,15 +31,23 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.POST
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.{AppConfig, MongoConfiguration}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationJourneyActionProvider
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
-trait BaseSpec extends AnyWordSpec with Matchers
+trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
 
-trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with WireMockSupport with MongoConfiguration {
+trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with WireMockSupport with MongoConfiguration with ScalaFutures {
   lazy val injector: Injector = fakeApplication().injector
   lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val strideAuth: StrideAuthAction = injector.instanceOf[StrideAuthAction]
   implicit lazy val appConf: AppConfig = injector.instanceOf[AppConfig]
   lazy val messageApi: Map[String, String] = app.injector.instanceOf[MessagesApi].messages("default")
+
+  lazy val repo = injector.instanceOf[DeclarationJourneyRepository]
+  lazy val actionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 
@@ -48,4 +58,12 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneAppPerSuite with Wir
 
   def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
+    repo.insert(declarationJourney).futureValue
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    Await.ready(repo.deleteAll(), 5 seconds)
+  }
 }

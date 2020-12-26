@@ -40,7 +40,8 @@ class GoodsDestinationController @Inject()(
       view(
         request.declarationJourney.maybeGoodsDestination
           .fold(form(request.declarationType))(form(request.declarationType).fill),
-        request.declarationJourney.declarationType
+        request.declarationJourney.declarationType,
+        routes.ImportExportChoiceController.onSubmit()
       ))
   }
 
@@ -48,7 +49,9 @@ class GoodsDestinationController @Inject()(
     form(request.declarationType)
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, request.declarationJourney.declarationType))),
+        formWithErrors =>
+          Future.successful(
+            BadRequest(view(formWithErrors, request.declarationJourney.declarationType, routes.ImportExportChoiceController.onSubmit()))),
         value => {
           val redirectIfNotComplete =
             if (value == NorthernIreland)

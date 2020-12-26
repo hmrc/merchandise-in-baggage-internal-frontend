@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsRemovedView
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class GoodsRemovedController @Inject()(
@@ -30,11 +30,6 @@ class GoodsRemovedController @Inject()(
     extends DeclarationJourneyController {
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
-    val startAgainUrl = request.declarationJourney.declarationType match {
-      case Import => routes.StartImportController.onPageLoad().url
-      case Export => routes.StartExportController.onPageLoad().url
-    }
-
-    Ok(view(startAgainUrl, request.declarationType))
+    Ok(view(routes.ImportExportChoiceController.onPageLoad().url, request.declarationType))
   }
 }

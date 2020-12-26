@@ -21,7 +21,6 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportChoice
@@ -30,9 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
 
-  val view = app.injector.instanceOf[ImportExportChoice]
-  val repo = app.injector.instanceOf[DeclarationJourneyRepository]
-  val actionProvider = app.injector.instanceOf[DeclarationJourneyActionProvider]
+  val view = injector.instanceOf[ImportExportChoice]
   val controller = new ImportExportChoiceController(component, view, actionProvider, repo)
 
   "onPageLoad" should {

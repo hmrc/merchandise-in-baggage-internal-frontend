@@ -29,7 +29,7 @@
 
 @(form: Form[_])(implicit request: Request[_], messages: Messages, appConf: AppConfig)
 
-@layout(pageTitle = Some(messages("declarationType.title")), maybeBackButtonUrl = None) {
+@layout(pageTitle = Some(title(form, "declarationType.title")), maybeBackButtonUrl = None) {
     @formHelper(action = ImportExportChoiceController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
 
         @errorSummary(form.errors, DeclarationType.values.headOption.map(_.entryName))
