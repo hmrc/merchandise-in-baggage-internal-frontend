@@ -22,27 +22,62 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportChoice
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
 
   val view = app.injector.instanceOf[ImportExportChoice]
   val repo = app.injector.instanceOf[DeclarationJourneyRepository]
-  val controller = new ImportExportChoiceController(component, view, repo)
+  val actionProvider = app.injector.instanceOf[DeclarationJourneyActionProvider]
+  val controller = new ImportExportChoiceController(component, view, actionProvider, repo)
 
-  "return 200 with radio button" in {
-    val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url)
-      .withSession((SessionKeys.sessionId, "123"))
-      .withCSRFToken
-      .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+  "onPageLoad" should {
+    "return 200 with radio button" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url)
+        .withSession((SessionKeys.sessionId, "123"))
+        .withCSRFToken
+        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
-    val eventualResult = controller.onPageLoad(request)
-    status(eventualResult) mustBe 200
-    contentAsString(eventualResult) must include(messageApi("importExportChoice.header"))
-    contentAsString(eventualResult) must include(messageApi("importExportChoice.MakeExport"))
-    contentAsString(eventualResult) must include(messageApi("importExportChoice.MakeImport"))
-    contentAsString(eventualResult) must include(messageApi("site.continue"))
+      val eventualResult = controller.onPageLoad(request)
+      status(eventualResult) mustBe 200
+      contentAsString(eventualResult) must include(messageApi("declarationType.header"))
+      contentAsString(eventualResult) must include(messageApi("declarationType.title"))
+    }
+  }
+
+  "onSubmit" should {
+    "redirect to next page after successful form submit" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
+        .withSession((SessionKeys.sessionId, "123"))
+        .withCSRFToken
+        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+        .withFormUrlEncodedBody("value" -> "Export")
+
+      val eventualResult = controller.onSubmit(request)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe Some(routes.GoodsDestinationController.onPageLoad().url)
+    }
+
+    "return 400 with any form errors" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
+        .withSession((SessionKeys.sessionId, "123"))
+        .withCSRFToken
+        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+        .withFormUrlEncodedBody("value" -> "in valid")
+
+      val eventualResult = controller.onSubmit(request)
+      status(eventualResult) mustBe 400
+
+      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
+      contentAsString(eventualResult) must include(messageApi("declarationType.header"))
+      contentAsString(eventualResult) must include(messageApi("declarationType.title"))
+    }
   }
 }

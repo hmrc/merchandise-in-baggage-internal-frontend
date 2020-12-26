@@ -24,6 +24,6 @@ object ImportExportChoiceForm extends Mappings {
 
   val form: Form[DeclarationType] =
     Form(
-      "value" -> enum[DeclarationType](DeclarationType, "importExportChoice.error.required")
+      "value" -> enum[DeclarationType](DeclarationType, "declarationType.error.required")
     )
 }

@@ -23,7 +23,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.Singleton
 
-class MerchandiseInBaggageInternalFrontendConfigModule(unused: Environment, configuration: Configuration) extends AbstractModule {
+class FrontendModule(unused: Environment, configuration: Configuration) extends AbstractModule {
 
   @Provides
   @Singleton

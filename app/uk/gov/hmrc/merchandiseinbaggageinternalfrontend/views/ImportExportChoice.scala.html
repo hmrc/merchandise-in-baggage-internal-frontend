@@ -27,16 +27,16 @@
     button: components.button
 )
 
-@(form: Form[_], backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConf: AppConfig)
+@(form: Form[_])(implicit request: Request[_], messages: Messages, appConf: AppConfig)
 
-@layout(pageTitle = Some(messages("importExportChoice.title")), maybeBackButtonUrl = None) {
+@layout(pageTitle = Some(messages("declarationType.title")), maybeBackButtonUrl = None) {
     @formHelper(action = ImportExportChoiceController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
 
         @errorSummary(form.errors, DeclarationType.values.headOption.map(_.entryName))
 
         @inputRadio(
             form = form,
-            legend = messages("importExportChoice.header"),
+            legend = messages("declarationType.header"),
             legendAsHeading = true,
             items = DeclarationType.options(form)
         )

@@ -1,24 +1,19 @@
-service.name = merchandise-in-baggage-internal-frontend
-service.homePageUrl = /merchandise-in-baggage-internal-frontend
+service.name = Declare commercial goods carried in accompanied baggage or small vehicles
+service.homePageUrl = /declare-commercial-goods
 service.text = This is your new service
 
-footer.cookies.text = Cookies
-footer.cookies.url = /help/cookies
-footer.privacy.text = Privacy policy
-footer.privacy.url = /help/privacy
-footer.termsConditions.text = Terms and conditions
-footer.termsConditions.url = /help/terms-and-conditions
-footer.govukHelp.text = Help using GOV.UK
-footer.govukHelp.url = https://www.gov.uk/help
+# Alpha/Beta Banner
+feedback.before = This is a new service - your
+feedback.link = feedback
+feedback.after = will help us to improve it.
 
-
-importExportChoice.header = What do you want to do?
-importExportChoice.title = What do you want to do?
-importExportChoice.MakeImport = Make an import declaration
-importExportChoice.MakeExport = Make an export declaration
-importExportChoice.error.required = You must enter value
-
-declarationType.Import = Make an import declaration
-declarationType.Export = Make an export declaration
+error.browser.title.prefix = Error:
+error.summary.title = There is a problem
 
 site.continue = Continue
+
+declarationType.header = What do you want to do?
+declarationType.title = What do you want to do?
+declarationType.Import = Make an import declaration
+declarationType.Export = Make an export declaration
+declarationType.error.required = You must enter value

@@ -59,7 +59,7 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appC
 
     authorised(strideEnrolment and AuthProviders(PrivilegedApplication))
       .retrieve(credentials) {
-        case Some(c: Credentials) => block(new AuthRequest(request, c))
+        case Some(c: Credentials) => block(AuthRequest(request, c))
         case None =>
           Future successful redirectToStrideLogin("User does not have credentials")
       }
