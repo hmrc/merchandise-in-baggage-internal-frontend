@@ -18,4 +18,7 @@ importExportChoice.MakeImport = Make an import declaration
 importExportChoice.MakeExport = Make an export declaration
 importExportChoice.error.required = You must enter value
 
+declarationType.Import = Make an import declaration
+declarationType.Export = Make an export declaration
+
 site.continue = Continue

@@ -36,9 +36,9 @@ class ImportExportChoiceController @Inject()(
     extends FrontendBaseController {
 
   val backButtonUrl = routes.ImportExportChoiceController.onPageLoad //TODO do we need back button to start with?
+
   val onPageLoad = Action { implicit request =>
     Ok(view(form, backButtonUrl))
-      .withSession(SessionKeys.sessionId -> SessionId().value) //TODO
   }
 
   val onSubmit = Action.async { implicit request =>
@@ -56,6 +56,5 @@ class ImportExportChoiceController @Inject()(
             .recoverWith { case _ => Future successful BadRequest(view(form, backButtonUrl)) } //TODO
         }
       )
-
   }
 }

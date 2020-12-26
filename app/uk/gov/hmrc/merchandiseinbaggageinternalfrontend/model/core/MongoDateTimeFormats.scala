@@ -18,7 +18,7 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
-import play.api.libs.json.{JsValue, Json, Reads, Writes, __}
+import play.api.libs.json._
 
 trait MongoDateTimeFormats {
 

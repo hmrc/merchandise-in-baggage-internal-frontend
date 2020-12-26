@@ -16,20 +16,32 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config
 
-import javax.inject.{Inject, Singleton}
+import com.google.inject.Inject
 import play.api.{Configuration, Environment}
 import pureconfig.ConfigSource
-import pureconfig.generic.auto._ // Do not remove this
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfigSource.configSource
+import pureconfig.generic.auto._
+import java.time.LocalDate
+import javax.inject.Singleton
 
 @Singleton
-class AppConfig @Inject()(val config: Configuration, val env: Environment) extends MIBBackendServiceConf with MongoConfiguration {
+class AppConfig @Inject()(val config: Configuration, val env: Environment)
+    extends MongoConfiguration with MibConfiguration with ArrivalDateValidationFlagConfiguration {
 
   val serviceIdentifier = "mib"
 
   lazy val strideRole: String = config.get[String]("stride.role")
 
-  val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
+  val contactHost = configSource("contact-frontend.host").loadOrThrow[String]
+
+  val betaFeedbackUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$serviceIdentifier"
+  val contactUrl = s"$contactHost/contact/contact-hmrc-unauthenticated?service=$serviceIdentifier"
+
+  lazy val timeout: Int = configSource("timeout.timeout").loadOrThrow[Int]
+  lazy val countdown: Int = configSource("timeout.countdown").loadOrThrow[Int]
+
+  lazy val paymentsReturnUrl: String = configSource("payments.returnUrl").loadOrThrow[String]
+  lazy val paymentsBackUrl: String = configSource("payments.backUrl").loadOrThrow[String]
 
   val feedbackUrl: String = {
     val url = configSource("microservice.services.feedback-frontend.url").loadOrThrow[String]
@@ -37,14 +49,9 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
   }
 }
 
-trait MIBBackendServiceConf {
-  lazy val mibBackendServiceConf: MIBBackEndServiceConfiguration =
-    ConfigSource.default.at("declaration").loadOrThrow[MIBBackEndServiceConfiguration]
-  import mibBackendServiceConf._
-  lazy val mibBackendBaseUri = s"$protocol://$host:$port"
+object AppConfigSource {
+  val configSource: String => ConfigSource = ConfigSource.default.at
 }
-
-case class MIBBackEndServiceConfiguration(protocol: String, port: Int, host: String, url: String)
 
 trait MongoConfiguration {
   lazy val mongoConf: MongoConf = configSource("mongodb").loadOrThrow[MongoConf]
@@ -52,6 +59,21 @@ trait MongoConfiguration {
 
 final case class MongoConf(uri: String, host: String = "localhost", port: Int = 27017, collectionName: String = "declaration")
 
-object AppConfigSource {
-  val configSource: String => ConfigSource = ConfigSource.default.at
+trait MibConfiguration {
+  lazy val mibConf: MIBConf = configSource("microservice.services.merchandise-in-baggage").loadOrThrow[MIBConf]
+  lazy val declarationsUrl: String = "/declare-commercial-goods/declarations"
+  lazy val sendEmailsUrl: String = "/declare-commercial-goods/declarations/sendEmails"
 }
+
+final case class MIBConf(protocol: String, host: String, port: Int)
+
+//TODO to be removed in 2021
+trait ArrivalDateValidationFlagConfiguration {
+  lazy val arrivalOrDepartureDateFlag: ArrivalDateValidationFlagConf =
+    configSource("retrospective-declaration-date").loadOrThrow[ArrivalDateValidationFlagConf]
+
+  import arrivalOrDepartureDateFlag._
+  lazy val configurationDate = LocalDate.of(year, month, day)
+}
+
+final case class ArrivalDateValidationFlagConf(is2021: Boolean, year: Int, month: Int, day: Int)

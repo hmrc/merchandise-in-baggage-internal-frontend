@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings
 
 import java.time.LocalDate
-
 import enumeratum.EnumEntry
 import play.api.data.FieldMapping
 import play.api.data.Forms.of

@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config
 
-import javax.inject.{Inject, Singleton}
-
 import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ErrorTemplate
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ErrorHandler @Inject()(errorTemplate: ErrorTemplate, val messagesApi: MessagesApi)(implicit appConfig: AppConfig)

@@ -31,7 +31,8 @@
   scriptsBlock: Option[Html] = None,
   fullWidth: Boolean = false,
   maybeBackButtonUrl: Option[play.api.mvc.Call],
-  maybeDeclarationType: Option[DeclarationType] = None
+  maybeDeclarationType: Option[DeclarationType] = None,
+  timeOut: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @defaultHead = {

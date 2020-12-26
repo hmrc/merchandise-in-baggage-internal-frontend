@@ -18,12 +18,12 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
 
 import play.api.data.Form
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.mappings.Mappings
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationType, DeclarationTypes}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType
 
 object ImportExportChoiceForm extends Mappings {
 
   val form: Form[DeclarationType] =
     Form(
-      "value" -> enum[DeclarationType](DeclarationTypes, "importExportChoice.error.required")
+      "value" -> enum[DeclarationType](DeclarationType, "importExportChoice.error.required")
     )
 }

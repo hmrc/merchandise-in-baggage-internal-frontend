@@ -16,8 +16,8 @@
 
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.components
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.routes._
-@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.YesNo
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
+@import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
 
 @this(
     layout: Layout,
@@ -38,7 +38,7 @@
             form = form,
             legend = messages("importExportChoice.header"),
             legendAsHeading = true,
-            items = DeclarationTypes.options(form)
+            items = DeclarationType.options(form)
         )
 
         @button("site.continue", name = Some("continue"))

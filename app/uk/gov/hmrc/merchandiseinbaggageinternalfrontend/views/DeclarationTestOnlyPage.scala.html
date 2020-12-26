@@ -22,7 +22,7 @@
 
 @(form: Form[DeclarationData])(implicit request: Request[_])
 
-@helper.form(action = testonly.routes.DeclarationTestOnlyController.onSubmit()) {
+@helper.form(action = testonly.routes.TestOnlyController.submitDeclarationJourneyPage()) {
 
     <div>
         <h1 class="govuk-heading-xl">This is a test only merchandise-in-baggage declaration</h1>

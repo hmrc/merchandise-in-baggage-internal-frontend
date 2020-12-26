@@ -61,7 +61,7 @@ object DeclarationJourneyLogger {
   private def context(implicit r: RequestHeader) = s"context: [${r.method} ${r.path}]] $sessionId $deviceId"
 
   private def obfuscatedDeclarationJourney(declarationJourneyRequest: DeclarationJourneyRequest[_]) =
-    s"declarationJourney: [${prettyPrint(toJson(declarationJourneyRequest.declarationJourney))}]"
+    s"declarationJourney: [${prettyPrint(toJson(declarationJourneyRequest.declarationJourney.obfuscated))}]"
 
   private def makeRichMessage(message: String)(implicit request: RequestHeader): String = request match {
     case declarationJourneyRequest: DeclarationJourneyRequest[_] =>
