@@ -21,7 +21,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType, SessionId}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{CategoryQuantityOfGoods, DeclarationJourney, DeclarationType, GoodsEntries, GoodsEntry, SessionId}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsVatRateView
@@ -36,7 +36,12 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
+      givenADeclarationJourneyIsPersisted(
+        DeclarationJourney(
+          SessionId("123"),
+          DeclarationType.Import,
+          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+        ))
 
       val request = FakeRequest(GET, routes.GoodsVatRateController.onPageLoad(1).url)
         .withSession((SessionKeys.sessionId, "123"))
@@ -45,19 +50,24 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
 
       val eventualResult = controller.onPageLoad(1)(request)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.heading"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.p"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.Zero"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.Five"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.Twenty"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.p"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.Zero"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.Five"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.Twenty"))
     }
   }
 
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
+      givenADeclarationJourneyIsPersisted(
+        DeclarationJourney(
+          SessionId("123"),
+          DeclarationType.Import,
+          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+        ))
       val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
         .withSession((SessionKeys.sessionId, "123"))
         .withCSRFToken
@@ -71,7 +81,12 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
+      givenADeclarationJourneyIsPersisted(
+        DeclarationJourney(
+          SessionId("123"),
+          DeclarationType.Import,
+          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+        ))
       val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
         .withSession((SessionKeys.sessionId, "123"))
         .withCSRFToken
@@ -81,8 +96,8 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
       val eventualResult = controller.onSubmit(1)(request)
       status(eventualResult) mustBe 400
 
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsVatRate.heading"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
+      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
     }
   }
 }
