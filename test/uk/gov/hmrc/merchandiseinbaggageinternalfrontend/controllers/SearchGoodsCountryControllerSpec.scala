@@ -21,17 +21,17 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{CategoryQuantityOfGoods, DeclarationJourney, DeclarationType, GoodsEntries, GoodsEntry, SessionId}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsVatRateView
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.SearchGoodsCountryView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
+class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
 
-  val view = app.injector.instanceOf[GoodsVatRateView]
-  val controller = new GoodsVatRateController(component, actionProvider, repo, view)
+  val view = app.injector.instanceOf[SearchGoodsCountryView]
+  val controller = new SearchGoodsCountryController(component, actionProvider, repo, view)
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
@@ -43,19 +43,16 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onPageLoad(1).url)
+      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onPageLoad(1).url)
         .withSession((SessionKeys.sessionId, "123"))
         .withCSRFToken
         .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
       val eventualResult = controller.onPageLoad(1)(request)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.p"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Zero"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Five"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Twenty"))
+      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.title", "clothes"))
+      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.heading", "clothes"))
+      contentAsString(eventualResult) must include(messages("searchGoodsCountry.hint"))
     }
   }
 
@@ -68,15 +65,15 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
+      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onSubmit(1).url)
         .withSession((SessionKeys.sessionId, "123"))
         .withCSRFToken
         .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
-        .withFormUrlEncodedBody("value" -> "Zero")
+        .withFormUrlEncodedBody("country" -> "AF")
 
       val eventualResult = controller.onSubmit(1)(request)
       status(eventualResult) mustBe 303
-      redirectLocation(eventualResult) mustBe Some(routes.SearchGoodsCountryController.onPageLoad(1).url)
+      redirectLocation(eventualResult) mustBe Some(routes.PurchaseDetailsController.onPageLoad(1).url)
     }
 
     "return 400 with any form errors" in {
@@ -87,18 +84,18 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
+      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onSubmit(1).url)
         .withSession((SessionKeys.sessionId, "123"))
         .withCSRFToken
         .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
-        .withFormUrlEncodedBody("value" -> "in valid")
+        .withFormUrlEncodedBody("country" -> "in valid")
 
       val eventualResult = controller.onSubmit(1)(request)
       status(eventualResult) mustBe 400
 
       contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
+      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.title", "clothes"))
+      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.heading", "clothes"))
     }
   }
 }

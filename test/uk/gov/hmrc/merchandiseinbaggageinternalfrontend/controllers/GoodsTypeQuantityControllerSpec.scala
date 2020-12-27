@@ -79,6 +79,7 @@ class GoodsTypeQuantityControllerSpec extends BaseSpecWithApplication {
       val eventualResult = controller.onSubmit(1)(request)
       status(eventualResult) mustBe 400
 
+      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
       contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.title"))
       contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.heading"))
       contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.p"))
