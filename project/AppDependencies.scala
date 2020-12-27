@@ -13,7 +13,8 @@ object AppDependencies {
     "com.beachape"            %% "enumeratum-play"            % "1.5.13",
     "org.typelevel"           %% "cats-core"                  % "2.0.0",
     "com.github.pureconfig"   %% "pureconfig"                 % "0.13.0",
-    "uk.gov.hmrc"             %% "play-language"              % "4.4.0-play-27"
+    "uk.gov.hmrc"             %% "play-language"              % "4.4.0-play-27",
+    "org.webjars.npm"         %  "accessible-autocomplete"    % "2.0.3"
   )
 
   val test = Seq(
