@@ -19,6 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
+import org.scalatest.time.{Milliseconds, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -38,14 +39,15 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJo
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.CalculationService
 
-import scala.concurrent.duration._
-import scala.concurrent.Await
-
 trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
 
 trait BaseSpecWithApplication
     extends BaseSpec with GuiceOneAppPerSuite with WireMockSupport with MongoConfiguration with ScalaFutures with CoreTestData {
-  lazy val injector: Injector = fakeApplication().injector
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(scaled(Span(5L, Seconds)), scaled(Span(500L, Milliseconds)))
+
+  lazy val injector: Injector = app.injector
   lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val strideAuth: StrideAuthAction = injector.instanceOf[StrideAuthAction]
   implicit lazy val appConf: AppConfig = injector.instanceOf[AppConfig]
@@ -76,8 +78,5 @@ trait BaseSpecWithApplication
   def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
     repo.insert(declarationJourney).futureValue
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    Await.ready(repo.deleteAll(), 5 seconds)
-  }
+  override def beforeEach(): Unit = repo.deleteAll().futureValue
 }
