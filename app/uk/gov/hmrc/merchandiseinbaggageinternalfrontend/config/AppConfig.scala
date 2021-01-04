@@ -35,9 +35,6 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
   val betaFeedbackUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$serviceIdentifier"
   val contactUrl = s"$contactHost/contact/contact-hmrc-unauthenticated?service=$serviceIdentifier"
 
-  lazy val timeout: Int = configSource("timeout.timeout").loadOrThrow[Int]
-  lazy val countdown: Int = configSource("timeout.countdown").loadOrThrow[Int]
-
   lazy val paymentsReturnUrl: String = configSource("payments.returnUrl").loadOrThrow[String]
   lazy val paymentsBackUrl: String = configSource("payments.backUrl").loadOrThrow[String]
 
