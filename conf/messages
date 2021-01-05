@@ -296,8 +296,8 @@ eoriNumber.agent.Export.error.required = Enter the EORI number of the business t
 eoriNumber.error.invalid = EORI number must start with GB followed by 12 numbers
 
 # GoodsInVehicle
-goodsInVehicle.Import.title = Are the goods arriving by vehicle?
-goodsInVehicle.Import.heading = Are the goods arriving by vehicle?
+goodsInVehicle.Import.title = Are you travelling by vehicle?
+goodsInVehicle.Import.heading = Are you travelling by vehicle?
 goodsInVehicle.Export.title = Are the goods being taken by vehicle?
 goodsInVehicle.Export.heading = Are the goods being taken by vehicle?
 goodsInVehicle.error.Import.required = Select yes if the goods are arriving by vehicle
