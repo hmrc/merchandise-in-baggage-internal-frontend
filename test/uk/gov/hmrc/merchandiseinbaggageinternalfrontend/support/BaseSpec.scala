@@ -73,11 +73,14 @@ trait BaseSpecWithApplication
     "microservice.services.tps-payments-backend.port"    -> WireMockSupport.port
   )
 
-  def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+  def buildPost(url: String, sessionId: SessionId = SessionId("123")): FakeRequest[AnyContentAsEmpty.type] =
+    buildRequest(POST, url, sessionId)
 
   def buildGet(url: String, sessionId: SessionId = SessionId("123")): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, url)
+    buildRequest(GET, url, sessionId)
+
+  private def buildRequest(httpVerbs: String, url: String, sessionId: SessionId): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(httpVerbs, url)
       .withSession(SessionKeys.sessionId -> sessionId.value)
       .withCSRFToken
       .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
