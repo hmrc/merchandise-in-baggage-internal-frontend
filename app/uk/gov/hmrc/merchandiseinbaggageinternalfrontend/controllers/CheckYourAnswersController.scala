@@ -28,7 +28,7 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.Declaration
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -40,8 +40,7 @@ class CheckYourAnswersController @Inject()(
   mibConnector: MibConnector,
   override val repo: DeclarationJourneyRepository,
   importView: CheckYourAnswersImportView,
-  exportView: CheckYourAnswersExportView,
-  @Named("tpsFrontendBaseUrl") tpsFrontendBaseUrl: String)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  exportView: CheckYourAnswersExportView)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
@@ -97,5 +96,5 @@ class CheckYourAnswersController @Inject()(
       taxDue <- calculationService.paymentCalculation(declaration.declarationGoods)
       _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
       tpsId  <- tpsPaymentsService.createTpsPayments(request.pid, declaration, taxDue)
-    } yield Redirect(s"$tpsFrontendBaseUrl/tps-payments/make-payment/mib/${tpsId.value}")
+    } yield Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")
 }

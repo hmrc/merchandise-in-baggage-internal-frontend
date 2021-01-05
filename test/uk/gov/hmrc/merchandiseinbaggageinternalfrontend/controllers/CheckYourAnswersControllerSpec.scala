@@ -44,8 +44,7 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
     mibConnector,
     repo,
     importView,
-    exportView,
-    s"http://localhost:${WireMockSupport.port}")
+    exportView)
 
   "onPageLoad" should {
     "return 200" in {
@@ -90,7 +89,7 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
 
       val eventualResult = controller.onSubmit()(request)
       status(eventualResult) mustBe 303
-      redirectLocation(eventualResult) mustBe Some(s"http://localhost:${WireMockSupport.port}/tps-payments/make-payment/mib/123")
+      redirectLocation(eventualResult) mustBe Some("http://localhost:9124/tps-payments/make-payment/mib/123")
     }
 
     "redirect to payment page after successful form submit for Exports" in {
