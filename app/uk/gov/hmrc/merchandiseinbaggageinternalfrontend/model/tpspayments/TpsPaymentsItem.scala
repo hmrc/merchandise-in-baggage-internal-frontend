@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments
 
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.URL
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.utils.ValueClassFormat
+import play.api.libs.json.{Json, OFormat}
 
-case class JourneyId(value: String)
-object JourneyId {
-  implicit val format: Format[JourneyId] = ValueClassFormat.format(value => JourneyId.apply(value))(_.value)
-}
+case class TpsPaymentsItem(
+  chargeReference: String,
+  customerName: String,
+  amount: BigDecimal,
+  taxRegimeDisplay: String = "MODS",
+  taxType: String = "MIB",
+  paymentSpecificData: PaymentSpecificData)
 
-case class PayApiResponse(journeyId: JourneyId, nextUrl: URL)
-
-object PayApiResponse {
-  implicit val format: Format[PayApiResponse] = Json.format[PayApiResponse]
+object TpsPaymentsItem {
+  implicit val format: OFormat[TpsPaymentsItem] = Json.format[TpsPaymentsItem]
 }

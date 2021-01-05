@@ -178,6 +178,8 @@ case class DeclarationJourney(
       maybeRegistrationNumber = maybeObfuscate(maybeRegistrationNumber)
     )
 
+  lazy val reset: DeclarationJourney = DeclarationJourney(sessionId, declarationType)
+
   val maybeCustomsAgent: Option[CustomsAgent] =
     for {
       _                   <- maybeIsACustomsAgent

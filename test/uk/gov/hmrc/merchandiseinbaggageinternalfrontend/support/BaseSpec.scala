@@ -33,11 +33,11 @@ import play.api.test.Helpers.POST
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.{AppConfig, MongoConfiguration}
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.{AddressLookupFrontendConnector, MibConnector, PaymentConnector}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.{AddressLookupFrontendConnector, MibConnector}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationJourneyActionProvider
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.{CalculationService, TpsPaymentsService}
 
 trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
 
@@ -58,7 +58,7 @@ trait BaseSpecWithApplication
   lazy val actionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
   lazy val addressLookupConnector = injector.instanceOf[AddressLookupFrontendConnector]
   lazy val calculationService = injector.instanceOf[CalculationService]
-  lazy val paymentConnector = injector.instanceOf[PaymentConnector]
+  lazy val tpsPaymentsService = injector.instanceOf[TpsPaymentsService]
   lazy val mibConnector = injector.instanceOf[MibConnector]
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
@@ -69,7 +69,8 @@ trait BaseSpecWithApplication
     "microservice.services.address-lookup-frontend.port" -> WireMockSupport.port,
     "microservice.services.currency-conversion.port"     -> WireMockSupport.port,
     "microservice.services.merchandise-in-baggage.port"  -> WireMockSupport.port,
-    "microservice.services.payment.port"                 -> WireMockSupport.port
+    "microservice.services.tps-payments-frontend.port"   -> WireMockSupport.port,
+    "microservice.services.tps-payments-backend.port"    -> WireMockSupport.port
   )
 
   def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =

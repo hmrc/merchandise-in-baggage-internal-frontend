@@ -38,7 +38,7 @@ class DeclarationJourneyActionProvider @Inject()(
     defaultActionBuilder andThen strideAuthAction andThen journeyActionRefiner
 
   def goodsAction(idx: Int): ActionBuilder[DeclarationGoodsRequest, AnyContent] =
-    defaultActionBuilder andThen journeyActionRefiner andThen goodsActionRefiner(idx)
+    journeyAction andThen goodsActionRefiner(idx)
 
   def invalidRequest(warnMessage: String)(implicit request: RequestHeader): Result = {
     DeclarationJourneyLogger.warn(s"$warnMessage so redirecting to ${routes.InvalidRequestController.onPageLoad()}")(request)
@@ -48,10 +48,10 @@ class DeclarationJourneyActionProvider @Inject()(
   def invalidRequestF(warningMessage: String)(implicit request: RequestHeader): Future[Result] =
     Future.successful(invalidRequest(warningMessage))
 
-  private def journeyActionRefiner: ActionRefiner[Request, DeclarationJourneyRequest] =
-    new ActionRefiner[Request, DeclarationJourneyRequest] {
+  private def journeyActionRefiner: ActionRefiner[AuthRequest, DeclarationJourneyRequest] =
+    new ActionRefiner[AuthRequest, DeclarationJourneyRequest] {
 
-      override protected def refine[A](request: Request[A]): Future[Either[Result, DeclarationJourneyRequest[A]]] =
+      override protected def refine[A](request: AuthRequest[A]): Future[Either[Result, DeclarationJourneyRequest[A]]] =
         request.session.get(SessionKeys.sessionId) match {
           case None => Future successful Left(invalidRequest("Session Id not found")(request))
           case Some(sessionId) =>

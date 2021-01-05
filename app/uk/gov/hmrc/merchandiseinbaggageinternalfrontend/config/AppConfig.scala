@@ -21,6 +21,8 @@ import play.api.{Configuration, Environment}
 import pureconfig.ConfigSource
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfigSource.configSource
 import pureconfig.generic.auto._
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments.TpsNavigation
+
 import javax.inject.Singleton
 
 @Singleton
@@ -35,8 +37,7 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
   val betaFeedbackUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$serviceIdentifier"
   val contactUrl = s"$contactHost/contact/contact-hmrc-unauthenticated?service=$serviceIdentifier"
 
-  lazy val paymentsReturnUrl: String = configSource("payments.returnUrl").loadOrThrow[String]
-  lazy val paymentsBackUrl: String = configSource("payments.backUrl").loadOrThrow[String]
+  lazy val tpsNavigation: TpsNavigation = configSource("tps-navigation").loadOrThrow[TpsNavigation]
 
   val feedbackUrl: String = {
     val url = configSource("microservice.services.feedback-frontend.url").loadOrThrow[String]

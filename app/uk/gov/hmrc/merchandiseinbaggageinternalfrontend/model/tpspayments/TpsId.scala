@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments
 
-import play.api.mvc.WrappedRequest
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.AuthRequest
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType}
+import play.api.libs.json.Format
+import play.api.libs.functional.syntax._
 
-final class DeclarationJourneyRequest[A](val declarationJourney: DeclarationJourney, val request: AuthRequest[A])
-    extends WrappedRequest[A](request) {
+case class TpsId(value: String)
 
-  def declarationType: DeclarationType = declarationJourney.declarationType
-  def pid: String = request.credentials.providerId
+object TpsId {
+  implicit val format: Format[TpsId] = implicitly[Format[String]].inmap(TpsId(_), _.value)
 }

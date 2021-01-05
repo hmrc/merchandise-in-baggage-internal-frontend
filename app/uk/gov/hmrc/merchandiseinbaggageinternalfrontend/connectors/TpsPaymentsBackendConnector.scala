@@ -19,31 +19,24 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors
 import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.PaymentApiUrls.payUrl
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{PayApiRequest, PayApiResponse}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments.{TpsId, TpsPaymentsRequest}
 
 import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-case class PayApiException(message: String) extends RuntimeException(message)
+case class TpsPaymentsException(message: String) extends RuntimeException(message)
 
 @Singleton
-class PaymentConnector @Inject()(httpClient: HttpClient, @Named("paymentBaseUrl") baseUrl: String) {
+class TpsPaymentsBackendConnector @Inject()(httpClient: HttpClient, @Named("tpsBackendBaseUrl") baseUrl: String) {
 
-  private val url = s"$baseUrl$payUrl"
-
-  def sendPaymentRequest(requestBody: PayApiRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PayApiResponse] =
-    httpClient.POST[PayApiRequest, HttpResponse](url, requestBody).map { response =>
+  def createTpsPayments(requestBody: TpsPaymentsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TpsId] =
+    httpClient.POST[TpsPaymentsRequest, HttpResponse](s"$baseUrl/tps-payments-backend/tps-payments", requestBody).map { response =>
       response.status match {
-        case Status.CREATED => response.json.as[PayApiResponse]
+        case Status.CREATED => response.json.as[TpsId]
         case other: Int     =>
           //TODO: PagerDuty
-          throw PayApiException(s"unexpected status from pay-api for reference:${requestBody.mibReference.value}, status:$other")
+          throw TpsPaymentsException(
+            s"unexpected status from tps-payments-backend for reference: ${requestBody.payments.head.chargeReference}, status: $other")
       }
     }
-}
-
-object PaymentApiUrls {
-  val payUrl = "/pay-api/mib-frontend/mib/journey/start"
-  val payInitiatedJourneyUrl = "/pay/initiate-journey"
 }

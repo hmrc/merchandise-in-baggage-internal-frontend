@@ -18,17 +18,17 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.{MibConnector, PaymentConnector}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationJourneyController.incompleteMessage
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.CheckYourAnswersForm.form
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.{Declaration, PayApiRequest}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,11 +36,12 @@ class CheckYourAnswersController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   calculationService: CalculationService,
-  connector: PaymentConnector,
+  tpsPaymentsService: TpsPaymentsService,
   mibConnector: MibConnector,
   override val repo: DeclarationJourneyRepository,
   importView: CheckYourAnswersImportView,
-  exportView: CheckYourAnswersExportView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  exportView: CheckYourAnswersExportView,
+  @Named("tpsFrontendBaseUrl") tpsFrontendBaseUrl: String)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
@@ -85,7 +86,7 @@ class CheckYourAnswersController @Inject()(
         continueImportDeclaration(declaration)
     }
 
-  private def continueExportDeclaration(declaration: Declaration)(implicit request: DeclarationJourneyRequest[AnyContent]) =
+  private def continueExportDeclaration(declaration: Declaration)(implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] =
     for {
       declarationId <- mibConnector.persistDeclaration(declaration)
       _             <- mibConnector.sendEmails(declarationId)
@@ -95,16 +96,6 @@ class CheckYourAnswersController @Inject()(
     for {
       taxDue <- calculationService.paymentCalculation(declaration.declarationGoods)
       _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
-      payApiResponse <- connector
-                         .sendPaymentRequest(
-                           PayApiRequest(
-                             declaration.mibReference,
-                             taxDue.totalTaxDue,
-                             taxDue.totalVatDue,
-                             taxDue.totalDutyDue,
-                             appConfig.paymentsReturnUrl,
-                             appConfig.paymentsBackUrl
-                           )
-                         )
-    } yield Redirect(payApiResponse.nextUrl.value)
+      tpsId  <- tpsPaymentsService.createTpsPayments(request.pid, declaration, taxDue)
+    } yield Redirect(s"$tpsFrontendBaseUrl/tps-payments/make-payment/mib/${tpsId.value}")
 }

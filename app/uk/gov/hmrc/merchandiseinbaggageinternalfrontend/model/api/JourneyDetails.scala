@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.api
 
-import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, JsonConfiguration, JsonNaming, OFormat}
+import play.api.libs.json._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.YesNo.{No, Yes}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{Port, YesNo}
 

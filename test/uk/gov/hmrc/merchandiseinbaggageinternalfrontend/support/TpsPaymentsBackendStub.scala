@@ -18,19 +18,18 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import play.api.libs.json.Json
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.PaymentApiUrls._
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments.TpsId
 
-object PayApiStub extends CoreTestData {
+object TpsPaymentsBackendStub extends CoreTestData {
 
-  val stubbedResponse = s"""{"journeyId":"5f3bc55","nextUrl":"http://localhost:17777/pay/initiate-journey"}"""
-
-  def givenTaxArePaid(): StubMapping = {
+  def givenTaxArePaid(tpsId: TpsId): StubMapping = {
     stubFor(
-      post(urlPathEqualTo(payUrl))
-        .willReturn(okJson(stubbedResponse).withStatus(201)))
+      post(urlPathEqualTo("/tps-payments-backend/tps-payments"))
+        .willReturn(okJson(Json.toJson(tpsId).toString).withStatus(201)))
     stubFor(
-      get(urlPathEqualTo(payInitiatedJourneyUrl))
+      get(urlPathEqualTo("/tps-payments/make-payment/mib/123"))
         .willReturn(aResponse().withStatus(200)))
   }
 

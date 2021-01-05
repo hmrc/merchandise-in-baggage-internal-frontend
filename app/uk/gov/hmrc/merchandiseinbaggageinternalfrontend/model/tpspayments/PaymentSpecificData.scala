@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
+package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments
 
-import play.api.mvc.WrappedRequest
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.AuthRequest
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType}
+import play.api.libs.json.{Json, OFormat}
 
-final class DeclarationJourneyRequest[A](val declarationJourney: DeclarationJourney, val request: AuthRequest[A])
-    extends WrappedRequest[A](request) {
+case class PaymentSpecificData(chargeReference: String, vat: BigDecimal, customs: BigDecimal)
 
-  def declarationType: DeclarationType = declarationJourney.declarationType
-  def pid: String = request.credentials.providerId
+object PaymentSpecificData {
+  implicit val format: OFormat[PaymentSpecificData] = Json.format[PaymentSpecificData]
 }
