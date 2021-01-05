@@ -43,10 +43,7 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onPageLoad(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsVatRateController.onPageLoad(1).url)
 
       val eventualResult = controller.onPageLoad(1)(request)
       status(eventualResult) mustBe 200
@@ -68,10 +65,8 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
+
         .withFormUrlEncodedBody("value" -> "Zero")
 
       val eventualResult = controller.onSubmit(1)(request)
@@ -87,10 +82,8 @@ class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.GoodsVatRateController.onSubmit(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
+
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(1)(request)

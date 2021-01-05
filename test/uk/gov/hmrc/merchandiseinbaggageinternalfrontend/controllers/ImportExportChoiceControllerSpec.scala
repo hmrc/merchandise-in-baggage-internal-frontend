@@ -35,10 +35,7 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
   "onPageLoad" should {
     "return 200 with radio button" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -50,10 +47,8 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "Export")
 
       val eventualResult = controller.onSubmit(request)
@@ -63,10 +58,8 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)

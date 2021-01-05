@@ -43,10 +43,7 @@ class EnterAgentAddressControllerSpec extends BaseSpecWithApplication {
         ))
       givenInitJourney()
 
-      val request = FakeRequest(GET, routes.EnterAgentAddressController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EnterAgentAddressController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 303
@@ -59,10 +56,7 @@ class EnterAgentAddressControllerSpec extends BaseSpecWithApplication {
       val address =
         Address(Seq("address line 1", "address line 2"), Some("AB12 3CD"), AddressLookupCountry("GB", Some("United Kingdom")))
 
-      val request = FakeRequest(GET, url)
-        .withSession((SessionKeys.sessionId, sessionId.value))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(url, sessionId)
 
       s"store address and redirect to ${routes.EoriNumberController.onPageLoad()}" when {
         "a declaration journey has been started" in {

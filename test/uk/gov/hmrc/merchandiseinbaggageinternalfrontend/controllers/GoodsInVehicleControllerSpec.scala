@@ -43,10 +43,7 @@ class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsInVehicleController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsInVehicleController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
@@ -65,10 +62,8 @@ class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsInVehicleController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "Yes")
 
       val eventualResult = controller.onSubmit()(request)
@@ -85,10 +80,8 @@ class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsInVehicleController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "No")
 
       val eventualResult = controller.onSubmit()(request)
@@ -105,10 +98,8 @@ class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsInVehicleController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit()(request)

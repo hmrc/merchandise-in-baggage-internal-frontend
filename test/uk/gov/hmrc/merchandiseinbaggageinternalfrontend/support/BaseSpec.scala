@@ -29,13 +29,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
-import play.api.test.Helpers.POST
+import play.api.test.Helpers.{GET, POST}
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.{AppConfig, MongoConfiguration}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.connectors.{AddressLookupFrontendConnector, MibConnector}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers.DeclarationJourneyActionProvider
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, SessionId}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.service.{CalculationService, TpsPaymentsService}
 
@@ -74,6 +75,12 @@ trait BaseSpecWithApplication
 
   def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def buildGet(url: String, sessionId: SessionId = SessionId("123")): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, url)
+      .withSession(SessionKeys.sessionId -> sessionId.value)
+      .withCSRFToken
+      .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
     repo.insert(declarationJourney).futureValue

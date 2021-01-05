@@ -52,10 +52,7 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
       givenSuccessfulCurrencyConversionResponse()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, sessionId.value))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200

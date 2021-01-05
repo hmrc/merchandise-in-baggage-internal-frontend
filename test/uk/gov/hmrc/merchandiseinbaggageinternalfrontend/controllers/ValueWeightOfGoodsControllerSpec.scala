@@ -40,10 +40,7 @@ class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
 
-      val request = FakeRequest(GET, routes.ValueWeightOfGoodsController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -57,10 +54,8 @@ class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
-      val request = FakeRequest(GET, routes.ValueWeightOfGoodsController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "No")
 
       val eventualResult = controller.onSubmit(request)
@@ -72,10 +67,8 @@ class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
-      val request = FakeRequest(GET, routes.ValueWeightOfGoodsController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "Yes")
 
       val eventualResult = controller.onSubmit(request)
@@ -87,10 +80,8 @@ class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
-      val request = FakeRequest(GET, routes.ValueWeightOfGoodsController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)

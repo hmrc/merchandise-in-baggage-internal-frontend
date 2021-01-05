@@ -39,10 +39,7 @@ class EnterEmailControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
-      val request = FakeRequest(GET, routes.EnterEmailController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EnterEmailController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -59,10 +56,8 @@ class EnterEmailControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.EnterEmailController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EnterEmailController.onSubmit().url)
+
         .withFormUrlEncodedBody("email" -> "s@s.s", "confirmation" -> "s@s.s")
 
       val eventualResult = controller.onSubmit(request)
@@ -74,10 +69,8 @@ class EnterEmailControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.EnterEmailController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EnterEmailController.onSubmit().url)
+
         .withFormUrlEncodedBody("email1" -> "s@s.s", "confirmation" -> "")
 
       val eventualResult = controller.onSubmit(request)

@@ -36,10 +36,7 @@ class ResetServiceControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(startedImportToGreatBritainJourney)
 
-      val request = FakeRequest(GET, routes.ResetServiceController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, sessionId.value))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ResetServiceController.onPageLoad().url, sessionId)
 
       repo.findBySessionId(sessionId).futureValue.get.maybeGoodsDestination mustBe Some(GreatBritain)
 

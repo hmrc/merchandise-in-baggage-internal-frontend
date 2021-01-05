@@ -39,10 +39,7 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
-      val request = FakeRequest(GET, routes.EoriNumberController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EoriNumberController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -57,10 +54,8 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.EoriNumberController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EoriNumberController.onSubmit().url)
+
         .withFormUrlEncodedBody("eori" -> "GB123456780000")
 
       val eventualResult = controller.onSubmit(request)
@@ -72,10 +67,8 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.EoriNumberController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.EoriNumberController.onSubmit().url)
+
         .withFormUrlEncodedBody("eori" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)

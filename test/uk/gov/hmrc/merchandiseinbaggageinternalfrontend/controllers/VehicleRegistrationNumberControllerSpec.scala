@@ -42,10 +42,7 @@ class VehicleRegistrationNumberControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import
         ))
 
-      val request = FakeRequest(GET, routes.VehicleRegistrationNumberController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
@@ -60,10 +57,8 @@ class VehicleRegistrationNumberControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
-      val request = FakeRequest(GET, routes.VehicleRegistrationNumberController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "business-name")
 
       val eventualResult = controller.onSubmit()(request)
@@ -74,10 +69,8 @@ class VehicleRegistrationNumberControllerSpec extends BaseSpecWithApplication {
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
-      val request = FakeRequest(GET, routes.VehicleRegistrationNumberController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
+
         .withFormUrlEncodedBody("value123" -> "in valid")
 
       val eventualResult = controller.onSubmit()(request)

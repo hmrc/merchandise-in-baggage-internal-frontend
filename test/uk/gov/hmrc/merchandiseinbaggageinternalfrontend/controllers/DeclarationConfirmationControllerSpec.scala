@@ -38,10 +38,7 @@ class DeclarationConfirmationControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
       MibBackendStub.givenPersistedDeclarationIsFound(declaration, declaration.declarationId)
 
-      val request = FakeRequest(GET, routes.DeclarationConfirmationController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, sessionId.value))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, sessionId)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200

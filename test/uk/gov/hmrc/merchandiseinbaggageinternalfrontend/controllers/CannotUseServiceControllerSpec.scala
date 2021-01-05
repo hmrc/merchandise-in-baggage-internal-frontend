@@ -37,10 +37,7 @@ class CannotUseServiceControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain)))
 
-      val request = FakeRequest(GET, routes.CannotUseServiceController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.CannotUseServiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200

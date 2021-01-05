@@ -41,10 +41,7 @@ class GoodsRemovedControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.GoodsRemovedController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsRemovedController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200

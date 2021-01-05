@@ -38,10 +38,7 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
-      val request = FakeRequest(GET, routes.GoodsDestinationController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.GoodsDestinationController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -56,10 +53,8 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
     "redirect to next page after successful form submit with GreatBritain" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "GreatBritain")
 
       val eventualResult = controller.onSubmit(request)
@@ -70,10 +65,8 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
     "redirect to /cannot-use-service-ireland after successful form submit with NorthernIreland" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "NorthernIreland")
 
       val eventualResult = controller.onSubmit(request)
@@ -84,10 +77,8 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
-      val request = FakeRequest(GET, routes.ImportExportChoiceController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)

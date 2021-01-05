@@ -36,10 +36,8 @@ class CannotUseServiceIrelandControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
-      val request = FakeRequest(GET, routes.CannotUseServiceIrelandController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.CannotUseServiceIrelandController.onPageLoad.url)
+
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200

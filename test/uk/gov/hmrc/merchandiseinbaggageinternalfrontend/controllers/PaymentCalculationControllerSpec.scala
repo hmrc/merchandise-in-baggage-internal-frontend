@@ -47,10 +47,7 @@ class PaymentCalculationControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
         ))
 
-      val request = FakeRequest(GET, routes.PaymentCalculationController.onPageLoad().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200

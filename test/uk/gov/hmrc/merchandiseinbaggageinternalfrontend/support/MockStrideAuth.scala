@@ -33,26 +33,12 @@ object MockStrideAuth {
   def givenTheUserIsAuthenticatedAndAuthorised(): StubMapping =
     stubFor(
       post(urlEqualTo("/auth/authorise"))
-        .withRequestBody(equalToJson(
-          s"""
-             |{
-             |  "authorise": [
-             |    {
-             |     "identifiers":[],
-             |     "state":"Activated",
-             |     "enrolment":"digital_tps_payment_taker_call_handler"
-             |    },
-             |    {
-             |      "authProviders": [
-             |        "PrivilegedApplication"
-             |      ]
-             |    }
-             |  ]
-             |}
-           """.stripMargin,
-          true,
-          true
-        ))
+        .withRequestBody(
+          equalToJson(
+            authRequestBody,
+            true,
+            true
+          ))
         .willReturn(aResponse()
           .withStatus(200)
           .withBody(s"""
@@ -67,26 +53,12 @@ object MockStrideAuth {
   def givenTheUserHasNoCredentials(): StubMapping =
     stubFor(
       post(urlEqualTo("/auth/authorise"))
-        .withRequestBody(equalToJson(
-          s"""
-             |{
-             |  "authorise": [
-             |    {
-             |     "identifiers":[],
-             |     "state":"Activated",
-             |     "enrolment":"digital_tps_payment_taker_call_handler"
-             |    },
-             |    {
-             |      "authProviders": [
-             |        "PrivilegedApplication"
-             |      ]
-             |    }
-             |  ]
-             |}
-           """.stripMargin,
-          true,
-          true
-        ))
+        .withRequestBody(
+          equalToJson(
+            authRequestBody,
+            true,
+            true
+          ))
         .willReturn(aResponse()
           .withStatus(200)
           .withBody("{}")))
@@ -98,4 +70,21 @@ object MockStrideAuth {
           aResponse()
             .withStatus(401)
             .withHeader("WWW-Authenticate", s"""MDTP detail=\"$error\"""")))
+
+  private val authRequestBody: String =
+    s"""
+       |{
+       |  "authorise": [
+       |    {
+       |     "identifiers":[],
+       |     "state":"Activated",
+       |     "enrolment":"digital_tps_payment_taker_call_handler"
+       |    },
+       |    {
+       |      "authProviders": [
+       |        "PrivilegedApplication"
+       |      ]
+       |    }
+       |  ]
+       |}""".stripMargin
 }

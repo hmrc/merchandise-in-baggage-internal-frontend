@@ -43,10 +43,7 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
 
-      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onPageLoad(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.SearchGoodsCountryController.onPageLoad(1).url)
 
       val eventualResult = controller.onPageLoad(1)(request)
       status(eventualResult) mustBe 200
@@ -65,10 +62,8 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onSubmit(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
+
         .withFormUrlEncodedBody("country" -> "AF")
 
       val eventualResult = controller.onSubmit(1)(request)
@@ -84,10 +79,8 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
           DeclarationType.Import,
           goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
         ))
-      val request = FakeRequest(GET, routes.SearchGoodsCountryController.onSubmit(1).url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
+
         .withFormUrlEncodedBody("country" -> "in valid")
 
       val eventualResult = controller.onSubmit(1)(request)

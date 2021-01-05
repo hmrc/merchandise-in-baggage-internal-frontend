@@ -40,10 +40,7 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
-      val request = FakeRequest(GET, routes.JourneyDetailsController.onPageLoad.url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.JourneyDetailsController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       status(eventualResult) mustBe 200
@@ -61,10 +58,8 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.JourneyDetailsController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
+
         .withFormUrlEncodedBody(
           "port"               -> "ABZ",
           "dateOfTravel.day"   -> today.getDayOfMonth.toString,
@@ -81,10 +76,8 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenADeclarationJourneyIsPersisted(
         DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
-      val request = FakeRequest(GET, routes.JourneyDetailsController.onSubmit().url)
-        .withSession((SessionKeys.sessionId, "123"))
-        .withCSRFToken
-        .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+      val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
+
         .withFormUrlEncodedBody("port111" -> "ABZ")
 
       val eventualResult = controller.onSubmit(request)
