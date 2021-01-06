@@ -43,9 +43,11 @@ class RemoveGoodsControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.RemoveGoodsController.onPageLoad(1).url)
 
       val eventualResult = controller.onPageLoad(1)(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("removeGoods.title", "wine"))
-      contentAsString(eventualResult) must include(messages("removeGoods.heading", "wine"))
+      result must include(messages("removeGoods.title", "wine"))
+      result must include(messages("removeGoods.heading", "wine"))
     }
   }
 
@@ -114,11 +116,12 @@ class RemoveGoodsControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(1)(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("removeGoods.title", "wine"))
-      contentAsString(eventualResult) must include(messages("removeGoods.heading", "wine"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("removeGoods.title", "wine"))
+      result must include(messages("removeGoods.heading", "wine"))
     }
   }
 }

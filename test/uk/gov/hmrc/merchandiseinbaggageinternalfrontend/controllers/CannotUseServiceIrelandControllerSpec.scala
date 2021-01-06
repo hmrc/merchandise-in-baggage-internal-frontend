@@ -36,11 +36,12 @@ class CannotUseServiceIrelandControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.CannotUseServiceIrelandController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("cannotUseServiceIreland.title"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseServiceIreland.heading"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseServiceIreland.p1"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseServiceIreland.p2"))
+      result must include(messageApi("cannotUseServiceIreland.title"))
+      result must include(messageApi("cannotUseServiceIreland.heading"))
+      result must include(messageApi("cannotUseServiceIreland.p1"))
+      result must include(messageApi("cannotUseServiceIreland.p2"))
     }
   }
 }

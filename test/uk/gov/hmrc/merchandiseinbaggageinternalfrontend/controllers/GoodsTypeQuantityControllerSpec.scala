@@ -38,11 +38,13 @@ class GoodsTypeQuantityControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.GoodsTypeQuantityController.onPageLoad(1).url)
 
       val eventualResult = controller.onPageLoad(1)(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.p"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.quantity"))
+      result must include(messageApi("goodsTypeQuantity.Import.title"))
+      result must include(messageApi("goodsTypeQuantity.Import.heading"))
+      result must include(messageApi("goodsTypeQuantity.p"))
+      result must include(messageApi("goodsTypeQuantity.quantity"))
     }
   }
 
@@ -65,13 +67,14 @@ class GoodsTypeQuantityControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("xyz" -> "clothes", "abc" -> "1")
 
       val eventualResult = controller.onSubmit(1)(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.p"))
-      contentAsString(eventualResult) must include(messageApi("goodsTypeQuantity.quantity"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi("goodsTypeQuantity.Import.title"))
+      result must include(messageApi("goodsTypeQuantity.Import.heading"))
+      result must include(messageApi("goodsTypeQuantity.p"))
+      result must include(messageApi("goodsTypeQuantity.quantity"))
     }
   }
 }

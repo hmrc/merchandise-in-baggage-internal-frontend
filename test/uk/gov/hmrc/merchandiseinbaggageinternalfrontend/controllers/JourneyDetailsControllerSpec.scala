@@ -40,12 +40,13 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.JourneyDetailsController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.title"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.heading"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.port.Import.label"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.port.hint"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.dateOfTravel.Import.label"))
+      result must include(messageApi("journeyDetails.title"))
+      result must include(messageApi("journeyDetails.heading"))
+      result must include(messageApi("journeyDetails.port.Import.label"))
+      result must include(messageApi("journeyDetails.port.hint"))
+      result must include(messageApi("journeyDetails.dateOfTravel.Import.label"))
     }
   }
 
@@ -76,13 +77,14 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("port111" -> "ABZ")
 
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.title"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.heading"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.port.Import.label"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.port.hint"))
-      contentAsString(eventualResult) must include(messageApi("journeyDetails.dateOfTravel.Import.label"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("journeyDetails.title"))
+      result must include(messageApi("journeyDetails.heading"))
+      result must include(messageApi("journeyDetails.port.Import.label"))
+      result must include(messageApi("journeyDetails.port.hint"))
+      result must include(messageApi("journeyDetails.dateOfTravel.Import.label"))
     }
   }
 }

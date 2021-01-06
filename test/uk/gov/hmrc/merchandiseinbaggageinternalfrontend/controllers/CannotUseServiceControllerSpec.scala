@@ -37,12 +37,14 @@ class CannotUseServiceControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.CannotUseServiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("cannotUseService.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseService.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseService.Import.p1"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseService.Import.p2"))
-      contentAsString(eventualResult) must include(messageApi("cannotUseService.Import.link.text"))
+      result must include(messageApi("cannotUseService.Import.title"))
+      result must include(messageApi("cannotUseService.Import.heading"))
+      result must include(messageApi("cannotUseService.Import.p1"))
+      result must include(messageApi("cannotUseService.Import.p2"))
+      result must include(messageApi("cannotUseService.Import.link.text"))
     }
   }
 }

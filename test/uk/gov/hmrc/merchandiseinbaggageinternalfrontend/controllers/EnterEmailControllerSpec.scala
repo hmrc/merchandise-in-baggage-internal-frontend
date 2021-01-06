@@ -39,12 +39,14 @@ class EnterEmailControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.EnterEmailController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("enterEmail.title"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.heading"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.hint"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.email"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.confirmation"))
+      result must include(messageApi("enterEmail.title"))
+      result must include(messageApi("enterEmail.heading"))
+      result must include(messageApi("enterEmail.hint"))
+      result must include(messageApi("enterEmail.email"))
+      result must include(messageApi("enterEmail.confirmation"))
     }
   }
 
@@ -69,13 +71,14 @@ class EnterEmailControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("email1" -> "s@s.s", "confirmation" -> "")
 
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("enterEmail.title"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.heading"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.hint"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.email"))
-      contentAsString(eventualResult) must include(messageApi("enterEmail.confirmation"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("enterEmail.title"))
+      result must include(messageApi("enterEmail.heading"))
+      result must include(messageApi("enterEmail.hint"))
+      result must include(messageApi("enterEmail.email"))
+      result must include(messageApi("enterEmail.confirmation"))
     }
   }
 }

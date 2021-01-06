@@ -41,10 +41,12 @@ class AgentDetailsControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.AgentDetailsController.onPageLoad().url)
 
       val eventualResult = controller.onPageLoad()(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("agentDetails.title"))
-      contentAsString(eventualResult) must include(messages("agentDetails.heading"))
-      contentAsString(eventualResult) must include(messages("agentDetails.hint"))
+      result must include(messages("agentDetails.title"))
+      result must include(messages("agentDetails.heading"))
+      result must include(messages("agentDetails.hint"))
     }
   }
 
@@ -70,9 +72,10 @@ class AgentDetailsControllerSpec extends BaseSpecWithApplication {
       val eventualResult = controller.onSubmit()(request)
       status(eventualResult) mustBe 400
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("agentDetails.title"))
-      contentAsString(eventualResult) must include(messages("agentDetails.heading"))
+      val result = contentAsString(eventualResult)
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("agentDetails.title"))
+      result must include(messages("agentDetails.heading"))
     }
   }
 }

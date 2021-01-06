@@ -43,10 +43,12 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.SearchGoodsCountryController.onPageLoad(1).url)
 
       val eventualResult = controller.onPageLoad(1)(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.heading", "clothes"))
-      contentAsString(eventualResult) must include(messages("searchGoodsCountry.hint"))
+      result must include(messages("searchGoodsCountry.Import.title", "clothes"))
+      result must include(messages("searchGoodsCountry.Import.heading", "clothes"))
+      result must include(messages("searchGoodsCountry.hint"))
     }
   }
 
@@ -79,11 +81,12 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("country" -> "in valid")
 
       val eventualResult = controller.onSubmit(1)(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("searchGoodsCountry.Import.heading", "clothes"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("searchGoodsCountry.Import.title", "clothes"))
+      result must include(messages("searchGoodsCountry.Import.heading", "clothes"))
     }
   }
 }

@@ -38,12 +38,13 @@ class ExciseAndRestrictedGoodsControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.ExciseAndRestrictedGoodsController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.li1"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.li2"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.details"))
+      result must include(messageApi("exciseAndRestrictedGoods.Import.title"))
+      result must include(messageApi("exciseAndRestrictedGoods.Import.heading"))
+      result must include(messageApi("exciseAndRestrictedGoods.li1"))
+      result must include(messageApi("exciseAndRestrictedGoods.li2"))
+      result must include(messageApi("exciseAndRestrictedGoods.details"))
     }
   }
 
@@ -77,11 +78,12 @@ class ExciseAndRestrictedGoodsControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("exciseAndRestrictedGoods.Import.heading"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi("exciseAndRestrictedGoods.Import.title"))
+      result must include(messageApi("exciseAndRestrictedGoods.Import.heading"))
     }
   }
 }

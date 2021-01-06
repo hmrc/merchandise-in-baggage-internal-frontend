@@ -38,6 +38,7 @@ class ResetServiceControllerSpec extends BaseSpecWithApplication {
       repo.findBySessionId(sessionId).futureValue.get.maybeGoodsDestination mustBe Some(GreatBritain)
 
       val eventualResult = controller.onPageLoad(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.ImportExportChoiceController.onPageLoad().url)
 

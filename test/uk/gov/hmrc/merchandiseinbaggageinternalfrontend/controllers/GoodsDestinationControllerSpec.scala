@@ -38,11 +38,12 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.GoodsDestinationController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.NorthernIreland"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.GreatBritain"))
+      result must include(messageApi("goodsDestination.Import.title"))
+      result must include(messageApi("goodsDestination.Import.heading"))
+      result must include(messageApi("goodsDestination.NorthernIreland"))
+      result must include(messageApi("goodsDestination.GreatBritain"))
     }
   }
 
@@ -76,12 +77,13 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.NorthernIreland"))
-      contentAsString(eventualResult) must include(messageApi("goodsDestination.GreatBritain"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi("goodsDestination.Import.title"))
+      result must include(messageApi("goodsDestination.NorthernIreland"))
+      result must include(messageApi("goodsDestination.GreatBritain"))
     }
   }
 }

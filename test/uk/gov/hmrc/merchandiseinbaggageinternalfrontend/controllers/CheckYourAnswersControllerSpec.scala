@@ -51,18 +51,20 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
       val eventualResult = controller.onPageLoad()(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.title"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.change"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.category"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.quantity"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.vatRate"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.country"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.price"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.detailsOfTheGoods.paymentDue"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.addMoreGoods"))
-      contentAsString(eventualResult) must include(messages("checkYourAnswers.personalDetails"))
+      result must include(messages("checkYourAnswers.title"))
+      result must include(messages("checkYourAnswers.change"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.category"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.quantity"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.vatRate"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.country"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.price"))
+      result must include(messages("checkYourAnswers.detailsOfTheGoods.paymentDue"))
+      result must include(messages("checkYourAnswers.addMoreGoods"))
+      result must include(messages("checkYourAnswers.personalDetails"))
       //TODO: Add others
     }
   }

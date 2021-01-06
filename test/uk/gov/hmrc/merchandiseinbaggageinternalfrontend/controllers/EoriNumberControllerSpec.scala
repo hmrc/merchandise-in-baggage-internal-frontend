@@ -39,10 +39,12 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.EoriNumberController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.trader.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.trader.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.hint"))
+      result must include(messageApi("eoriNumber.trader.Import.title"))
+      result must include(messageApi("eoriNumber.trader.Import.heading"))
+      result must include(messageApi("eoriNumber.hint"))
     }
   }
 
@@ -55,6 +57,7 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("eori" -> "GB123456780000")
 
       val eventualResult = controller.onSubmit(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.TravellerDetailsController.onPageLoad().url)
     }
@@ -66,12 +69,13 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.EoriNumberController.onSubmit().url)
         .withFormUrlEncodedBody("eori" -> "in valid")
 
-      val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val eventualResult = controller.onSubmit()(request)
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.trader.Import.title"))
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.trader.Import.heading"))
-      contentAsString(eventualResult) must include(messageApi("eoriNumber.hint"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("eoriNumber.trader.Import.title"))
+      result must include(messageApi("eoriNumber.trader.Import.heading"))
+      result must include(messageApi("eoriNumber.hint"))
     }
   }
 }

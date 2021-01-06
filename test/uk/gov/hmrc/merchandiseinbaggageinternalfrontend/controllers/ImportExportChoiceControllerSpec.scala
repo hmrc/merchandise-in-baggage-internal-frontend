@@ -35,9 +35,10 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.ImportExportChoiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("declarationType.header"))
-      contentAsString(eventualResult) must include(messageApi("declarationType.title"))
+      result must include(messageApi("declarationType.header"))
+      result must include(messageApi("declarationType.title"))
     }
   }
 
@@ -58,11 +59,12 @@ class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
         .withFormUrlEncodedBody("value" -> "in valid")
 
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messageApi("declarationType.header"))
-      contentAsString(eventualResult) must include(messageApi("declarationType.title"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi("declarationType.header"))
+      result must include(messageApi("declarationType.title"))
     }
   }
 }

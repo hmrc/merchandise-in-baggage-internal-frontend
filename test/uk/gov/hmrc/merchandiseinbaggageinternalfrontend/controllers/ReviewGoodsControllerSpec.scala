@@ -43,8 +43,9 @@ class ReviewGoodsControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.ReviewGoodsController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
+      val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.title"))
+      result must include(messageApi("reviewGoods.title"))
       contentAsString(eventualResult) must include(messageApi("reviewGoods.heading"))
       contentAsString(eventualResult) must include(messageApi("reviewGoods.list.item"))
       contentAsString(eventualResult) must include(messageApi("reviewGoods.list.quantity"))

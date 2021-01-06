@@ -38,18 +38,20 @@ class DeclarationConfirmationControllerSpec extends BaseSpecWithApplication {
       val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, sessionId)
 
       val eventualResult = controller.onPageLoad()(request)
+      val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.title"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.banner.title"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.yourReferenceNumber.label"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.h2.1"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.ul.p"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.ul.1"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.ul.1.strong"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.ul.2"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.Import.ul.3"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.makeAnotherDeclaration"))
-      contentAsString(eventualResult) must include(messages("declarationConfirmation.printOrSave.label"))
+      result must include(messages("declarationConfirmation.title"))
+      result must include(messages("declarationConfirmation.banner.title"))
+      result must include(messages("declarationConfirmation.yourReferenceNumber.label"))
+      result must include(messages("declarationConfirmation.h2.1"))
+      result must include(messages("declarationConfirmation.ul.p"))
+      result must include(messages("declarationConfirmation.ul.1"))
+      result must include(messages("declarationConfirmation.ul.1.strong"))
+      result must include(messages("declarationConfirmation.ul.2"))
+      result must include(messages("declarationConfirmation.Import.ul.3"))
+      result must include(messages("declarationConfirmation.makeAnotherDeclaration"))
+      result must include(messages("declarationConfirmation.printOrSave.label"))
     }
   }
 }
