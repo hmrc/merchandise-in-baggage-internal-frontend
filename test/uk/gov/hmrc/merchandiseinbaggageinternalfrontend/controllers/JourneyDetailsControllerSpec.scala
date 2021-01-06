@@ -16,31 +16,33 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
-import play.api.test.Helpers._
+import java.time.LocalDate
 
+import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType, SessionId, YesNo}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.JourneyDetailsPage
 
-import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
+class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[JourneyDetailsPage]
-  val controller = new JourneyDetailsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => JourneyDetailsController =
+    declarationJourney => new JourneyDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney =
+    DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No))
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
       val request = buildGet(routes.JourneyDetailsController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("journeyDetails.title"))
       result must include(messageApi("journeyDetails.heading"))
@@ -54,8 +56,6 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
     "redirect to next page after successful form submit" in {
       val today = LocalDate.now();
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
         .withFormUrlEncodedBody(
           "port"               -> "ABZ",
@@ -64,19 +64,17 @@ class JourneyDetailsControllerSpec extends BaseSpecWithApplication {
           "dateOfTravel.year"  -> today.getYear.toString
         )
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.GoodsInVehicleController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("port111" -> "ABZ")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

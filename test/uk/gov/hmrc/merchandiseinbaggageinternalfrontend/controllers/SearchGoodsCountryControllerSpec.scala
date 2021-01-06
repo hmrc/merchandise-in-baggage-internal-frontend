@@ -25,24 +25,24 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.SearchGoodsCo
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
+class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[SearchGoodsCountryView]
-  val controller = new SearchGoodsCountryController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => SearchGoodsCountryController =
+    declarationJourney => new SearchGoodsCountryController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(
+    SessionId("123"),
+    DeclarationType.Import,
+    goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+  )
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
 
       val request = buildGet(routes.SearchGoodsCountryController.onPageLoad(1).url)
-
-      val eventualResult = controller.onPageLoad(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -55,32 +55,21 @@ class SearchGoodsCountryControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
       val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
         .withFormUrlEncodedBody("country" -> "AF")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.PurchaseDetailsController.onPageLoad(1).url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
       val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
         .withFormUrlEncodedBody("country" -> "in valid")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

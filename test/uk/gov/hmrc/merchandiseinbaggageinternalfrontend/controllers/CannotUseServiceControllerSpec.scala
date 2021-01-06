@@ -23,20 +23,20 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.g
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.CannotUseServiceView
 
-class CannotUseServiceControllerSpec extends BaseSpecWithApplication {
+class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = injector.instanceOf[CannotUseServiceView]
-  val controller = new CannotUseServiceController(component, actionProvider, view)
+  val controller: DeclarationJourney => CannotUseServiceController =
+    declarationJourney => new CannotUseServiceController(component, stubProvider(declarationJourney), view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain)))
-
+      val journey =
+        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
       val request = buildGet(routes.CannotUseServiceController.onPageLoad.url)
 
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200

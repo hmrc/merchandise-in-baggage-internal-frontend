@@ -25,68 +25,60 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsVatRateV
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoodsVatRateControllerSpec extends BaseSpecWithApplication {
+class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[GoodsVatRateView]
-  val controller = new GoodsVatRateController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => GoodsVatRateController =
+    declarationJourney => new GoodsVatRateController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(
+    SessionId("123"),
+    DeclarationType.Import,
+    goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+  )
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
 
       val request = buildGet(routes.GoodsVatRateController.onPageLoad(1).url)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+      val result = contentAsString(eventualResult)
 
-      val eventualResult = controller.onPageLoad(1)(request)
       status(eventualResult) mustBe 200
-      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.p"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Zero"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Five"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.Twenty"))
+      result must include(messages("goodsVatRate.title", "clothes"))
+      result must include(messages("goodsVatRate.heading", "clothes"))
+      result must include(messages("goodsVatRate.p"))
+      result must include(messages("goodsVatRate.Zero"))
+      result must include(messages("goodsVatRate.Five"))
+      result must include(messages("goodsVatRate.Twenty"))
     }
   }
 
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
       val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "Zero")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.SearchGoodsCountryController.onPageLoad(1).url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
-        ))
       val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(1)(request)
-      status(eventualResult) mustBe 400
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.title", "clothes"))
-      contentAsString(eventualResult) must include(messages("goodsVatRate.heading", "clothes"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("goodsVatRate.title", "clothes"))
+      result must include(messages("goodsVatRate.heading", "clothes"))
     }
   }
 }

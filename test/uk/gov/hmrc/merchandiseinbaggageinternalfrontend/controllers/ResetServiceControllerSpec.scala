@@ -24,14 +24,14 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ResetServiceControllerSpec extends BaseSpecWithApplication {
+class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   val controller = new ResetServiceController(component, actionProvider, repo)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(startedImportToGreatBritainJourney)
+      repo.insert(startedImportToGreatBritainJourney)
 
       val request = buildGet(routes.ResetServiceController.onPageLoad().url, sessionId)
 

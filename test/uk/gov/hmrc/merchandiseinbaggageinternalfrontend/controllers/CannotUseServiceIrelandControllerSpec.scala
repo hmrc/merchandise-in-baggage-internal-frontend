@@ -23,20 +23,23 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.g
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.CannotUseServiceIrelandView
 
-class CannotUseServiceIrelandControllerSpec extends BaseSpecWithApplication {
+class CannotUseServiceIrelandControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = injector.instanceOf[CannotUseServiceIrelandView]
-  val controller = new CannotUseServiceIrelandController(component, actionProvider, view)
+  val controller: DeclarationJourney => CannotUseServiceIrelandController =
+    declarationJourney => new CannotUseServiceIrelandController(component, stubProvider(declarationJourney), view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
+      val journey = DeclarationJourney(SessionId("123"), DeclarationType.Import)
+      givenADeclarationJourneyIsPersisted(journey)
 
       val request = buildGet(routes.CannotUseServiceIrelandController.onPageLoad.url)
 
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("cannotUseServiceIreland.title"))
       result must include(messageApi("cannotUseServiceIreland.heading"))

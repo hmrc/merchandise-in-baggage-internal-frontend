@@ -26,21 +26,23 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ValueWeightOf
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
+class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[ValueWeightOfGoodsView]
-  val controller = new ValueWeightOfGoodsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => ValueWeightOfGoodsController =
+    declarationJourney => new ValueWeightOfGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney =
+    DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain))
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
 
       val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("valueWeightOfGoods.GreatBritain.title"))
       result must include(messageApi("valueWeightOfGoods.GreatBritain.heading"))
@@ -50,36 +52,32 @@ class ValueWeightOfGoodsControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit with No" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
       val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "No")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.GoodsTypeQuantityController.onPageLoad(1).url)
     }
 
     "redirect to next page after successful form submit with Yes" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
       val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "Yes")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.CannotUseServiceController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeGoodsDestination = Some(GreatBritain)))
       val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

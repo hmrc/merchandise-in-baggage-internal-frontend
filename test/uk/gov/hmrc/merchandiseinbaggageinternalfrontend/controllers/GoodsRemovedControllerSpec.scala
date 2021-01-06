@@ -23,24 +23,24 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.g
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsRemovedView
 
-class GoodsRemovedControllerSpec extends BaseSpecWithApplication {
+class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[GoodsRemovedView]
-  val controller = new GoodsRemovedController(component, actionProvider, view)
+  val controller: DeclarationJourney => GoodsRemovedController =
+    declarationJourney => new GoodsRemovedController(component, stubProvider(declarationJourney), view)
 
   "onPageLoad" should {
     "return 200" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
+      val journey = DeclarationJourney(
+        SessionId("123"),
+        DeclarationType.Import,
+        goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
+      )
 
       val request = buildGet(routes.GoodsRemovedController.onPageLoad().url)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
 
-      val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
       contentAsString(eventualResult) must include(messages("goodsRemoved.title"))
       contentAsString(eventualResult) must include(messages("goodsRemoved.heading"))

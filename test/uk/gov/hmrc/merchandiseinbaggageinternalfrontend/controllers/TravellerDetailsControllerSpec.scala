@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType, SessionId, YesNo}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
@@ -25,21 +24,23 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.TravellerDeta
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TravellerDetailsControllerSpec extends BaseSpecWithApplication {
+class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[TravellerDetailsPage]
-  val controller = new TravellerDetailsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => TravellerDetailsController =
+    declarationJourney => new TravellerDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney =
+    DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No))
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
       val request = buildGet(routes.TravellerDetailsController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("travellerDetails.title"))
       result must include(messageApi("travellerDetails.heading"))
@@ -52,24 +53,20 @@ class TravellerDetailsControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.TravellerDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("firstName" -> "Foo", "lastName" -> "Bar")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.EnterEmailController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.EoriNumberController.onSubmit().url)
         .withFormUrlEncodedBody("firstName11" -> "Foo", "lastName11" -> "Bar")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

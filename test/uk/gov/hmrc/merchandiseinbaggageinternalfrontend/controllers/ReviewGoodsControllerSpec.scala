@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
@@ -25,94 +24,80 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ReviewGoodsVi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ReviewGoodsControllerSpec extends BaseSpecWithApplication {
+class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[ReviewGoodsView]
-  val controller = new ReviewGoodsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => ReviewGoodsController =
+    declarationJourney => new ReviewGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(
+    SessionId("123"),
+    DeclarationType.Import,
+    goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
+  )
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.ReviewGoodsController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("reviewGoods.title"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.heading"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.list.item"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.list.quantity"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.list.vatRate"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.list.country"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.list.price"))
+      result must include(messageApi("reviewGoods.heading"))
+      result must include(messageApi("reviewGoods.list.item"))
+      result must include(messageApi("reviewGoods.list.quantity"))
+      result must include(messageApi("reviewGoods.list.vatRate"))
+      result must include(messageApi("reviewGoods.list.country"))
+      result must include(messageApi("reviewGoods.list.price"))
 
-      contentAsString(eventualResult) must include(messageApi("site.change"))
-      contentAsString(eventualResult) must include(messageApi("site.remove"))
+      result must include(messageApi("site.change"))
+      result must include(messageApi("site.remove"))
 
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.h3"))
+      result must include(messageApi("reviewGoods.h3"))
     }
   }
 
   "onSubmit" should {
     "redirect to next page after successful form submit with Yes" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "Yes")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.GoodsTypeQuantityController.onPageLoad(2).url)
     }
 
     "redirect to next page after successful form submit with No" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "No")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.PaymentCalculationController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 400
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.title"))
-      contentAsString(eventualResult) must include(messageApi("reviewGoods.heading"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi("reviewGoods.title"))
+      result must include(messageApi("reviewGoods.heading"))
     }
   }
 }

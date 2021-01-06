@@ -24,23 +24,22 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.AgentDetailsV
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AgentDetailsControllerSpec extends BaseSpecWithApplication {
+class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[AgentDetailsView]
-  val controller = new AgentDetailsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => AgentDetailsController =
+    declarationJourney => new AgentDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
+  private val journey: DeclarationJourney = DeclarationJourney(
+    SessionId("123"),
+    DeclarationType.Import
+  )
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import
-        ))
 
       val request = buildGet(routes.AgentDetailsController.onPageLoad().url)
-
-      val eventualResult = controller.onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -53,26 +52,24 @@ class AgentDetailsControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
       val request = buildGet(routes.AgentDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "business-name")
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.EnterAgentAddressController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.AgentDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("value123" -> "in valid")
 
-      val eventualResult = controller.onSubmit()(request)
-      status(eventualResult) mustBe 400
-
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
       val result = contentAsString(eventualResult)
+
+      status(eventualResult) mustBe 400
       result must include(messageApi("error.summary.title"))
       result must include(messages("agentDetails.title"))
       result must include(messages("agentDetails.heading"))

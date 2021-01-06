@@ -24,7 +24,7 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.ImportExportC
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ImportExportChoiceControllerSpec extends BaseSpecWithApplication {
+class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = injector.instanceOf[ImportExportChoice]
   val controller = new ImportExportChoiceController(component, view, actionProvider, repo)

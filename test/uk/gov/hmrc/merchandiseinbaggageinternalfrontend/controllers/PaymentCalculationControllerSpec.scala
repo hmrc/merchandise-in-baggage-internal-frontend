@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -26,38 +25,38 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.PaymentCalcul
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PaymentCalculationControllerSpec extends BaseSpecWithApplication {
+class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[PaymentCalculationView]
-  val controller = new PaymentCalculationController(component, actionProvider, calculationService, view)
+  val controller: DeclarationJourney => PaymentCalculationController =
+    declarationJourney => new PaymentCalculationController(component, stubProvider(declarationJourney), calculationService, view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenSuccessfulCurrencyConversionResponse()
 
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          maybeGoodsDestination = Some(GoodsDestinations.GreatBritain),
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
+      val journey = DeclarationJourney(
+        SessionId("123"),
+        DeclarationType.Import,
+        maybeGoodsDestination = Some(GoodsDestinations.GreatBritain),
+        goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
+      )
 
       val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+      val result = contentAsString(eventualResult)
 
-      val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
-
-      contentAsString(eventualResult) must include(messages("paymentCalculation.title", "£18.34"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.heading", "£18.34"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.col1.head"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.col2.head"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.col3.head"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.col4.head"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.col5.head"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.table.total"))
-      contentAsString(eventualResult) must include(messages("paymentCalculation.h3"))
+      result must include(messages("paymentCalculation.title", "£18.34"))
+      result must include(messages("paymentCalculation.heading", "£18.34"))
+      result must include(messages("paymentCalculation.table.col1.head"))
+      result must include(messages("paymentCalculation.table.col2.head"))
+      result must include(messages("paymentCalculation.table.col3.head"))
+      result must include(messages("paymentCalculation.table.col4.head"))
+      result must include(messages("paymentCalculation.table.col5.head"))
+      result must include(messages("paymentCalculation.table.total"))
+      result must include(messages("paymentCalculation.h3"))
     }
   }
 }

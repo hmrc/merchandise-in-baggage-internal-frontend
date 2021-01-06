@@ -25,24 +25,24 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.RemoveGoodsVi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RemoveGoodsControllerSpec extends BaseSpecWithApplication {
+class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[RemoveGoodsView]
-  val controller = new RemoveGoodsController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => RemoveGoodsController =
+    declarationJourney => new RemoveGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(
+    SessionId("123"),
+    DeclarationType.Import,
+    goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
+  )
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.RemoveGoodsController.onPageLoad(1).url)
-
-      val eventualResult = controller.onPageLoad(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -54,68 +54,52 @@ class RemoveGoodsControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to /goods-removed after successful form submit with Yes and there was only one item" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "Yes")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.GoodsRemovedController.onPageLoad().url)
     }
 
     "redirect to /review-goods after successful form submit with Yes and there was more than one item" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry))
-        ))
+      val declarationJourney = DeclarationJourney(
+        SessionId("123"),
+        DeclarationType.Import,
+        goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry))
+      )
 
       val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "Yes")
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(declarationJourney)).onSubmit(1)(request)
 
-      val eventualResult = controller.onSubmit(1)(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.ReviewGoodsController.onPageLoad().url)
     }
 
     "redirect to next page after successful form submit with No" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "No")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.ReviewGoodsController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
+      givenADeclarationJourneyIsPersisted(journey)
 
       val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

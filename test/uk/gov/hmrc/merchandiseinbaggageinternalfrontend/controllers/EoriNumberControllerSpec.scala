@@ -25,20 +25,21 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.EoriNumberVie
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EoriNumberControllerSpec extends BaseSpecWithApplication {
+class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[EoriNumberView]
-  val controller = new EoriNumberController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => EoriNumberController =
+    declarationJourney => new EoriNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney =
+    DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No))
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
 
       val request = buildGet(routes.EoriNumberController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -51,12 +52,10 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.EoriNumberController.onSubmit().url)
         .withFormUrlEncodedBody("eori" -> "GB123456780000")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
 
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.TravellerDetailsController.onPageLoad().url)
@@ -64,12 +63,10 @@ class EoriNumberControllerSpec extends BaseSpecWithApplication {
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(SessionId("123"), DeclarationType.Import, maybeIsACustomsAgent = Some(YesNo.No)))
       val request = buildGet(routes.EoriNumberController.onSubmit().url)
         .withFormUrlEncodedBody("eori" -> "in valid")
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

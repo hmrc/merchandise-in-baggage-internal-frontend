@@ -61,9 +61,9 @@ class DeclarationJourneyRepository @Inject()(mongo: () => DB)
     override def writes(o: JsObject): JsObject = o
   }
 
-  /**
-    * Update or Insert (UpSert)
-    */
-  def upsert(declarationJourney: DeclarationJourney): Future[UpdateWriteResult] =
-    collection.update(ordered = false).one(Json.obj(id -> declarationJourney.sessionId.value), declarationJourney, upsert = true)
+  def upsert(declarationJourney: DeclarationJourney): Future[DeclarationJourney] =
+    collection
+      .update(ordered = false)
+      .one(Json.obj(id -> declarationJourney.sessionId.value), declarationJourney, upsert = true)
+      .map(_ => declarationJourney)
 }

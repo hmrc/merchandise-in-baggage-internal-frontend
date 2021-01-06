@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.{DeclarationJourney, DeclarationType, SessionId}
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
@@ -25,20 +24,22 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsDestinat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
+class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[GoodsDestinationView]
-  val controller = new GoodsDestinationController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => GoodsDestinationController =
+    declarationJourney => new GoodsDestinationController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), DeclarationType.Import)
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
       val request = buildGet(routes.GoodsDestinationController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
+
       status(eventualResult) mustBe 200
       result must include(messageApi("goodsDestination.Import.title"))
       result must include(messageApi("goodsDestination.Import.heading"))
@@ -50,33 +51,30 @@ class GoodsDestinationControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit with GreatBritain" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "GreatBritain")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.ExciseAndRestrictedGoodsController.onPageLoad().url)
     }
 
     "redirect to /cannot-use-service-ireland after successful form submit with NorthernIreland" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "NorthernIreland")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.CannotUseServiceIrelandController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

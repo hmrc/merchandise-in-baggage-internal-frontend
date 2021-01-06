@@ -25,19 +25,20 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.CustomsAgentV
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CustomsAgentControllerSpec extends BaseSpecWithApplication {
+class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[CustomsAgentView]
-  val controller = new CustomsAgentController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => CustomsAgentController =
+    declarationJourney => new CustomsAgentController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), DeclarationType.Import)
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
       val request = buildGet(routes.CustomsAgentController.onPageLoad.url)
-
-      val eventualResult = controller.onPageLoad(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -50,33 +51,30 @@ class CustomsAgentControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit with Yes" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.CustomsAgentController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "Yes")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.AgentDetailsController.onPageLoad().url)
     }
 
     "redirect to next page after successful form submit with No" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.CustomsAgentController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "No")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.EoriNumberController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
       val request = buildGet(routes.CustomsAgentController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

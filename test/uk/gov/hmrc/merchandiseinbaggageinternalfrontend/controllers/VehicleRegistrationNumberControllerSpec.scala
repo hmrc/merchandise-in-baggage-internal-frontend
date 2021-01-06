@@ -25,23 +25,22 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.VehicleRegist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class VehicleRegistrationNumberControllerSpec extends BaseSpecWithApplication {
+class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[VehicleRegistrationNumberView]
-  val controller = new VehicleRegistrationNumberController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => VehicleRegistrationNumberController =
+    declarationJourney =>
+      new VehicleRegistrationNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), DeclarationType.Import)
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import
-        ))
 
       val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
 
-      val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
       contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.title"))
       contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.heading"))
@@ -52,28 +51,29 @@ class VehicleRegistrationNumberControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
 
       val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "business-name")
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(DeclarationJourney(SessionId("123"), DeclarationType.Import))
+
       val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
         .withFormUrlEncodedBody("value123" -> "in valid")
 
-      val eventualResult = controller.onSubmit()(request)
-      status(eventualResult) mustBe 400
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.title"))
-      contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.heading"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("vehicleRegistrationNumber.title"))
+      result must include(messages("vehicleRegistrationNumber.heading"))
     }
   }
 }

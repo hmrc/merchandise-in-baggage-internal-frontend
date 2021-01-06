@@ -17,6 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
@@ -28,29 +29,31 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{CheckYourAns
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
+class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
 
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
-  val controller = new CheckYourAnswersController(
-    component,
-    actionProvider,
-    calculationService,
-    tpsPaymentsService,
-    mibConnector,
-    repo,
-    importView,
-    exportView)
+
+  val controller: DeclarationJourney => CheckYourAnswersController =
+    declarationJourney =>
+      new CheckYourAnswersController(
+        component,
+        stubProvider(declarationJourney),
+        calculationService,
+        tpsPaymentsService,
+        mibConnector,
+        stubRepo(declarationJourney),
+        importView,
+        exportView)
 
   "onPageLoad" should {
     "return 200" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
       givenSuccessfulCurrencyConversionResponse()
 
       val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
-      val eventualResult = controller.onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).onPageLoad()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -73,13 +76,12 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
     "redirect to payment page after successful form submit for Imports" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenSuccessfulCurrencyConversionResponse()
-      givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
       givenDeclarationIsPersistedInBackend()
       givenTaxArePaid(TpsId("123"))
 
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).onSubmit()(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some("http://localhost:9124/tps-payments/make-payment/mib/123")
     }
@@ -87,12 +89,13 @@ class CheckYourAnswersControllerSpec extends BaseSpecWithApplication {
     "redirect to payment page after successful form submit for Exports" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenSuccessfulCurrencyConversionResponse()
-      givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = Export))
       givenDeclarationIsPersistedInBackend()
 
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = Export)))
+        .onSubmit()(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.DeclarationConfirmationController.onPageLoad().url)
     }

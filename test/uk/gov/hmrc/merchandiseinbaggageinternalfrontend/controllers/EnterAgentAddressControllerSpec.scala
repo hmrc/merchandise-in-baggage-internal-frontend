@@ -26,23 +26,21 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EnterAgentAddressControllerSpec extends BaseSpecWithApplication {
+class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val controller = new EnterAgentAddressController(component, actionProvider, repo, addressLookupConnector)
+  val controller: DeclarationJourney => EnterAgentAddressController =
+    declarationJourney =>
+      new EnterAgentAddressController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), addressLookupConnector)
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import
-        ))
+      val journey = DeclarationJourney(SessionId("123"), DeclarationType.Import)
       givenInitJourney()
 
       val request = buildGet(routes.EnterAgentAddressController.onPageLoad().url)
 
-      val eventualResult = controller.onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some("/blah")
     }
@@ -57,12 +55,10 @@ class EnterAgentAddressControllerSpec extends BaseSpecWithApplication {
 
       s"store address and redirect to ${routes.EoriNumberController.onPageLoad()}" when {
         "a declaration journey has been started" in {
-
           givenTheUserIsAuthenticatedAndAuthorised()
           givenConfirmJourney("id", address)
-          givenADeclarationJourneyIsPersisted(startedImportJourney)
 
-          val result = controller.returnFromAddressLookup("id")(request)
+          val result = controller(givenADeclarationJourneyIsPersisted(startedImportJourney)).returnFromAddressLookup("id")(request)
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).get mustEqual routes.EoriNumberController.onPageLoad().url
@@ -71,12 +67,10 @@ class EnterAgentAddressControllerSpec extends BaseSpecWithApplication {
 
       s"store address and redirect to ${routes.CheckYourAnswersController.onPageLoad()}" when {
         "a declaration journey is complete" in {
-
           givenTheUserIsAuthenticatedAndAuthorised()
           givenConfirmJourney("id", address)
-          givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
 
-          val result = controller.returnFromAddressLookup("id")(request)
+          val result = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).returnFromAddressLookup("id")(request)
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).get mustEqual routes.CheckYourAnswersController.onPageLoad().url

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
@@ -25,24 +24,22 @@ import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.GoodsInVehicl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
+class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[GoodsInVehicleView]
-  val controller = new GoodsInVehicleController(component, actionProvider, repo, view)
+  val controller: DeclarationJourney => GoodsInVehicleController =
+    declarationJourney => new GoodsInVehicleController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+
+  private val journey: DeclarationJourney =
+    DeclarationJourney(SessionId("123"), DeclarationType.Import, goodsEntries = GoodsEntries(Seq(completedGoodsEntry)))
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.GoodsInVehicleController.onPageLoad().url)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
 
-      val eventualResult = controller.onPageLoad()(request)
       status(eventualResult) mustBe 200
       contentAsString(eventualResult) must include(messages("goodsInVehicle.Import.title"))
       contentAsString(eventualResult) must include(messages("goodsInVehicle.Import.heading"))
@@ -52,56 +49,45 @@ class GoodsInVehicleControllerSpec extends BaseSpecWithApplication {
   "onSubmit" should {
     "redirect to /vehicle-size after successful form submit with Yes" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "Yes")
 
-      val eventualResult = controller.onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.VehicleSizeController.onPageLoad().url)
     }
 
     "redirect to /check-your-answers after successful form submit with No" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry))
-        ))
+      val declarationJourney = DeclarationJourney(
+        SessionId("123"),
+        DeclarationType.Import,
+        goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry))
+      )
 
       val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "No")
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(declarationJourney)).onSubmit()(request)
 
-      val eventualResult = controller.onSubmit()(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
     }
 
     "return 400 with any form errors" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(
-        DeclarationJourney(
-          SessionId("123"),
-          DeclarationType.Import,
-          goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
-        ))
 
       val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller.onSubmit()(request)
-      status(eventualResult) mustBe 400
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+      val result = contentAsString(eventualResult)
 
-      contentAsString(eventualResult) must include(messageApi("error.summary.title"))
-      contentAsString(eventualResult) must include(messages("goodsInVehicle.Import.title"))
-      contentAsString(eventualResult) must include(messages("goodsInVehicle.Import.heading"))
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messages("goodsInVehicle.Import.title"))
+      result must include(messages("goodsInVehicle.Import.heading"))
     }
   }
 }
