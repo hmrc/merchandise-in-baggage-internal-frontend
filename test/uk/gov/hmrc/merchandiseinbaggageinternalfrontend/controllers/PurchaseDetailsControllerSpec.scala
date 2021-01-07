@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.controllers
 
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.support._
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.html.{PurchaseDetailsExportView, PurchaseDetailsImportView}

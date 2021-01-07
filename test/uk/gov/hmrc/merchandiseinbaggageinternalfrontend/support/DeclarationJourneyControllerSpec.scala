@@ -23,6 +23,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{GET, POST}
 import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DefaultDB
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
@@ -64,8 +65,10 @@ trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication {
       .withCSRFToken
       .asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
-  val stubRepo: DeclarationJourney => DeclarationJourneyRepository = declarationJourney =>
-    new DeclarationJourneyRepository(app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.db) {
+  private lazy val db: () => DefaultDB = app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.db
+
+  lazy val stubRepo: DeclarationJourney => DeclarationJourneyRepository = declarationJourney =>
+    new DeclarationJourneyRepository(db) {
       override def insert(declarationJourney: DeclarationJourney): Future[DeclarationJourney] = Future.successful(declarationJourney)
       override def findBySessionId(sessionId: SessionId): Future[Option[DeclarationJourney]] = Future.successful(Some(declarationJourney))
       override def upsert(declarationJourney: DeclarationJourney): Future[DeclarationJourney] = Future.successful(declarationJourney)
@@ -74,8 +77,6 @@ trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication {
   def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
     stubRepo(declarationJourney).findBySessionId(declarationJourney.sessionId).futureValue.get
 
-  val stubProvider: DeclarationJourney => DeclarationJourneyActionProvider = declarationJourney =>
+  lazy val stubProvider: DeclarationJourney => DeclarationJourneyActionProvider = declarationJourney =>
     new DeclarationJourneyActionProvider(defaultBuilder, stubRepo(declarationJourney), strideAuth)
-
-  override def beforeEach(): Unit = injector.instanceOf[DeclarationJourneyRepository].deleteAll().futureValue
 }
