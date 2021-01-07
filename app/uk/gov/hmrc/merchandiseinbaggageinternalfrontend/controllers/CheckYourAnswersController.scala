@@ -91,11 +91,25 @@ class CheckYourAnswersController @Inject()(
       _             <- mibConnector.sendEmails(declarationId)
     } yield Redirect(routes.DeclarationConfirmationController.onPageLoad())
 
-  private def continueImportDeclaration(declaration: Declaration)(implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] =
+  private def continueImportDeclaration(declaration: Declaration)(
+    implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] = {
+
+    def redirectToPaymentsIfNecessary(paymentCalcs: PaymentCalculations) =
+      if (paymentCalcs.totalTaxDue.value == 0L) {
+        Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
+      } else {
+        tpsPaymentsService
+          .createTpsPayments(request.pid, declaration, paymentCalcs)
+          .map(
+            tpsId =>
+              Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")
+                .addingToSession("TPS_ID" -> tpsId.value))
+      }
+
     for {
       taxDue <- calculationService.paymentCalculation(declaration.declarationGoods)
       _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
-      tpsId  <- tpsPaymentsService.createTpsPayments(request.pid, declaration, taxDue)
-    } yield
-      Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}").addingToSession("TPS_ID" -> tpsId.value)
+      result <- redirectToPaymentsIfNecessary(taxDue)
+    } yield result
+  }
 }
