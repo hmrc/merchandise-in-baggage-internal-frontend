@@ -47,7 +47,7 @@ declarationType.header = What do you want to do?
 declarationType.title = What do you want to do?
 declarationType.Import = Make an import declaration
 declarationType.Export = Make an export declaration
-declarationType.error.required = You must enter value
+declarationType.error.required = Select if you want to make an import or export declaration
 
 # ExciseAndRestrictedGoods
 exciseAndRestrictedGoods.Import.title = Are you bringing any of the following goods to Great Britain?
