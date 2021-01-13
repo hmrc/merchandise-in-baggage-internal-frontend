@@ -58,7 +58,7 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
         result must include(messages(s"declarationConfirmation.$importOrExport.ul.3"))
         result must include(messages("declarationConfirmation.makeAnotherDeclaration"))
         result must include(messages("declarationConfirmation.date"))
-        result must include(messages("declarationConfirmation.email", declaration.email.email))
+        result must include(messages("declarationConfirmation.email", declaration.email.map(_.email).getOrElse("")))
         result must include(messages("declarationConfirmation.printOrSave.label"))
 
         if (importOrExport == Import) {

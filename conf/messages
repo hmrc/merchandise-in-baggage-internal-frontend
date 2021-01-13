@@ -389,6 +389,7 @@ checkYourAnswers.customsAgent.name = Name of customs agent
 checkYourAnswers.customsAgent.address = Customs agent address
 checkYourAnswers.personalDetails.nameOfPersonCarryingTheGoods = Name of person carrying goods
 checkYourAnswers.personalDetails.emailAddress = Email address
+checkYourAnswers.personalDetails.no.email.text = no email provided
 checkYourAnswers.personalDetails.eori = EORI number
 checkYourAnswers.journeyDetails = Journey details
 checkYourAnswers.journeyDetails.placeOfArrival = Place of arrival
