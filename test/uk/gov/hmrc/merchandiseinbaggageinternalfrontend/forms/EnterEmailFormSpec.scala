@@ -18,17 +18,18 @@ package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms
 
 import play.api.data.FormError
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.EnterEmailForm.form
-import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.behaviours.FieldBehaviours
+import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.forms.behaviours.OptionFieldBehaviours
 
-class EnterEmailFormSpec extends FieldBehaviours {
+class EnterEmailFormSpec extends OptionFieldBehaviours {
 
   ".email" must {
     val fieldName = "email"
 
-    behave like mandatoryEmailField(
+    behave like optionsField(
       form,
       fieldName,
-      requiredError = FormError(fieldName, "enterEmail.error.required")
+      Seq("valid@email.com"),
+      invalidError = FormError(fieldName, "enterEmail.error.invalid")
     )
   }
 

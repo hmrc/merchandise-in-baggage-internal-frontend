@@ -21,14 +21,16 @@
 @import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core.DeclarationType
 
 @this(
-layout: Layout,
-formHelper: FormWithCSRF,
-errorSummary: components.errorSummary,
-button: components.button,
-text: components.inputText,
-h1: components.h1)
+        layout: Layout,
+        formHelper: FormWithCSRF,
+        errorSummary: components.errorSummary,
+        button: components.button,
+        text: components.inputText,
+        h1: components.h1,
+        p: components.p)
 
-@(form: Form[Email], declarationType: DeclarationType, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@(form: Form[Option[Email]], declarationType: DeclarationType, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @notMatching = @{
     if(form.errors.find(_.message == "enterEmail.error.notMatching").isDefined) Some("confirmation")
@@ -37,16 +39,17 @@ h1: components.h1)
 
 @layout(pageTitle = Some(title(form, "enterEmail.title")), maybeBackButtonUrl = Some(backButtonUrl), maybeDeclarationType = Some(declarationType)) {
   @formHelper(action = EnterEmailController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
-    @errorSummary(form.errors, notMatching)
-    @h1(messages("enterEmail.heading"), classes = Some("govuk-fieldset__legend govuk-fieldset__legend--xl"))
 
-    <p class="govuk-hint">@messages("enterEmail.hint")</p>
+    @errorSummary(form.errors, notMatching)
+
+    @h1(messages("enterEmail.heading"))
 
     @text(
         form = form,
         id = "email",
         name = "email",
         label = "enterEmail.email",
+        hint = Some("enterEmail.hint"),
         isPageHeading = false,
         classes = Some("govuk-input--width-20")
     )

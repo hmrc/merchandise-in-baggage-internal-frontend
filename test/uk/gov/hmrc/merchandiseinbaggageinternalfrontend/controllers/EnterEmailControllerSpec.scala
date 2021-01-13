@@ -50,7 +50,7 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec {
     }
 
     "onSubmit" should {
-      s"redirect to next page after successful form submit for $importOrExport" in {
+      s"redirect to next page after a valid email form submit for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.EnterEmailController.onSubmit().url)
           .withFormUrlEncodedBody("email" -> "s@s.s")
@@ -60,10 +60,20 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec {
         redirectLocation(eventualResult) mustBe Some(routes.JourneyDetailsController.onPageLoad().url)
       }
 
-      s"return 400 with any form errors for $importOrExport" in {
+      s"redirect to next page if user do not enter any email and submit for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.EnterEmailController.onSubmit().url)
-          .withFormUrlEncodedBody("email1" -> "")
+          .withFormUrlEncodedBody("email" -> "")
+
+        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        status(eventualResult) mustBe 303
+        redirectLocation(eventualResult) mustBe Some(routes.JourneyDetailsController.onPageLoad().url)
+      }
+
+      s"return 400 with any invalid emails for $importOrExport" in {
+        givenTheUserIsAuthenticatedAndAuthorised()
+        val request = buildGet(routes.EnterEmailController.onSubmit().url)
+          .withFormUrlEncodedBody("email" -> "invalidEmail")
 
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)

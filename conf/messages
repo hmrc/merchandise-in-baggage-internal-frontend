@@ -250,9 +250,8 @@ travellerDetails.lastName.error.invalid = Last name must only include letters a 
 # EnterEmail
 enterEmail.title = Enter an email address
 enterEmail.heading = Enter an email address
-enterEmail.hint = We will only use this to send you confirmation of your declaration.
-enterEmail.email = Email address
-enterEmail.error.required = Enter an email address
+enterEmail.hint = We will only use this to send confirmation of the declaration
+enterEmail.email = Email address (optional)
 enterEmail.error.invalid = Enter an email address in the correct format, like name@example.com
 
 # JourneyDetails

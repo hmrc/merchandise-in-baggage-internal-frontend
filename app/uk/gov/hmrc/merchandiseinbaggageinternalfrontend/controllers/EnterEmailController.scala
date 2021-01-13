@@ -38,7 +38,7 @@ class EnterEmailController @Inject()(
     backToCheckYourAnswersIfCompleteElse(routes.TravellerDetailsController.onPageLoad())
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
-    val preparedForm = request.declarationJourney.maybeEmailAddress.fold(form)(form.fill)
+    val preparedForm = form.fill(request.declarationJourney.maybeEmailAddress)
 
     Ok(view(preparedForm, request.declarationType, backButtonUrl))
   }
@@ -49,7 +49,7 @@ class EnterEmailController @Inject()(
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, request.declarationType, backButtonUrl))),
         email =>
-          persistAndRedirect(request.declarationJourney.copy(maybeEmailAddress = Some(email)), routes.JourneyDetailsController.onPageLoad())
+          persistAndRedirect(request.declarationJourney.copy(maybeEmailAddress = email), routes.JourneyDetailsController.onPageLoad())
       )
   }
 }
