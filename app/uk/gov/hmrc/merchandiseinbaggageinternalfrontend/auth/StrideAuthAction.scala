@@ -16,20 +16,21 @@
 
 package uk.gov.hmrc.merchandiseinbaggageinternalfrontend.auth
 
-import javax.inject.Inject
+import controllers.Assets.Unauthorized
 import org.slf4j.LoggerFactory.getLogger
 import play.api.mvc.Results.Forbidden
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.credentials
+import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appConfig: AppConfig, mcc: MessagesControllerComponents)(
@@ -49,19 +50,17 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appC
   override def invokeBlock[A](request: Request[A], block: AuthRequest[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    val strideEnrolment = Enrolment(appConfig.strideRole)
-
     def redirectToStrideLogin(message: String) = {
       logger.warn(s"user is not authenticated - redirecting user to login: $message")
       val uri = if (request.host.contains("localhost")) s"http://${request.host}${request.uri}" else s"${request.uri}"
       toStrideLogin(uri)
     }
 
-    authorised(strideEnrolment and AuthProviders(PrivilegedApplication))
-      .retrieve(credentials) {
-        case Some(c: Credentials) => block(AuthRequest(request, c))
-        case None =>
-          Future successful redirectToStrideLogin("User does not have credentials")
+    authorised(AuthProviders(PrivilegedApplication))
+      .retrieve(credentials and allEnrolments) {
+        case creds ~ enrolments =>
+          if (hasRequiredRoles(enrolments)) block(AuthRequest(request, creds))
+          else Future successful Unauthorized("Insufficient Roles")
       }
       .recover {
         case e: NoActiveSession =>
@@ -72,5 +71,11 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appC
           logger.warn(s"User is forbidden because of ${e.reason}, $e")
           Forbidden
       }
+  }
+
+  private def hasRequiredRoles(enrolments: Enrolments): Boolean = {
+    val requiredEnrolments = appConfig.strideRoles
+
+    requiredEnrolments.forall(e => enrolments.getEnrolment(e).isDefined)
   }
 }

@@ -30,7 +30,7 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
 
   val serviceIdentifier = "mib"
 
-  lazy val strideRole: String = config.get[String]("stride.role")
+  lazy val strideRoles: Seq[String] = config.get[Seq[String]]("stride.roles")
 
   val contactHost = configSource("contact-frontend.host").loadOrThrow[String]
 

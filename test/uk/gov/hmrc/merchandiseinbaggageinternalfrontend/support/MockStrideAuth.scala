@@ -46,22 +46,13 @@ object MockStrideAuth {
                        |  "optionalCredentials":{
                        |    "providerId": "userId",
                        |    "providerType": "PrivilegedApplication"
-                       |  }
+                       |  },
+                       |  "allEnrolments": [
+                       |    "digital_tps_payment_taker_call_handler",
+                       |    "digital_mib_call_handler"
+                       |  ]
                        |}
        """.stripMargin)))
-
-  def givenTheUserHasNoCredentials(): StubMapping =
-    stubFor(
-      post(urlEqualTo("/auth/authorise"))
-        .withRequestBody(
-          equalToJson(
-            authRequestBody,
-            true,
-            true
-          ))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody("{}")))
 
   def givenAuthFailsWith(error: String): StubMapping =
     stubFor(
@@ -76,15 +67,11 @@ object MockStrideAuth {
        |{
        |  "authorise": [
        |    {
-       |     "identifiers":[],
-       |     "state":"Activated",
-       |     "enrolment":"digital_tps_payment_taker_call_handler"
-       |    },
-       |    {
        |      "authProviders": [
        |        "PrivilegedApplication"
        |      ]
        |    }
-       |  ]
+       |  ],
+       |  "retrieve" : [ "optionalCredentials", "allEnrolments" ]
        |}""".stripMargin
 }
