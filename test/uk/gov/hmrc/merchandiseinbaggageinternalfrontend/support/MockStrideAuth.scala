@@ -43,14 +43,32 @@ object MockStrideAuth {
           .withStatus(200)
           .withBody(s"""
                        |{
-                       |  "optionalCredentials":{
-                       |    "providerId": "userId",
-                       |    "providerType": "PrivilegedApplication"
+                       | "optionalCredentials": {
+                       |  "providerId": "userId",
+                       |  "providerType": "PrivilegedApplication"
+                       | },
+                       | "allEnrolments": [
+                       |  {
+                       |   "key": "digital_tps_payment_taker_call_handler",
+                       |   "identifiers": [
+                       |    {
+                       |     "key": "digital_tps_payment_taker_call_handler",
+                       |     "value": "digital_tps_payment_taker_call_handler"
+                       |    }
+                       |   ],
+                       |   "state": "Activated"
                        |  },
-                       |  "allEnrolments": [
-                       |    "digital_tps_payment_taker_call_handler",
-                       |    "digital_mib_call_handler"
-                       |  ]
+                       |  {
+                       |   "key": "digital_mib_call_handler",
+                       |   "identifiers": [
+                       |    {
+                       |     "key": "digital_mib_call_handler",
+                       |     "value": "digital_mib_call_handler"
+                       |    }
+                       |   ],
+                       |   "state": "Activated"
+                       |  }
+                       | ]
                        |}
        """.stripMargin)))
 
