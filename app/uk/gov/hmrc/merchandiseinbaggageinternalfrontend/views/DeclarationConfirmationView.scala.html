@@ -39,21 +39,15 @@
    <p id="declarationEmailId" class="govuk-body">@messages("declarationConfirmation.email", email.email)</p>
   }
 
- <p class="govuk-body">
-  <a id="printDeclarationId" class="govuk-link" href="javascript:window.print();">@messages("declarationConfirmation.printOrSave.label")
-   <link id="printDeclarationLinkId" class="govuk-link" href="/declare-commercial-goods/assets/stylesheets/application.css" media="all" rel="stylesheet" type="text/css">
-  </a>
- </p>
-
  <h2 id="whatToDoNextId" class="govuk-heading-m" id="main-message">@messages("declarationConfirmation.h2.1")</h2>
  <p class="govuk-body">@messages("declarationConfirmation.ul.p")</p>
  <ul id="whatToDoNextUlId" class="govuk-list govuk-list--bullet">
+  <li>@messages("declarationConfirmation.ul.1")</li>
   @if(declaration.declarationType == Import) {
-   <li>@messages("declarationConfirmation.ul.1") <strong>@messages("declarationConfirmation.ul.1.strong")</strong> @messages("declarationConfirmation.ul.1.1")</li>
+   <li>@messages("declarationConfirmation.ul.2") <strong>@messages("declarationConfirmation.ul.2.strong")</strong> @messages("declarationConfirmation.ul.2.2")</li>
   } else {
    @Html("")
   }
-  <li>@messages("declarationConfirmation.ul.2")</li>
   <li>@messages(s"declarationConfirmation.${declaration.declarationType}.ul.3")</li>
  </ul>
 
