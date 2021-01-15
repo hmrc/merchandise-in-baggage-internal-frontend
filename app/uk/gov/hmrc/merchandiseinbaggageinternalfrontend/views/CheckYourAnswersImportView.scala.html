@@ -185,6 +185,10 @@
   </strong>
  </div>
 
+  @if(totalTaxDue.isPaymentRequired) {
    @button(messages("checkYourAnswers.payButton"), name = Some("payButton"))
+  } else {
+   @button(messages("checkYourAnswers.makeDeclarationButton"), name = Some("makeDeclarationButton"))
+  }
  }
 }
