@@ -72,7 +72,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
         result must include(messages(s"checkYourAnswers.sendDeclaration.$importOrExport.acknowledgement.1"))
         result must include(messages("checkYourAnswers.sendDeclaration.confirm"))
         result must include(messages("checkYourAnswers.sendDeclaration.warning"))
-        result must include(messages("checkYourAnswers.sendDeclaration.warning.message"))
+        result must include(messages(s"checkYourAnswers.sendDeclaration.warning.$importOrExport.message"))
 
         if (importOrExport == Import) {
           result must include(messages("checkYourAnswers.detailsOfTheGoods.vatRate"))
