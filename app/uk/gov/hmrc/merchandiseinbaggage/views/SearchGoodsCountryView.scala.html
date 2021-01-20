@@ -1,0 +1,124 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.merchandiseinbaggage.views.html.components
+@import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
+@import uk.gov.hmrc.merchandiseinbaggage.service.CountryService
+@import uk.gov.hmrc.merchandiseinbaggage.model.api._
+@import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType._
+@import play.api.libs.json.Json
+@import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
+@import views.html.helper.form
+
+@this(
+layout: Layout,
+formHelper: FormWithCSRF,
+h1: components.h1,
+errorSummary: components.errorSummary,
+inputSelect: components.inputSelect,
+button: components.button
+)
+
+@(form: Form[_], idx: Int, goodsCategory: String, backButtonUrl: Call, declarationType: DeclarationType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+
+@head = {
+    <link rel="stylesheet" href="@routes.Assets.versioned("lib/accessible-autocomplete/dist/accessible-autocomplete.min.css")" >
+}
+
+@scripts = {
+    <script src="@routes.Assets.versioned("lib/accessible-autocomplete/dist/accessible-autocomplete.min.js")"></script>
+    <script>
+
+        var selectElementId = 'country'
+        var submitOnConfirm = false
+        var dataSource = @Html( Json.toJson(CountryService.getAllCountries.map(_.toAutoCompleteJson)).toString )
+
+            accessibleAutocomplete.enhanceSelectElement({
+                selectElement: document.querySelector('#' + selectElementId),
+                displayMenu: 'inline',
+                minLength: 2,
+                source: customSuggest,
+                confirmOnBlur: true,
+                onConfirm: function(confirmed) {
+
+                    //Workaround the bug sending confirmed = undefined when confirmOnBlur == true
+                    let foundInData = dataSource.find(e => e.displayName === $('#'+selectElementId).val())
+                    let element = !!confirmed ? confirmed : foundInData
+
+                    if(!!element) {
+                        $('select[name="'+selectElementId+'"]').val(element.code);
+                        if(submitOnConfirm) {
+                            window.setTimeout(function(){
+                                $('form').submit();
+                            }, 100);
+                        }
+                    }
+                    else {
+                        $('select[name="'+selectElementId+'"]').val('')
+                    }
+                },
+                templates: {
+                    inputValue: function(result) {
+                        return (!!result && result.displayName ? result.displayName : '');
+                    },
+                    suggestion: function(result) {
+                        return !!result.displayName ? result.displayName : result;
+                    }
+                }
+            })
+
+            function customSuggest (query, syncResults) {
+                var results = dataSource
+                syncResults(query ? results.filter(function (result) {
+                    return (result.synonyms.findIndex( function(s) { return s.toLowerCase().indexOf(query.toLowerCase()) !== -1 } ) !== -1 ) || (result.displayName.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+                }) : [])
+            }
+
+            @if(form("country").error.isDefined) {
+                document.getElementById("country").setAttribute("style", "border: 2px solid #d4351c;")
+            }
+    </script>
+}
+
+@layout(
+    pageTitle = Some(title(form, s"searchGoodsCountry.$declarationType.title", titleMessageArgs = Seq(goodsCategory))),
+    headBlock = Some(head),
+    scriptsBlock = Some(scripts),
+    maybeBackButtonUrl = Some(backButtonUrl),
+    maybeDeclarationType = Some(declarationType)
+) {
+    @formHelper(action = SearchGoodsCountryController.onSubmit(idx), 'autoComplete -> "off", 'novalidate -> "novalidate") {
+
+        @errorSummary(form.errors, Some("country"))
+
+        @inputSelect(
+            form = form,
+            id = "country",
+            name = "country",
+            items = CountryService.getAllCountries.map(c => SelectItem(
+                value = Some(c.code),
+                text = messages(c.countryName),
+                selected = form("country").value.contains(c.code)
+            )),
+            label = messages(s"searchGoodsCountry.$declarationType.heading", goodsCategory),
+            isPageHeading = true,
+            hint = if(declarationType == Import) Some("searchGoodsCountry.hint") else None
+        )
+
+        @button("site.continue", name = Some("continue"))
+    }
+}

@@ -15,11 +15,11 @@ lazy val microservice = Project(appName, file("."))
     playDefaultPort                  := 8282,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     TwirlKeys.templateImports ++= Seq(
-      "uk.gov.hmrc.merchandiseinbaggageinternalfrontend.config.AppConfig",
+      "uk.gov.hmrc.merchandiseinbaggage.config.AppConfig",
       "uk.gov.hmrc.govukfrontend.views.html.components._",
       "uk.gov.hmrc.govukfrontend.views.html.helpers._",
       "uk.gov.hmrc.hmrcfrontend.views.html.components._",
-      "uk.gov.hmrc.merchandiseinbaggageinternalfrontend.views.ViewUtils._"
+      "uk.gov.hmrc.merchandiseinbaggage.views.ViewUtils._"
     ),
     // ***************
     // Use the silencer plugin to suppress warnings
@@ -37,8 +37,6 @@ lazy val microservice = Project(appName, file("."))
     // ***************
   )
   .settings(publishingSettings: _*)
-  .settings(
-    routesImport ++= Seq("uk.gov.hmrc.merchandiseinbaggageinternalfrontend.model.core._"))
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
