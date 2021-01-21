@@ -45,6 +45,8 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
     val url = configSource("microservice.services.feedback-frontend.url").loadOrThrow[String]
     s"$url/$serviceIdentifier"
   }
+
+  val gaTrackingId: String = configSource("google-analytics.trackingId").loadOrThrow[String]
 }
 
 object AppConfigSource {
