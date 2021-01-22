@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.service
 
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.TpsPaymentsBackendConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
-import uk.gov.hmrc.merchandiseinbaggage.model.api.PaymentCalculations
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.{PaymentSpecificData, TpsId, TpsPaymentsItem, TpsPaymentsRequest}
+import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

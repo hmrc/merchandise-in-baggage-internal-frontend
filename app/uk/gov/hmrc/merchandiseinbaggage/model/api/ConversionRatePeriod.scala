@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.model.api
 
-import play.api.libs.json._
+import java.time.LocalDate
 
-case class Port(code: String, displayName: String, isGB: Boolean, portSynonyms: List[String])
+import play.api.libs.json.{Json, OFormat}
 
-object Port {
-  implicit val format: OFormat[Port] = Json.format[Port]
+case class ConversionRatePeriod(startDate: LocalDate, endDate: LocalDate, currencyCode: String, rate: BigDecimal)
+
+object ConversionRatePeriod {
+  implicit val format: OFormat[ConversionRatePeriod] = Json.format[ConversionRatePeriod]
 }

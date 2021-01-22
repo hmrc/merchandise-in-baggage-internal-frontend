@@ -96,8 +96,7 @@ trait CoreTestData {
   val aGoods: Goods = Goods(aCategoryQuantityOfGoods, Twenty, Country("FR", "title.france", "FR", isEu = true, Nil), aPurchaseDetails)
 
   val aCalculationResult: CalculationResult = CalculationResult(AmountInPence(10L), AmountInPence(5), AmountInPence(7), None)
-  val aDeclarationGood: DeclarationGoods = DeclarationGoods(aGoods)
+  val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aGoods))
   val aPaymentCalculation: PaymentCalculation = PaymentCalculation(aGoods, aCalculationResult)
   val aPaymentCalculations: PaymentCalculations = PaymentCalculations(Seq(aPaymentCalculation))
-
 }
