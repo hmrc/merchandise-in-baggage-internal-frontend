@@ -17,9 +17,12 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
+import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
 import uk.gov.hmrc.merchandiseinbaggage.support.MibBackendStub.givenDeclarationIsPersistedInBackend
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -28,23 +31,32 @@ import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
 
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
 
-  val controller: DeclarationJourney => CheckYourAnswersController =
-    declarationJourney =>
-      new CheckYourAnswersController(
-        component,
-        stubProvider(declarationJourney),
-        calculationService,
-        tpsPaymentsService,
-        mibConnector,
-        stubRepo(declarationJourney),
-        importView,
-        exportView)
+  private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
+    new CalculationService(currencyConnector, mibConnector) {
+      override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
+        Future.successful(aPaymentCalculations)
+  }
+
+  def controller(
+    declarationJourney: DeclarationJourney,
+    paymentCalcs: PaymentCalculations = aPaymentCalculations): CheckYourAnswersController =
+    new CheckYourAnswersController(
+      component,
+      stubProvider(declarationJourney),
+      stubbedCalculation(paymentCalcs),
+      tpsPaymentsService,
+      mibConnector,
+      stubRepo(declarationJourney),
+      importView,
+      exportView
+    )
 
   forAll(declarationTypes) { importOrExport =>
     "onPageLoad" should {

@@ -18,25 +18,34 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import com.softwaremill.quicklens._
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[PaymentCalculationView]
+  private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
+    new CalculationService(currencyConnector, mibConnector) {
+      override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
+        Future.successful(aPaymentCalculations)
+  }
+
   val controller: DeclarationJourney => PaymentCalculationController =
-    declarationJourney => new PaymentCalculationController(component, stubProvider(declarationJourney), calculationService, view)
+    declarationJourney =>
+      new PaymentCalculationController(component, stubProvider(declarationJourney), stubbedCalculation(aPaymentCalculations), view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenSuccessfulCurrencyConversionResponse()
 
       val journey = DeclarationJourney(
         SessionId("123"),
@@ -50,8 +59,8 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
-      result must include(messages("paymentCalculation.title", "£18.34"))
-      result must include(messages("paymentCalculation.heading", "£18.34"))
+      result must include(messages("paymentCalculation.title", "£0.12"))
+      result must include(messages("paymentCalculation.heading", "£0.12"))
       result must include(messages("paymentCalculation.table.col1.head"))
       result must include(messages("paymentCalculation.table.col2.head"))
       result must include(messages("paymentCalculation.table.col3.head"))

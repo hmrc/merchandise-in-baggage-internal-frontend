@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.support
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{post, urlPathEqualTo, _}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
@@ -23,6 +24,7 @@ import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationId
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResult}
 
 object MibBackendStub extends MibConfiguration {
 
@@ -48,4 +50,17 @@ object MibBackendStub extends MibConfiguration {
     stubFor(
       get(urlPathEqualTo(s"$sendEmailsUrl/${declarationId.value}"))
         .willReturn(aResponse().withStatus(202)))
+
+  def givenAPaymentCalculation(server: WireMockServer, request: CalculationRequest, result: CalculationResult): StubMapping =
+    server
+      .stubFor(
+        post(urlPathEqualTo(s"$calculationUrl"))
+          .withRequestBody(equalToJson(toJson(request).toString, true, false))
+          .willReturn(okJson(Json.toJson(result).toString)))
+
+  def givenAPaymentCalculation(server: WireMockServer, result: CalculationResult): StubMapping =
+    server
+      .stubFor(
+        post(urlPathEqualTo(s"$calculationUrl"))
+          .willReturn(okJson(Json.toJson(result).toString)))
 }

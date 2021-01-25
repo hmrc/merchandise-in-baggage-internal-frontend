@@ -27,7 +27,7 @@ import reactivemongo.api.DefaultDB
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggage.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggage.connectors.{AddressLookupFrontendConnector, MibConnector}
+import uk.gov.hmrc.merchandiseinbaggage.connectors.{AddressLookupFrontendConnector, CurrencyConversionConnector, MibConnector}
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyActionProvider
 import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
@@ -52,6 +52,7 @@ trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication with Prop
   lazy val addressLookupConnector = injector.instanceOf[AddressLookupFrontendConnector]
   lazy val calculationService = injector.instanceOf[CalculationService]
   lazy val tpsPaymentsService = injector.instanceOf[TpsPaymentsService]
+  lazy val currencyConnector = injector.instanceOf[CurrencyConversionConnector]
   lazy val mibConnector = injector.instanceOf[MibConnector]
 
   private lazy val db: () => DefaultDB = app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.db
