@@ -43,7 +43,6 @@ trait BaseSpecWithApplication
     "application.router"                                 -> "testOnlyDoNotUseInAppConf.Routes",
     "microservice.services.auth.port"                    -> WireMockSupport.port,
     "microservice.services.address-lookup-frontend.port" -> WireMockSupport.port,
-    "microservice.services.currency-conversion.port"     -> WireMockSupport.port,
     "microservice.services.merchandise-in-baggage.port"  -> WireMockSupport.port,
     "microservice.services.tps-payments-backend.port"    -> WireMockSupport.port
   )

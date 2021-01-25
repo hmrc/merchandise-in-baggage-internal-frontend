@@ -22,7 +22,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
@@ -34,7 +33,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
 
   val view = app.injector.instanceOf[PaymentCalculationView]
   private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
-    new CalculationService(currencyConnector, mibConnector) {
+    new CalculationService(mibConnector) {
       override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
         Future.successful(aPaymentCalculations)
   }
@@ -74,7 +73,6 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
       forAll(paymentCalculationThreshold) { (thresholdValue, redirectTo) =>
         s"redirect to $redirectTo for $importOrExport if threshold is $thresholdValue" in {
           givenTheUserIsAuthenticatedAndAuthorised()
-          givenSuccessfulCurrencyConversionResponse()
 
           val journey = DeclarationJourney(
             SessionId("123"),

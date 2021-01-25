@@ -35,7 +35,6 @@ class FrontendModule(unused: Environment, configuration: Configuration) extends 
     bindConstant().annotatedWith(named(name)).to(servicesConfig.baseUrl(service))
 
   override def configure(): Unit = {
-    bindBaseUrl("currencyConversionBaseUrl", "currency-conversion")
     bindBaseUrl("tpsBackendBaseUrl", "tps-payments-backend")
     bindBaseUrl("mibBackendBaseUrl", "merchandise-in-baggage")
     bindBaseUrl("addressLookupFrontendBaseUrl", "address-lookup-frontend")

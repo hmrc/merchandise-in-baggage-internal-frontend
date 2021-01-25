@@ -18,12 +18,11 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.support.CurrencyConversionSupport.givenSuccessfulCurrencyConversionResponse
 import uk.gov.hmrc.merchandiseinbaggage.support.MibBackendStub.givenDeclarationIsPersistedInBackend
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.TpsPaymentsBackendStub._
@@ -39,7 +38,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
 
   private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
-    new CalculationService(currencyConnector, mibConnector) {
+    new CalculationService(mibConnector) {
       override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
         Future.successful(aPaymentCalculations)
   }
@@ -62,7 +61,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
     "onPageLoad" should {
       s"return 200 for type $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        givenSuccessfulCurrencyConversionResponse()
 
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
@@ -106,10 +104,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
 
       s"return 200 for type $importOrExport when email is None" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        givenSuccessfulCurrencyConversionResponse()
-
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
-
         val eventualResult = controller(
           givenADeclarationJourneyIsPersisted(completedDeclarationJourney
             .copy(declarationType = importOrExport, maybeEmailAddress = None))).onPageLoad()(request)
@@ -122,24 +117,19 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
   "onSubmit" should {
     "redirect to payment page after successful form submit for Imports" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenSuccessfulCurrencyConversionResponse()
       givenDeclarationIsPersistedInBackend()
       givenTaxArePaid(TpsId("123"))
-
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
-
       val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).onSubmit()(request)
+
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some("http://localhost:9124/tps-payments/make-payment/mib/123")
     }
 
     "redirect to payment page after successful form submit for Exports" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenSuccessfulCurrencyConversionResponse()
       givenDeclarationIsPersistedInBackend()
-
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
-
       val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = Export)))
         .onSubmit()(request)
 
