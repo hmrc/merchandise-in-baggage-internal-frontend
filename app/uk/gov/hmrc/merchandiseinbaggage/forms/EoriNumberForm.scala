@@ -36,7 +36,7 @@ object EoriNumberForm extends Mappings {
 
   def form(customsAgent: YesNo, declarationType: DeclarationType): Form[String] = Form(
     "eori" ->
-      text(s"eoriNumber.${agentOrTrader(customsAgent)}.$declarationType.error.required")
+      eori(s"eoriNumber.${agentOrTrader(customsAgent)}.$declarationType.error.required")
         .verifying(isValidEori)
   )
 
