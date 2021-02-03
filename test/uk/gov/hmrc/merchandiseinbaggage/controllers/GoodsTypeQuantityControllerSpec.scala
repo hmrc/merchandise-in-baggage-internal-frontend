@@ -42,8 +42,8 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
-        result must include(messageApi(s"goodsTypeQuantity.$importOrExport.title"))
-        result must include(messageApi(s"goodsTypeQuantity.$importOrExport.heading"))
+        result must include(messageApi(s"goodsTypeQuantity.title"))
+        result must include(messageApi(s"goodsTypeQuantity.heading"))
         result must include(messageApi("goodsTypeQuantity.p"))
         result must include(messageApi("goodsTypeQuantity.quantity"))
       }
@@ -70,8 +70,8 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
 
         status(eventualResult) mustBe 400
         result must include(messageApi("error.summary.title"))
-        result must include(messageApi(s"goodsTypeQuantity.$importOrExport.title"))
-        result must include(messageApi(s"goodsTypeQuantity.$importOrExport.heading"))
+        result must include(messageApi(s"goodsTypeQuantity.title"))
+        result must include(messageApi(s"goodsTypeQuantity.heading"))
         result must include(messageApi("goodsTypeQuantity.p"))
         result must include(messageApi("goodsTypeQuantity.quantity"))
       }

@@ -4,3 +4,7 @@ $hmrc-assets-path: "/declare-commercial-goods/assets/lib/hmrc-frontend/hmrc/";
 @import "lib/govuk-frontend/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
 @import "autocomplete";
+
+.govuk-fieldset__legend--xl {
+  margin-top: 0;
+}
