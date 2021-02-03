@@ -52,7 +52,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
         val address =
           Address(Seq("address line 1", "address line 2"), Some("AB12 3CD"), AddressLookupCountry("GB", Some("United Kingdom")))
 
-        val request = buildGet(url, sessionId)
+        val request = buildGet(url, aSessionId)
 
         s"store address and redirect to ${routes.EoriNumberController.onPageLoad()} for $importOrExport" when {
           s"a declaration journey has been started for $importOrExport" in {

@@ -33,16 +33,16 @@ class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
         repo.insert(startedImportToGreatBritainJourney.copy(declarationType = importOrExport)).futureValue
 
-        val request = buildGet(routes.ResetServiceController.onPageLoad().url, sessionId)
+        val request = buildGet(routes.ResetServiceController.onPageLoad().url, aSessionId)
 
-        repo.findBySessionId(sessionId).futureValue.get.maybeGoodsDestination mustBe Some(GreatBritain)
+        repo.findBySessionId(aSessionId).futureValue.get.maybeGoodsDestination mustBe Some(GreatBritain)
 
         val eventualResult = controller.onPageLoad(request)
 
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.ImportExportChoiceController.onPageLoad().url)
 
-        repo.findBySessionId(sessionId).futureValue.get.maybeGoodsDestination mustBe None
+        repo.findBySessionId(aSessionId).futureValue.get.maybeGoodsDestination mustBe None
       }
     }
   }

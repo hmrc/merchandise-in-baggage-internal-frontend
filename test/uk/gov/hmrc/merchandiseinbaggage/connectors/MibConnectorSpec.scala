@@ -42,7 +42,7 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
     val calculationRequest = aDeclarationGood.goods.head.calculationRequest
     val stubbedResult = CalculationResult(AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)
 
-    givenAPaymentCalculation(wireMockServer, calculationRequest, stubbedResult)
+    givenAPaymentCalculation(calculationRequest, stubbedResult)
 
     client.calculatePayment(calculationRequest).futureValue mustBe stubbedResult
   }
@@ -57,5 +57,11 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
     givenSendEmailsSuccess(stubbedDeclarationId)
 
     client.sendEmails(stubbedDeclarationId).futureValue mustBe (())
+  }
+
+  "check eori number" in {
+    givenEoriIsChecked(aEoriNumber)
+
+    client.checkEoriNumber(aEoriNumber).futureValue mustBe aCheckResponse
   }
 }

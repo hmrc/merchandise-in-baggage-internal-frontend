@@ -17,19 +17,30 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
+import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EoriNumberView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec {
+class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
 
   val view = app.injector.instanceOf[EoriNumberView]
+  val client = app.injector.instanceOf[HttpClient]
+  val connector = new MibConnector(client, "some url") {
+    override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
+      Future.successful(CheckResponse("123", true, None))
+  }
   val controller: DeclarationJourney => EoriNumberController =
-    declarationJourney => new EoriNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new EoriNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, connector)
 
   forAll(declarationTypes) { importOrExport =>
     forAll(traderYesOrNoAnswer) { (yesNo, traderOrAgent) =>
@@ -86,6 +97,29 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec {
           status(eventualResult) mustBe 400
           result must include(messageApi(s"eoriNumber.$traderOrAgent.$importOrExport.error.required"))
         }
+      }
+
+      s"return a form error if API EROI validation fails for $traderOrAgent $importOrExport" in {
+        givenTheUserIsAuthenticatedAndAuthorised()
+        val client = app.injector.instanceOf[HttpClient]
+        val connector = new MibConnector(client, "some url") {
+          override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
+            Future.successful(CheckResponse("123", false, None))
+        }
+        val controller = new EoriNumberController(
+          component,
+          stubProvider(completedDeclarationJourney),
+          stubRepo(completedDeclarationJourney),
+          view,
+          connector)
+
+        val result = controller.onSubmit()(
+          buildPost(routes.EoriNumberController.onSubmit().url, aSessionId)
+            .withFormUrlEncodedBody(("eori", "GB123467800000"))
+        )
+
+        status(result) mustBe 400
+        contentAsString(result) must include(messages("eoriNumber.error.notFound"))
       }
     }
   }

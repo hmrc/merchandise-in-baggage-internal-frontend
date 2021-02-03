@@ -45,7 +45,7 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
           )
         MibBackendStub.givenPersistedDeclarationIsFound(persistedDeclaration, persistedDeclaration.declarationId)
 
-        val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, sessionId)
+        val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, aSessionId)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).onPageLoad()(request)
         val result = contentAsString(eventualResult)
 

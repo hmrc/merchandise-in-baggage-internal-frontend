@@ -26,15 +26,16 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.addresslookup.Country
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
+import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, GoodsEntry}
 
 trait CoreTestData {
 
-  val sessionId: SessionId = SessionId()
+  val aSessionId: SessionId = SessionId()
 
-  val startedImportJourney: DeclarationJourney = DeclarationJourney(sessionId, Import)
+  val startedImportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
-  val startedExportJourney: DeclarationJourney = DeclarationJourney(sessionId, Export)
+  val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export)
 
   val startedImportToGreatBritainJourney: DeclarationJourney =
     startedImportJourney.copy(maybeGoodsDestination = Some(GreatBritain))
@@ -48,7 +49,7 @@ trait CoreTestData {
     completedGoodsEntry.copy(
       maybePurchaseDetails = Some(PurchaseDetails("1915", Currency("EUR", "title.euro_eur", Some("EUR"), List("Europe", "European"))))))
 
-  val completedDeclarationJourney: DeclarationJourney = TestOnlyController.sampleDeclarationJourney(sessionId)
+  val completedDeclarationJourney: DeclarationJourney = TestOnlyController.sampleDeclarationJourney(aSessionId)
 
   val declaration: Declaration = completedDeclarationJourney.declarationIfRequiredAndComplete.get
 
@@ -99,4 +100,25 @@ trait CoreTestData {
   val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aGoods))
   val aPaymentCalculation: PaymentCalculation = PaymentCalculation(aGoods, aCalculationResult)
   val aPaymentCalculations: PaymentCalculations = PaymentCalculations(Seq(aPaymentCalculation))
+
+  val aEoriNumber = "GB025115110987654"
+  val aCheckEoriAddress = CheckEoriAddress("999 High Street", "CityName", "SS99 1AA")
+  val aCompanyDetails = CompanyDetails("Firstname LastName", aCheckEoriAddress)
+
+  val aCheckResponse = CheckResponse(aEoriNumber, true, Some(aCompanyDetails))
+
+  def aSuccessCheckResponse(eoriNumber: String = aEoriNumber): String =
+    s"""{
+       |  "eori": "$eoriNumber",
+       |  "valid": true,
+       |  "companyDetails": {
+       |    "traderName": "Firstname LastName",
+       |    "address": {
+       |      "streetAndNumber": "999 High Street",
+       |      "cityName": "CityName",
+       |      "postcode": "SS99 1AA"
+       |    }
+       |  },
+       |  "processingDate": "2021-01-27T11:00:22.522Z[Europe/London]"
+       |}""".stripMargin
 }

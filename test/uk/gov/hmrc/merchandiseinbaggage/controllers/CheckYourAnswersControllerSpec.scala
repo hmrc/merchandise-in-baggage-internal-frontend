@@ -32,7 +32,7 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
+class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec with WireMockSupport {
 
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
@@ -62,7 +62,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
       s"return 200 for type $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
+        val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
 
         val eventualResult = controller(
           givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = importOrExport))).onPageLoad()(request)
@@ -104,7 +104,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
 
       s"return 200 for type $importOrExport when email is None" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
+        val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
         val eventualResult = controller(
           givenADeclarationJourneyIsPersisted(completedDeclarationJourney
             .copy(declarationType = importOrExport, maybeEmailAddress = None))).onPageLoad()(request)
@@ -119,7 +119,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenDeclarationIsPersistedInBackend()
       givenTaxArePaid(TpsId("123"))
-      val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
+      val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, aSessionId)
       val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).onSubmit()(request)
 
       status(eventualResult) mustBe 303
@@ -129,7 +129,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec {
     "redirect to payment page after successful form submit for Exports" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenDeclarationIsPersistedInBackend()
-      val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, sessionId)
+      val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, aSessionId)
       val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = Export)))
         .onSubmit()(request)
 
