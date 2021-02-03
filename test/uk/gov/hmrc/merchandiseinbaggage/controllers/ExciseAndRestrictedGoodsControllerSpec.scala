@@ -45,8 +45,6 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
         status(eventualResult) mustBe 200
         result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.title"))
         result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.heading"))
-        result must include(messageApi("exciseAndRestrictedGoods.li1"))
-        result must include(messageApi("exciseAndRestrictedGoods.li2"))
         result must include(messageApi("exciseAndRestrictedGoods.details"))
       }
     }

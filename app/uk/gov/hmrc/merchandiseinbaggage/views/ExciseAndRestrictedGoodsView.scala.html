@@ -40,11 +40,6 @@ button: components.button
 
         @h1(s"exciseAndRestrictedGoods.$declarationType.heading")
 
-        <ul class="govuk-list govuk-list--bullet">
-            <li>@messages("exciseAndRestrictedGoods.li1")</li>
-            <li>@messages("exciseAndRestrictedGoods.li2")</li>
-        </ul>
-
         @details(
             summaryText = messages("exciseAndRestrictedGoods.details")
         ) {
