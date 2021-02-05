@@ -27,17 +27,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[TravellerDetailsPage]
+  private val view = app.injector.instanceOf[TravellerDetailsPage]
   val controller: DeclarationJourney => TravellerDetailsController =
     declarationJourney => new TravellerDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
-    val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
+    val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.TravellerDetailsController.onPageLoad.url)
+        val request = buildGet(routes.TravellerDetailsController.onPageLoad().url)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 

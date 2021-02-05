@@ -29,18 +29,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[JourneyDetailsPage]
-  val controller: DeclarationJourney => JourneyDetailsController =
+  private val view = app.injector.instanceOf[JourneyDetailsPage]
+  private val controller: DeclarationJourney => JourneyDetailsController =
     declarationJourney => new JourneyDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
+      DeclarationJourney(SessionId("123"), importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.JourneyDetailsController.onPageLoad.url)
+        val request = buildGet(routes.JourneyDetailsController.onPageLoad().url)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
@@ -55,7 +55,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
-        val today = LocalDate.now();
+        val today = LocalDate.now()
         givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
           .withFormUrlEncodedBody(

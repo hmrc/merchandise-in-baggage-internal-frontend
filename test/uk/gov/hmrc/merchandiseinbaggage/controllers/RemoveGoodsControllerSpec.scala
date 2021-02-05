@@ -29,13 +29,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[RemoveGoodsView]
+  private val view = app.injector.instanceOf[RemoveGoodsView]
 
   forAll(declarationTypes) { importOrExport =>
     val controller: DeclarationJourney => RemoveGoodsController =
       declarationJourney => new RemoveGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedGoodsEntry)))
+      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
@@ -109,7 +109,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
     }
 
     s"redirect to ${routes.ReviewGoodsController.onPageLoad()} if goods contains more entries" in {
-      val journey = importJourneyWithStartedGoodsEntry.copy(goodsEntries = GoodsEntries(Seq(startedGoodsEntry, startedGoodsEntry)))
+      val journey = importJourneyWithStartedGoodsEntry.copy(goodsEntries = GoodsEntries(Seq(startedImportGoods, startedImportGoods)))
       val result = controller.removeGoodOrRedirect(1, journey, Yes)
 
       status(result) mustBe Status.SEE_OTHER
@@ -117,7 +117,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
     }
 
     s"redirect to ${routes.CheckYourAnswersController.onPageLoad()} if goods contains more entries and is completed" in {
-      val journey = completedDeclarationJourney.copy(goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry)))
+      val journey = completedDeclarationJourney.copy(goodsEntries = GoodsEntries(Seq(completedImportGoods, completedImportGoods)))
       val result = controller.removeGoodOrRedirect(1, journey, Yes)
 
       status(result) mustBe Status.SEE_OTHER

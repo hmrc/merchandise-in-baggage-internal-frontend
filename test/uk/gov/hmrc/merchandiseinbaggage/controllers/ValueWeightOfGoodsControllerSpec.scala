@@ -27,19 +27,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[ValueWeightOfGoodsView]
+  private val view = app.injector.instanceOf[ValueWeightOfGoodsView]
   val controller: DeclarationJourney => ValueWeightOfGoodsController =
     declarationJourney => new ValueWeightOfGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
     forAll(destinations) { destination =>
       val journey: DeclarationJourney =
-        DeclarationJourney(SessionId("123"), importOrExport, maybeGoodsDestination = Some(destination))
+        DeclarationJourney(SessionId("123"), importOrExport).copy(maybeGoodsDestination = Some(destination))
       "onPageLoad" should {
         s"return 200 with radio buttons for $importOrExport to $destination" in {
           givenTheUserIsAuthenticatedAndAuthorised()
 
-          val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad.url)
+          val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad().url)
           val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
           val result = contentAsString(eventualResult)
 

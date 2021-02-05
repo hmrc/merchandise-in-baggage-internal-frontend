@@ -27,13 +27,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[GoodsInVehicleView]
+  private val view = app.injector.instanceOf[GoodsInVehicleView]
   val controller: DeclarationJourney => GoodsInVehicleController =
     declarationJourney => new GoodsInVehicleController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedGoodsEntry)))
+      DeclarationJourney(SessionId("123"), importOrExport).copy(goodsEntries = GoodsEntries(Seq(completedImportGoods)))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

@@ -17,9 +17,8 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, DeclarationType, SessionId}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, GoodsEntry}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsVatRateView
@@ -28,14 +27,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[GoodsVatRateView]
+  private val view = app.injector.instanceOf[GoodsVatRateView]
   val controller: DeclarationJourney => GoodsVatRateController =
     declarationJourney => new GoodsVatRateController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   private val journey: DeclarationJourney = DeclarationJourney(
     SessionId("123"),
     DeclarationType.Import,
-    goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+    goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
   )
 
   "onPageLoad" should {
@@ -53,16 +52,6 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
       result must include(messages("goodsVatRate.Zero"))
       result must include(messages("goodsVatRate.Five"))
       result must include(messages("goodsVatRate.Twenty"))
-    }
-
-    s"return 303 redirect to ${routes.SearchGoodsCountryController.onPageLoad(1).url}" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
-      val request = buildGet(routes.GoodsVatRateController.onPageLoad(1).url)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey.copy(declarationType = Export))).onPageLoad(1)(request)
-
-      status(eventualResult) mustBe 303
-      redirectLocation(eventualResult).get must endWith(routes.SearchGoodsCountryController.onPageLoad(1).url)
     }
   }
 

@@ -32,11 +32,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
 
-  val view = app.injector.instanceOf[EoriNumberView]
-  val client = app.injector.instanceOf[HttpClient]
-  val connector = new MibConnector(client, "some url") {
+  private val view = app.injector.instanceOf[EoriNumberView]
+  private val client = app.injector.instanceOf[HttpClient]
+  private val connector = new MibConnector(client, "some url") {
     override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
-      Future.successful(CheckResponse("123", true, None))
+      Future.successful(CheckResponse("123", valid = true, None))
   }
   val controller: DeclarationJourney => EoriNumberController =
     declarationJourney =>
@@ -44,12 +44,12 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
 
   forAll(declarationTypes) { importOrExport =>
     forAll(traderYesOrNoAnswer) { (yesNo, traderOrAgent) =>
-      val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), importOrExport, maybeIsACustomsAgent = Some(yesNo))
+      val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), importOrExport).copy(maybeIsACustomsAgent = Some(yesNo))
       "onPageLoad" should {
         s"return 200 with radio buttons for $traderOrAgent $importOrExport" in {
           givenTheUserIsAuthenticatedAndAuthorised()
 
-          val request = buildGet(routes.EoriNumberController.onPageLoad.url)
+          val request = buildGet(routes.EoriNumberController.onPageLoad().url)
           val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
           val result = contentAsString(eventualResult)
 
@@ -104,7 +104,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
         val client = app.injector.instanceOf[HttpClient]
         val connector = new MibConnector(client, "some url") {
           override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
-            Future.successful(CheckResponse("123", false, None))
+            Future.successful(CheckResponse("123", valid = false, None))
         }
         val controller = new EoriNumberController(
           component,

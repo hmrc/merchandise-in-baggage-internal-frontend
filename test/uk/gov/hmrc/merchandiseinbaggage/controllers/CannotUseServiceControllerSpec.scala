@@ -25,7 +25,7 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.CannotUseServiceView
 
 class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = injector.instanceOf[CannotUseServiceView]
+  private val view = injector.instanceOf[CannotUseServiceView]
   val controller: DeclarationJourney => CannotUseServiceController =
     declarationJourney => new CannotUseServiceController(component, stubProvider(declarationJourney), view)
 
@@ -34,8 +34,8 @@ class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
       s"return 200 for $importOrExport with expected content" in {
         givenTheUserIsAuthenticatedAndAuthorised()
         val journey =
-          DeclarationJourney(SessionId("123"), importOrExport, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
-        val request = buildGet(routes.CannotUseServiceController.onPageLoad.url)
+          DeclarationJourney(SessionId("123"), importOrExport).copy(maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
+        val request = buildGet(routes.CannotUseServiceController.onPageLoad().url)
 
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)

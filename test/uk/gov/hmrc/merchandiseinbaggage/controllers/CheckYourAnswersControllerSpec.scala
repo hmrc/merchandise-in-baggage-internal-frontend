@@ -19,7 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, PaymentCalculations}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{ImportGoods, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
@@ -39,7 +39,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
 
   private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
     new CalculationService(mibConnector) {
-      override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
+      override def paymentCalculation(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
         Future.successful(aPaymentCalculations)
   }
 
@@ -64,8 +64,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
 
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
 
-        val eventualResult = controller(
-          givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = importOrExport))).onPageLoad()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(importOrExport))).onPageLoad()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -86,7 +85,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
 
         if (importOrExport == Import) {
           result must include(messages("checkYourAnswers.detailsOfTheGoods.vatRate"))
-          result must include(messages("checkYourAnswers.detailsOfTheGoods.country"))
+          result must include(messages("checkYourAnswers.detailsOfTheGoods.producedInEu"))
           result must include(messages("checkYourAnswers.detailsOfTheGoods.price"))
           result must include(messages("checkYourAnswers.detailsOfTheGoods.paymentDue"))
           result must include(messages("checkYourAnswers.journeyDetails.placeOfArrival"))
@@ -106,8 +105,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
         givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
         val eventualResult = controller(
-          givenADeclarationJourneyIsPersisted(completedDeclarationJourney
-            .copy(declarationType = importOrExport, maybeEmailAddress = None))).onPageLoad()(request)
+          givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(importOrExport).copy(maybeEmailAddress = None))).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
       }
@@ -130,7 +128,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       givenTheUserIsAuthenticatedAndAuthorised()
       givenDeclarationIsPersistedInBackend()
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, aSessionId)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney.copy(declarationType = Export)))
+      val eventualResult = controller(givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(Export)))
         .onSubmit()(request)
 
       status(eventualResult) mustBe 303

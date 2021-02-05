@@ -17,6 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -27,7 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[GoodsTypeQuantityView]
+  private val view = app.injector.instanceOf[GoodsTypeQuantityView]
   val controller: DeclarationJourney => GoodsTypeQuantityController =
     declarationJourney => new GoodsTypeQuantityController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
@@ -57,7 +58,11 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
 
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
         status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(routes.GoodsVatRateController.onPageLoad(1).url)
+
+        importOrExport match {
+          case Import => redirectLocation(eventualResult) mustBe Some(routes.GoodsVatRateController.onPageLoad(1).url)
+          case Export => redirectLocation(eventualResult) mustBe Some(routes.SearchGoodsCountryController.onPageLoad(1).url)
+        }
       }
 
       s"return 400 with any form errors for $importOrExport" in {

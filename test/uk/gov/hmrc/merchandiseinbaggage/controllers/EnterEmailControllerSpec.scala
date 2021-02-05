@@ -27,18 +27,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[EnterEmailView]
+  private val view = app.injector.instanceOf[EnterEmailView]
   val controller: DeclarationJourney => EnterEmailController =
     declarationJourney => new EnterEmailController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
+      DeclarationJourney(SessionId("123"), declarationType = importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.EnterEmailController.onPageLoad.url)
+        val request = buildGet(routes.EnterEmailController.onPageLoad().url)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 

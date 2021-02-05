@@ -19,7 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
@@ -28,18 +28,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[ReviewGoodsView]
-  val controller: DeclarationJourney => ReviewGoodsController =
+  private val view = app.injector.instanceOf[ReviewGoodsView]
+  private val controller: DeclarationJourney => ReviewGoodsController =
     declarationJourney => new ReviewGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedGoodsEntry)))
+      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = dynamicCompletedGoodsEntries(importOrExport))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.ReviewGoodsController.onPageLoad.url)
+        val request = buildGet(routes.ReviewGoodsController.onPageLoad().url)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
@@ -50,7 +50,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
         result must include(messageApi("reviewGoods.list.quantity"))
         if (importOrExport == Import) {
           result must include(messageApi("reviewGoods.list.vatRate"))
-          result must include(messageApi("reviewGoods.list.country"))
+          result must include(messageApi("reviewGoods.list.producedInEu"))
         }
         if (importOrExport == Export) { result must include(messageApi("reviewGoods.list.destination")) }
         result must include(messageApi("reviewGoods.list.price"))

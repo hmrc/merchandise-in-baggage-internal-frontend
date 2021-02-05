@@ -31,10 +31,10 @@ import scala.concurrent.Future
 
 class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[PaymentCalculationView]
+  private val view = app.injector.instanceOf[PaymentCalculationView]
   private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
     new CalculationService(mibConnector) {
-      override def paymentBECalculation(declarationGoods: DeclarationGoods)(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
+      override def paymentCalculation(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
         Future.successful(aPaymentCalculations)
   }
 
@@ -50,7 +50,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
         SessionId("123"),
         DeclarationType.Import,
         maybeGoodsDestination = Some(GoodsDestinations.GreatBritain),
-        goodsEntries = GoodsEntries(Seq(completedGoodsEntry))
+        goodsEntries = GoodsEntries(Seq(completedImportGoods))
       )
 
       val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
@@ -78,7 +78,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
             SessionId("123"),
             DeclarationType.Export,
             maybeGoodsDestination = Some(GoodsDestinations.GreatBritain),
-            goodsEntries = GoodsEntries(Seq(completedGoodsEntry.modify(_.maybePurchaseDetails.each.amount).setTo(thresholdValue)))
+            goodsEntries = GoodsEntries(Seq(completedImportGoods.modify(_.maybePurchaseDetails.each.amount).setTo(thresholdValue)))
           )
 
           val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)

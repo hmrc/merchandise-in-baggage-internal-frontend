@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.merchandiseinbaggage
 
-import java.time.LocalDate
-
 import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Twenty
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.addresslookup.Country
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, GoodsEntry}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
+
+import java.time.LocalDate
 
 trait CoreTestData {
 
@@ -37,45 +36,85 @@ trait CoreTestData {
 
   val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export)
 
+  val startedExportFromGreatBritain: DeclarationJourney =
+    startedExportJourney.copy(maybeGoodsDestination = Some(GreatBritain))
+
   val startedImportToGreatBritainJourney: DeclarationJourney =
     startedImportJourney.copy(maybeGoodsDestination = Some(GreatBritain))
 
   val startedImportToNorthernIrelandJourney: DeclarationJourney =
     startedImportJourney.copy(maybeGoodsDestination = Some(NorthernIreland))
 
-  val completedGoodsEntry: GoodsEntry = TestOnlyController.completedGoodsEntry
+  val aCategoryQuantityOfGoods: CategoryQuantityOfGoods = CategoryQuantityOfGoods("test good", "123")
+
+  val completedImportGoods: ImportGoodsEntry = TestOnlyController.completedGoodsEntry
+
+  val completedExportGoods: ExportGoodsEntry = ExportGoodsEntry(
+    Some(aCategoryQuantityOfGoods),
+    Some(Country("FR", "title.france", "FR", isEu = true, Nil)),
+    Some(PurchaseDetails("99.99", Currency("GBP", "title.british_pounds_gbp", Some("GBP"), Nil)))
+  )
+
+  def dynamicCompletedGoodsEntries(declarationType: DeclarationType): GoodsEntries =
+    declarationType match {
+      case Import => GoodsEntries(completedImportGoods)
+      case Export => GoodsEntries(completedExportGoods)
+    }
+
+  def dynamicStartedGoodsEntries(declarationType: DeclarationType): GoodsEntries =
+    declarationType match {
+      case Import => GoodsEntries(startedImportGoods)
+      case Export => GoodsEntries(startedExportGoods)
+    }
+
+  val aImportGoods: ImportGoods =
+    ImportGoods(
+      completedImportGoods.maybeCategoryQuantityOfGoods.get,
+      completedImportGoods.maybeGoodsVatRate.get,
+      completedImportGoods.maybeProducedInEu.get,
+      completedImportGoods.maybePurchaseDetails.get
+    )
 
   val overThresholdGoods: GoodsEntries = GoodsEntries(
-    completedGoodsEntry.copy(
+    completedImportGoods.copy(
       maybePurchaseDetails = Some(PurchaseDetails("1915", Currency("EUR", "title.euro_eur", Some("EUR"), List("Europe", "European"))))))
 
   val completedDeclarationJourney: DeclarationJourney = TestOnlyController.sampleDeclarationJourney(aSessionId)
+
+  def dynamicCompletedJourney(declarationType: DeclarationType): DeclarationJourney =
+    declarationType match {
+      case Import => completedDeclarationJourney
+      case Export => completedDeclarationJourney.copy(declarationType = Export, goodsEntries = GoodsEntries(completedExportGoods))
+    }
 
   val declaration: Declaration = completedDeclarationJourney.declarationIfRequiredAndComplete.get
 
   val incompleteDeclarationJourney: DeclarationJourney = completedDeclarationJourney.copy(maybeJourneyDetailsEntry = None)
 
-  val aCategoryQuantityOfGoods: CategoryQuantityOfGoods = CategoryQuantityOfGoods("test good", "123")
+  val startedImportGoods: ImportGoodsEntry = ImportGoodsEntry(Some(aCategoryQuantityOfGoods))
 
-  val startedGoodsEntry: GoodsEntry = GoodsEntry(Some(aCategoryQuantityOfGoods))
+  val startedExportGoods: ExportGoodsEntry = ExportGoodsEntry(Some(aCategoryQuantityOfGoods))
 
   val importJourneyWithStartedGoodsEntry: DeclarationJourney =
-    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(startedGoodsEntry))
+    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(startedImportGoods))
+
+  val exportJourneyWithStartedGoodsEntry: DeclarationJourney =
+    startedExportFromGreatBritain.copy(goodsEntries = GoodsEntries(startedExportGoods))
 
   val importJourneyWithOneCompleteAndOneEmptyGoodsEntry: DeclarationJourney =
-    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(Seq(completedGoodsEntry, GoodsEntry.empty)))
+    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(Seq(completedImportGoods, ImportGoodsEntry())))
 
   val importJourneyWithOneCompleteAndOneStartedGoodsEntry: DeclarationJourney =
-    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(Seq(completedGoodsEntry, startedGoodsEntry)))
+    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(Seq(completedImportGoods, startedImportGoods)))
 
   val importJourneyWithOneCompleteGoodsEntry: DeclarationJourney =
-    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(completedGoodsEntry))
+    startedImportToGreatBritainJourney.copy(goodsEntries = GoodsEntries(completedImportGoods))
 
   val importJourneyWithTwoCompleteGoodsEntries: DeclarationJourney =
     startedImportToGreatBritainJourney.copy(goodsEntries = completedDeclarationJourney.goodsEntries)
 
   val previouslyCompleteJourneyWithIncompleteGoodsEntryAdded: DeclarationJourney =
-    completedDeclarationJourney.copy(goodsEntries = GoodsEntries(Seq(completedGoodsEntry, completedGoodsEntry, startedGoodsEntry)))
+    completedDeclarationJourney.copy(goodsEntries = GoodsEntries(Seq(completedImportGoods, completedImportGoods, startedImportGoods)))
 
   val importJourneyWithGoodsOverThreshold: DeclarationJourney =
     startedImportToGreatBritainJourney.copy(goodsEntries = overThresholdGoods)
@@ -94,18 +133,26 @@ trait CoreTestData {
 
   val aPurchaseDetails: PurchaseDetails =
     PurchaseDetails("199.99", Currency("EUR", "title.euro_eur", Some("EUR"), List("Europe", "European")))
-  val aGoods: Goods = Goods(aCategoryQuantityOfGoods, Twenty, Country("FR", "title.france", "FR", isEu = true, Nil), aPurchaseDetails)
+  val aGoods: ImportGoods = ImportGoods(aCategoryQuantityOfGoods, Twenty, YesNoDontKnow.Yes, aPurchaseDetails)
 
-  val aCalculationResult: CalculationResult = CalculationResult(AmountInPence(10L), AmountInPence(5), AmountInPence(7), None)
+  val aConversionRatePeriod: ConversionRatePeriod = ConversionRatePeriod(journeyDate, journeyDate, "EUR", BigDecimal(1.2))
+  val aCalculationResult: CalculationResult =
+    CalculationResult(aImportGoods, AmountInPence(10L), AmountInPence(5), AmountInPence(7), Some(aConversionRatePeriod))
+
+  val aCalculationResultWithNoTax: CalculationResult =
+    CalculationResult(aImportGoods, AmountInPence(100), AmountInPence(0), AmountInPence(0), Some(aConversionRatePeriod))
   val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aGoods))
   val aPaymentCalculation: PaymentCalculation = PaymentCalculation(aGoods, aCalculationResult)
   val aPaymentCalculations: PaymentCalculations = PaymentCalculations(Seq(aPaymentCalculation))
 
-  val aEoriNumber = "GB025115110987654"
-  val aCheckEoriAddress = CheckEoriAddress("999 High Street", "CityName", "SS99 1AA")
-  val aCompanyDetails = CompanyDetails("Firstname LastName", aCheckEoriAddress)
+  val aPaymentCalculationWithNoTax: PaymentCalculations = PaymentCalculations(
+    Seq(aPaymentCalculation.copy(calculationResult = aCalculationResultWithNoTax)))
 
-  val aCheckResponse = CheckResponse(aEoriNumber, true, Some(aCompanyDetails))
+  val aEoriNumber: String = "GB025115110987654"
+  val aCheckEoriAddress: CheckEoriAddress = CheckEoriAddress("999 High Street", "CityName", "SS99 1AA")
+  val aCompanyDetails: CompanyDetails = CompanyDetails("Firstname LastName", aCheckEoriAddress)
+
+  val aCheckResponse: CheckResponse = CheckResponse(aEoriNumber, valid = true, Some(aCompanyDetails))
 
   def aSuccessCheckResponse(eoriNumber: String = aEoriNumber): String =
     s"""{

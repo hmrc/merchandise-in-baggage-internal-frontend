@@ -25,7 +25,7 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsRemovedView
 
 class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val view = app.injector.instanceOf[GoodsRemovedView]
+  private val view = app.injector.instanceOf[GoodsRemovedView]
   val controller: DeclarationJourney => GoodsRemovedController =
     declarationJourney => new GoodsRemovedController(component, stubProvider(declarationJourney), view)
 
@@ -33,7 +33,7 @@ class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
     "onPageLoad" should {
       s"return 200 for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        val journey = DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedGoodsEntry)))
+        val journey = DeclarationJourney(SessionId("123"), importOrExport).copy(goodsEntries = GoodsEntries(Seq(completedImportGoods)))
 
         val request = buildGet(routes.GoodsRemovedController.onPageLoad().url)
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)

@@ -19,7 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, GoodsEntry}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{PurchaseDetailsExportView, PurchaseDetailsImportView}
@@ -28,8 +28,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val importView = app.injector.instanceOf[PurchaseDetailsImportView]
-  val exportView = app.injector.instanceOf[PurchaseDetailsExportView]
+  private val importView = app.injector.instanceOf[PurchaseDetailsImportView]
+  private val exportView = app.injector.instanceOf[PurchaseDetailsExportView]
   val controller: DeclarationJourney => PurchaseDetailsController = declarationJourney =>
     new PurchaseDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), importView, exportView)
 
@@ -37,7 +37,8 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
     val journey: DeclarationJourney = DeclarationJourney(
       SessionId("123"),
       importOrExport,
-      goodsEntries = GoodsEntries(Seq(GoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1"))))))
+      goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+    )
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

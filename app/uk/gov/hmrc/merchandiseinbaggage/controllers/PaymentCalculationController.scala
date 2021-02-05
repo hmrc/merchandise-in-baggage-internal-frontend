@@ -20,11 +20,12 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{goodsDeclarationIncompleteMessage, goodsDestinationUnansweredMessage}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestination
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, GoodsDestination, PaymentCalculations}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, PaymentCalculations}
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
+import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -51,7 +52,7 @@ class PaymentCalculationController @Inject()(
             request.declarationJourney.declarationType match {
               case Import =>
                 calculationService
-                  .paymentBECalculation(goods)
+                  .paymentCalculation(goods.importGoods)
                   .map(calculations => redirectIfOverThreshold(destination, calculations))
               case Export =>
                 Future successful exportRedirectIfOverThreshold(goods, destination)

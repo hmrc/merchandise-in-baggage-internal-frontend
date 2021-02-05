@@ -28,9 +28,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with WireMockSupport {
 
-  val client = app.injector.instanceOf[MibConnector]
-  implicit val hc = HeaderCarrier()
-  val declarationWithId = declaration.copy(declarationId = stubbedDeclarationId)
+  private val client = app.injector.instanceOf[MibConnector]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val declarationWithId = declaration.copy(declarationId = stubbedDeclarationId)
 
   "send a declaration to backend to be persisted" in {
     givenDeclarationIsPersistedInBackend(declarationWithId)
@@ -39,8 +39,8 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
   }
 
   "send a calculation request to backend for payment" in {
-    val calculationRequest = aDeclarationGood.goods.head.calculationRequest
-    val stubbedResult = CalculationResult(AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)
+    val calculationRequest = aDeclarationGood.goods.head.asInstanceOf[ImportGoods].calculationRequest
+    val stubbedResult = CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)
 
     givenAPaymentCalculation(calculationRequest, stubbedResult)
 
