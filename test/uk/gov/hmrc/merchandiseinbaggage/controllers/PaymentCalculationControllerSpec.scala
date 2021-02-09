@@ -19,7 +19,9 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import com.softwaremill.quicklens._
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -29,18 +31,18 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec {
+class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
 
   private val view = app.injector.instanceOf[PaymentCalculationView]
-  private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
+  private lazy val stubbedCalculation: CalculationResults => CalculationService = calculationResults =>
     new CalculationService(mibConnector) {
-      override def paymentCalculation(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
-        Future.successful(aPaymentCalculations)
+      override def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
+        Future.successful(calculationResults)
   }
 
   val controller: DeclarationJourney => PaymentCalculationController =
     declarationJourney =>
-      new PaymentCalculationController(component, stubProvider(declarationJourney), stubbedCalculation(aPaymentCalculations), view)
+      new PaymentCalculationController(component, stubProvider(declarationJourney), stubbedCalculation(aCalculationResults), view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {

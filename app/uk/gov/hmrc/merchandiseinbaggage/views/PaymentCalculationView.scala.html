@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components
-@import uk.gov.hmrc.merchandiseinbaggage.model.api.PaymentCalculations
+@import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 @import uk.gov.hmrc.merchandiseinbaggage.model.currencyconversion.ConversionRatePeriod
 @import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 @import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
@@ -30,14 +30,14 @@ table: GovukTable,
 button: components.button
 )
 
-@(paymentCalculations: PaymentCalculations, next: Call, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(calculations: CalculationResults, next: Call, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@rates = @{ paymentCalculations.paymentCalculations.flatMap(_.calculationResult.conversionRatePeriod).distinct }
+@rates = @{ calculations.calculationResults.flatMap(_.conversionRatePeriod).distinct }
 
-@layout(pageTitle = Some(titleNoForm("paymentCalculation.title", titleMessageArgs = Seq(paymentCalculations.totalTaxDue.formattedInPounds))), maybeBackButtonUrl = Some(backButtonUrl), maybeDeclarationType = Some(Import)) {
- @h1(messages("paymentCalculation.heading", paymentCalculations.totalTaxDue.formattedInPounds))
+@layout(pageTitle = Some(titleNoForm("paymentCalculation.title", titleMessageArgs = Seq(calculations.totalTaxDue.formattedInPounds))), maybeBackButtonUrl = Some(backButtonUrl), maybeDeclarationType = Some(Import)) {
+ @h1(messages("paymentCalculation.heading", calculations.totalTaxDue.formattedInPounds))
 
- @table(paymentCalculations.toTable)
+ @table(calculations.toTable)
 
  @h2(messages("paymentCalculation.h3"), classes = Some("govuk-heading-m"))
 

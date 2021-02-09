@@ -20,7 +20,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{ImportGoods, PaymentCalculation, PaymentCalculations}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.ImportGoods
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,13 +30,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class CalculationService @Inject()(mibConnector: MibConnector)(implicit ec: ExecutionContext) {
   private val logger = Logger("CalculationService")
 
-  def paymentCalculation(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
-    Future
-      .traverse(importGoods) { goods =>
-        mibConnector.calculatePayment(goods.calculationRequest).map { result =>
-          logger.info(s"Payment calculation for good [$goods] gave result [$result]")
-          PaymentCalculation(goods, result)
-        }
-      }
-      .map(PaymentCalculations.apply)
+  def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
+    mibConnector.calculatePayments(importGoods.map(_.calculationRequest)).map(withLogging)
+
+  private def withLogging(calculationResults: Seq[CalculationResult]): CalculationResults = {
+    calculationResults.foreach(result => logger.info(s"Payment calculation for good [${result.goods}] gave result [$result]"))
+    CalculationResults(calculationResults)
+  }
 }

@@ -20,7 +20,8 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.TpsPaymentsBackendConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, PaymentCalculations}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.{PaymentSpecificData, TpsId, TpsPaymentsItem, TpsPaymentsRequest}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
@@ -29,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector)(implicit ec: ExecutionContext, appConfig: AppConfig) {
 
-  def createTpsPayments(pid: String, declaration: Declaration, paymentDue: PaymentCalculations)(
+  def createTpsPayments(pid: String, declaration: Declaration, paymentDue: CalculationResults)(
     implicit hc: HeaderCarrier): Future[TpsId] = {
     val request = TpsPaymentsRequest(
       pid = pid,

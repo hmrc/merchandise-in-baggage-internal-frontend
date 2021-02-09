@@ -40,7 +40,7 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
         val persistedDeclaration = declaration
           .copy(
             maybeTotalCalculationResult =
-              Some(TotalCalculationResult(aPaymentCalculations, AmountInPence(10L), AmountInPence(5), AmountInPence(2), AmountInPence(3))),
+              Some(TotalCalculationResult(aCalculationResults, AmountInPence(10L), AmountInPence(5), AmountInPence(2), AmountInPence(3))),
             declarationType = importOrExport
           )
         MibBackendStub.givenPersistedDeclarationIsFound(persistedDeclaration, persistedDeclaration.declarationId)

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
@@ -23,13 +24,12 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.core.GoodsEntries
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
-import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.GoodsEntries
+import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,7 +50,7 @@ class CheckYourAnswersController @Inject()(
       .fold(actionProvider.invalidRequestF(incompleteMessage)) { declaration =>
         request.declarationJourney.declarationType match {
           case Import =>
-            calculationService.paymentCalculation(declaration.declarationGoods.importGoods).map { paymentCalculations =>
+            calculationService.paymentCalculations(declaration.declarationGoods.importGoods).map { paymentCalculations =>
               if (paymentCalculations.totalGbpValue.value > declaration.goodsDestination.threshold.value) {
                 Redirect(routes.GoodsOverThresholdController.onPageLoad())
               } else Ok(importView(form, declaration, paymentCalculations.totalTaxDue))
@@ -96,12 +96,12 @@ class CheckYourAnswersController @Inject()(
   private def continueImportDeclaration(declaration: Declaration)(
     implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] = {
 
-    def redirectToPaymentsIfNecessary(paymentCalcs: PaymentCalculations) =
-      if (paymentCalcs.totalTaxDue.value == 0L) {
+    def redirectToPaymentsIfNecessary(calculations: CalculationResults) =
+      if (calculations.totalTaxDue.value == 0L) {
         Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
       } else {
         tpsPaymentsService
-          .createTpsPayments(request.pid, declaration, paymentCalcs)
+          .createTpsPayments(request.pid, declaration, calculations)
           .map(
             tpsId =>
               Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")
@@ -109,7 +109,7 @@ class CheckYourAnswersController @Inject()(
       }
 
     for {
-      taxDue <- calculationService.paymentCalculation(declaration.declarationGoods.importGoods)
+      taxDue <- calculationService.paymentCalculations(declaration.declarationGoods.importGoods)
       _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
       result <- redirectToPaymentsIfNecessary(taxDue)
     } yield result

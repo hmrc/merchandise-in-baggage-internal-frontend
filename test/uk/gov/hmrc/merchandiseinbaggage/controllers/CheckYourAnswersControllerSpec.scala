@@ -19,7 +19,8 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{ImportGoods, PaymentCalculations}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.ImportGoods
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
@@ -37,15 +38,15 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
 
-  private lazy val stubbedCalculation: PaymentCalculations => CalculationService = aPaymentCalculations =>
+  private lazy val stubbedCalculation: CalculationResults => CalculationService = aPaymentCalculations =>
     new CalculationService(mibConnector) {
-      override def paymentCalculation(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[PaymentCalculations] =
+      override def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
         Future.successful(aPaymentCalculations)
   }
 
   def controller(
     declarationJourney: DeclarationJourney,
-    paymentCalcs: PaymentCalculations = aPaymentCalculations): CheckYourAnswersController =
+    paymentCalcs: CalculationResults = aCalculationResults): CheckYourAnswersController =
     new CheckYourAnswersController(
       component,
       stubProvider(declarationJourney),

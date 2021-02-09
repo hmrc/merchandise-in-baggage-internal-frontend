@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.merchandiseinbaggage
 
+import java.time.LocalDate
+
 import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Twenty
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
-
-import java.time.LocalDate
 
 trait CoreTestData {
 
@@ -133,7 +132,6 @@ trait CoreTestData {
 
   val aPurchaseDetails: PurchaseDetails =
     PurchaseDetails("199.99", Currency("EUR", "title.euro_eur", Some("EUR"), List("Europe", "European")))
-  val aGoods: ImportGoods = ImportGoods(aCategoryQuantityOfGoods, Twenty, YesNoDontKnow.Yes, aPurchaseDetails)
 
   val aConversionRatePeriod: ConversionRatePeriod = ConversionRatePeriod(journeyDate, journeyDate, "EUR", BigDecimal(1.2))
   val aCalculationResult: CalculationResult =
@@ -141,12 +139,10 @@ trait CoreTestData {
 
   val aCalculationResultWithNoTax: CalculationResult =
     CalculationResult(aImportGoods, AmountInPence(100), AmountInPence(0), AmountInPence(0), Some(aConversionRatePeriod))
-  val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aGoods))
-  val aPaymentCalculation: PaymentCalculation = PaymentCalculation(aGoods, aCalculationResult)
-  val aPaymentCalculations: PaymentCalculations = PaymentCalculations(Seq(aPaymentCalculation))
 
-  val aPaymentCalculationWithNoTax: PaymentCalculations = PaymentCalculations(
-    Seq(aPaymentCalculation.copy(calculationResult = aCalculationResultWithNoTax)))
+  val aCalculationResults = CalculationResults(Seq(aCalculationResult))
+
+  val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aImportGoods))
 
   val aEoriNumber: String = "GB025115110987654"
   val aCheckEoriAddress: CheckEoriAddress = CheckEoriAddress("999 High Street", "CityName", "SS99 1AA")

@@ -20,9 +20,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
+import uk.gov.hmrc.merchandiseinbaggage.support.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support.{BaseSpecWithApplication, WireMockSupport}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
-import uk.gov.hmrc.merchandiseinbaggage.support.MibBackendStub._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -39,16 +39,26 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
   }
 
   "send a calculation request to backend for payment" in {
-    val calculationRequest = aDeclarationGood.goods.head.asInstanceOf[ImportGoods].calculationRequest
-    val stubbedResult = CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)
+    val calculationRequest = List(aImportGoods).map(_.calculationRequest)
+    val stubbedResult = List(CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None))
 
-    givenAPaymentCalculation(calculationRequest, stubbedResult)
+    givenAPaymentCalculations(calculationRequest, stubbedResult)
 
-    client.calculatePayment(calculationRequest).futureValue mustBe stubbedResult
+    client.calculatePayments(calculationRequest).futureValue mustBe stubbedResult
+  }
+
+  "send a calculation requests to backend for payment" in {
+    val calculationRequests = aDeclarationGood.importGoods.map(_.calculationRequest)
+    val stubbedResults =
+      CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil
+
+    givenAPaymentCalculations(calculationRequests, stubbedResults)
+
+    client.calculatePayments(calculationRequests).futureValue mustBe stubbedResults
   }
 
   "find a persisted declaration from backend by declarationId" in {
-    givenPersistedDeclarationIsFound(declarationWithId)
+    givenPersistedDeclarationIsFound(declarationWithId, stubbedDeclarationId)
 
     client.findDeclaration(stubbedDeclarationId).futureValue mustBe Some(declarationWithId)
   }

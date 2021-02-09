@@ -51,17 +51,18 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
         get(urlPathEqualTo(s"$declarationsUrl/${declarationId.value}"))
           .willReturn(okJson(Json.toJson(declaration).toString)))
 
-  def givenAPaymentCalculation(request: CalculationRequest, result: CalculationResult)(implicit server: WireMockServer): StubMapping =
+  def givenAPaymentCalculations(requests: Seq[CalculationRequest], results: Seq[CalculationResult])(
+    implicit server: WireMockServer): StubMapping =
     server
       .stubFor(
-        post(urlPathEqualTo(s"$calculationUrl"))
-          .withRequestBody(equalToJson(toJson(request).toString, true, false))
-          .willReturn(okJson(Json.toJson(result).toString)))
+        post(urlPathEqualTo(s"$calculationsUrl"))
+          .withRequestBody(equalToJson(toJson(requests).toString, true, false))
+          .willReturn(okJson(Json.toJson(results).toString)))
 
   def givenAPaymentCalculation(result: CalculationResult)(implicit server: WireMockServer): StubMapping =
     server
       .stubFor(
-        post(urlPathEqualTo(s"$calculationUrl"))
+        post(urlPathEqualTo(s"$calculationsUrl"))
           .willReturn(okJson(Json.toJson(result).toString)))
 
   def givenSendEmailsSuccess(declarationId: DeclarationId = stubbedDeclarationId)(implicit server: WireMockServer): StubMapping =
