@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.utils
 
+import java.text.NumberFormat.getCurrencyInstance
+import java.util.Locale.UK
+
 import play.api.i18n.Messages
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.govukfrontend.views.Aliases.{Table, TableRow, Text}
@@ -36,7 +39,9 @@ object DataModelEnriched {
 
   implicit class AmountInPenceEnriched(amountInPence: AmountInPence) {
     import amountInPence._
-    val formattedInPoundsUI: String = formattedInPounds.split("\\.00")(0) //TODO not sure if necessary different formats
+    val inPounds: BigDecimal = (BigDecimal(value) / 100).setScale(2)
+    val formattedInPounds: String =
+      if (value == 0) getCurrencyInstance(UK).format(inPounds) else getCurrencyInstance(UK).format(inPounds).split("\\.00")(0)
     lazy val isPaymentRequired: Boolean = inPounds.compareTo(BigDecimal(0.0)) > 0
     def fromBigDecimal(in: BigDecimal): AmountInPence = AmountInPence((in * 100).toLong)
   }
@@ -120,22 +125,22 @@ object DataModelEnriched {
             Text(goods.categoryQuantityOfGoods.category)
           ),
           TableRow(
-            Text(tc.gbpAmount.formattedInPoundsUI)
+            Text(tc.gbpAmount.formattedInPounds)
           ),
           TableRow(
-            Text(tc.duty.formattedInPoundsUI)
+            Text(tc.duty.formattedInPounds)
           ),
           TableRow(
             Text(
               messages(
                 "paymentCalculation.table.col3.row",
-                tc.vat.formattedInPoundsUI,
+                tc.vat.formattedInPounds,
                 goods.goodsVatRate.value
               )
             )
           ),
           TableRow(
-            Text(tc.taxDue.formattedInPoundsUI)
+            Text(tc.taxDue.formattedInPounds)
           )
         )
       } :+ Seq(
@@ -145,7 +150,7 @@ object DataModelEnriched {
           colspan = Some(4)
         ),
         TableRow(
-          content = Text(totalTaxDue.formattedInPoundsUI),
+          content = Text(totalTaxDue.formattedInPounds),
           classes = "govuk-!-font-weight-bold"
         )
       )
