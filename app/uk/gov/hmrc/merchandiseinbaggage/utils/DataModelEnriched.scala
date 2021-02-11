@@ -157,7 +157,6 @@ object DataModelEnriched {
 
       Table(
         rows = tableRows,
-        attributes = Map("style" -> "margin-bottom:60px"),
         head = Some(
           Seq(
             HeadCell(

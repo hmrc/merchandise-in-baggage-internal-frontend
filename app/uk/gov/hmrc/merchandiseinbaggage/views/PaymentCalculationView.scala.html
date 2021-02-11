@@ -16,50 +16,74 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components
 @import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
-@import uk.gov.hmrc.merchandiseinbaggage.model.currencyconversion.ConversionRatePeriod
 @import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
-@import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 @import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
 @this(
-layout: Layout,
-h1: components.h1,
-h2: components.h2,
-p: components.p,
-table: GovukTable,
-button: components.button
+        layout: Layout,
+        h1: components.h1,
+        h2: components.h2,
+        p: components.p,
+        table: GovukTable,
+        button: components.button
 )
 
-@(calculations: CalculationResults, next: Call, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(calculationResults: CalculationResults, next: Call, backButtonUrl: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@rates = @{ calculations.calculationResults.flatMap(_.conversionRatePeriod).distinct }
+@title = @{
+ if(calculationResults.isNothingToPay)
+  titleNoForm("paymentCalculation.zero.title")
+ else titleNoForm("paymentCalculation.title", titleMessageArgs = Seq(calculationResults.totalTaxDue.formattedInPounds))
+}
 
-@layout(pageTitle = Some(titleNoForm("paymentCalculation.title", titleMessageArgs = Seq(calculations.totalTaxDue.formattedInPounds))), maybeBackButtonUrl = Some(backButtonUrl), maybeDeclarationType = Some(Import)) {
- @h1(messages("paymentCalculation.heading", calculations.totalTaxDue.formattedInPounds))
+@heading = @{
+ if(calculationResults.isNothingToPay)
+  messages("paymentCalculation.zero.heading")
+ else messages("paymentCalculation.heading", calculationResults.totalTaxDue.formattedInPounds)
+}
 
- @table(calculations.toTable)
+@rates = @{ calculationResults.calculationResults.flatMap(_.conversionRatePeriod).distinct }
 
- @h2(messages("paymentCalculation.h3"), classes = Some("govuk-heading-m"))
+@layout(pageTitle = Some(title), maybeBackButtonUrl = Some(backButtonUrl), maybeDeclarationType = Some(Import)) {
+ @h1(heading)
 
- @p(Html(messages("paymentCalculation.p1")))
+ @table(calculationResults.toTable)
 
- @if(rates.nonEmpty) {
-  @p(Html(messages("paymentCalculation.p2")))
+ @if(calculationResults.isNothingToPay) {
+  @p(Html(messages("paymentCalculation.zero.p1")))
+ } else {
+  @h2(messages("paymentCalculation.h3"), classes = Some("govuk-heading-m"))
 
-  <ul class="govuk-list govuk-list--bullet">
-  @for(rate <- rates) {
-   <li>@messages("paymentCalculation.li", rate.display)</li>
+  @if(calculationResults.isDutyOnly) {
+   @p(Html(messages("paymentCalculation.dutyOnly.p1")))
   }
-  </ul>
+
+  @if(calculationResults.isVatOnly) {
+   @p(Html(messages("paymentCalculation.vatOnly.p1")))
+  }
+
+  @if(calculationResults.isDutyAndVat) {
+   @p(Html(messages("paymentCalculation.dutyAndVat.p1")))
+  }
+
+  @if(rates.nonEmpty) {
+   @p(Html(messages("paymentCalculation.p2")))
+
+   <ul class="govuk-list govuk-list--bullet">
+   @for(rate <- rates) {
+    <li>@messages("paymentCalculation.li", rate.display)</li>
+   }
+   </ul>
+  }
+
+  <p class="govuk-body">
+   @messages("paymentCalculation.p3.1")
+   <a href="@messages("paymentCalculation.p3.a.href")" class="govuk-link" target="_blank">
+   @messages("paymentCalculation.p3.a.text")
+   </a>
+   @messages("paymentCalculation.p3.2")
+  </p>
  }
 
- <p class="govuk-body">
-  @messages("paymentCalculation.p3.1")
-  <a href="@messages("paymentCalculation.p3.a.href")" class="govuk-link" target="_blank">
-   @messages("paymentCalculation.p3.a.text")
-  </a>
-  @messages("paymentCalculation.p3.2")
- </p>
-
- @p(button("site.continue", href = Some(next.url)))
+ @p(button(if(calculationResults.isNothingToPay) "paymentCalculation.zero.button" else "site.continue", href = Some(next.url)))
 }
