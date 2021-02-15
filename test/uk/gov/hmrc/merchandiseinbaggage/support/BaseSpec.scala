@@ -23,6 +23,7 @@ import org.scalatest.time.{Milliseconds, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
@@ -40,6 +41,9 @@ trait BaseSpecWithApplication
 
   override implicit lazy val app = fakeApplication()
   lazy val injector: Injector = app.injector
+
+  lazy val messageApi: Map[String, String] = injector.instanceOf[MessagesApi].messages("default")
+  implicit lazy val messages: Messages = injector.instanceOf[MessagesApi].preferred(Seq(Lang("en")))
 
   private val configMap: Map[String, Any] = Map[String, Any](
     "application.router"                                 -> "testOnlyDoNotUseInAppConf.Routes",
