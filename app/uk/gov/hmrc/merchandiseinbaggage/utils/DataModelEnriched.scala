@@ -18,11 +18,11 @@ package uk.gov.hmrc.merchandiseinbaggage.utils
 
 import java.text.NumberFormat.getCurrencyInstance
 import java.util.Locale.UK
-
 import play.api.i18n.Messages
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.govukfrontend.views.Aliases.{Table, TableRow, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.table.HeadCell
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Zero
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResults}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.PurchaseDetailsInput
@@ -132,11 +132,8 @@ object DataModelEnriched {
           ),
           TableRow(
             Text(
-              messages(
-                "paymentCalculation.table.col3.row",
-                tc.vat.formattedInPounds,
-                goods.goodsVatRate.value
-              )
+              if (goods.goodsVatRate == Zero) s"${goods.goodsVatRate.value}%"
+              else messages("paymentCalculation.table.col3.row", tc.vat.formattedInPounds, goods.goodsVatRate.value)
             )
           ),
           TableRow(
