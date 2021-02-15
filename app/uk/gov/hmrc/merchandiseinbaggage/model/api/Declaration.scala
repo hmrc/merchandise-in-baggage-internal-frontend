@@ -35,7 +35,8 @@ case class Declaration(
   mibReference: MibReference,
   maybeTotalCalculationResult: Option[TotalCalculationResult] = None,
   paymentSuccess: Option[Boolean] = None,
-  lang: String = "en")
+  lang: String = "en",
+  source: Option[String] = Some("AssistedDigital"))
 
 object Declaration {
   implicit val format: OFormat[Declaration] = Json.format[Declaration]
