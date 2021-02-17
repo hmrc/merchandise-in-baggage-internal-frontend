@@ -26,6 +26,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
+import com.softwaremill.quicklens._
 
 trait CoreTestData {
 
@@ -139,6 +140,26 @@ trait CoreTestData {
 
   val aCalculationResultWithNoTax: CalculationResult =
     CalculationResult(aImportGoods, AmountInPence(100), AmountInPence(0), AmountInPence(0), Some(aConversionRatePeriod))
+
+  val aCalculationResultOverThousand: CalculationResult = aCalculationResult
+    .modify(_.goods.producedInEu)
+    .setTo(YesNoDontKnow.Yes)
+    .modify(_.duty.value)
+    .setTo(140000)
+    .modify(_.vat.value)
+    .setTo(140000)
+    .modify(_.gbpAmount.value)
+    .setTo(140000)
+
+  val aCalculationResultWithNothingToPay: CalculationResult = aCalculationResult
+    .modify(_.goods.producedInEu)
+    .setTo(YesNoDontKnow.Yes)
+    .modify(_.duty.value)
+    .setTo(0)
+    .modify(_.vat.value)
+    .setTo(0)
+    .modify(_.gbpAmount.value)
+    .setTo(0)
 
   val aCalculationResults = CalculationResults(Seq(aCalculationResult))
 

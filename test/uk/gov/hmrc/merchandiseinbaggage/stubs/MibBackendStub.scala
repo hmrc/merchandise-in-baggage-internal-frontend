@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggage.support
+package uk.gov.hmrc.merchandiseinbaggage.stubs
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{post, urlPathEqualTo, _}
@@ -23,8 +23,8 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
-import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationId
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResult}
 
 object MibBackendStub extends MibConfiguration with CoreTestData {
@@ -51,6 +51,12 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
         get(urlPathEqualTo(s"$declarationsUrl/${declarationId.value}"))
           .willReturn(okJson(Json.toJson(declaration).toString)))
 
+  def givenPersistedDeclarationIsFound()(implicit server: WireMockServer): StubMapping =
+    server
+      .stubFor(
+        get(urlMatching(s"$declarationsUrl/(.*)"))
+          .willReturn(okJson(Json.toJson(declaration.copy(declarationId = stubbedDeclarationId, declarationType = Export)).toString)))
+
   def givenAPaymentCalculations(requests: Seq[CalculationRequest], results: Seq[CalculationResult])(
     implicit server: WireMockServer): StubMapping =
     server
@@ -59,11 +65,11 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
           .withRequestBody(equalToJson(toJson(requests).toString, true, false))
           .willReturn(okJson(Json.toJson(results).toString)))
 
-  def givenAPaymentCalculation(result: CalculationResult)(implicit server: WireMockServer): StubMapping =
+  def givenAPaymentCalculation(results: Seq[CalculationResult])(implicit server: WireMockServer): StubMapping =
     server
       .stubFor(
         post(urlPathEqualTo(s"$calculationsUrl"))
-          .willReturn(okJson(Json.toJson(result).toString)))
+          .willReturn(okJson(Json.toJson(results).toString)))
 
   def givenSendEmailsSuccess(declarationId: DeclarationId = stubbedDeclarationId)(implicit server: WireMockServer): StubMapping =
     server
