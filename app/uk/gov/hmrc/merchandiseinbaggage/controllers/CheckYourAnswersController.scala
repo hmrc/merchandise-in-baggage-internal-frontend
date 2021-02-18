@@ -88,10 +88,7 @@ class CheckYourAnswersController @Inject()(
     }
 
   private def continueExportDeclaration(declaration: Declaration)(implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] =
-    for {
-      declarationId <- mibConnector.persistDeclaration(declaration)
-      _             <- mibConnector.sendEmails(declarationId)
-    } yield Redirect(routes.DeclarationConfirmationController.onPageLoad())
+    mibConnector.persistDeclaration(declaration).map(_ => Redirect(routes.DeclarationConfirmationController.onPageLoad()))
 
   private def continueImportDeclaration(declaration: Declaration)(
     implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] = {
