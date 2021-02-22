@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage
 
-import java.time.LocalDate
-
+import java.time.{LocalDate, LocalDateTime}
 import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
@@ -27,6 +26,13 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, C
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
 import com.softwaremill.quicklens._
+import play.api.Application
+import play.api.i18n.Messages
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
+import play.api.test.FakeRequest
+import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
+import uk.gov.hmrc.merchandiseinbaggage.views.html.{DeclarationConfirmationView, Layout}
 
 trait CoreTestData {
 
@@ -185,4 +191,54 @@ trait CoreTestData {
        |  },
        |  "processingDate": "2021-01-27T11:00:22.522Z[Europe/London]"
        |}""".stripMargin
+
+  def generateDeclarationConfirmationPage(
+    decType: DeclarationType,
+    purchaseAmount: Long)(implicit app: Application, message: Messages, appConfig: AppConfig): String = {
+    val layout = app.injector.instanceOf[Layout]
+    val link = app.injector.instanceOf[uk.gov.hmrc.merchandiseinbaggage.views.html.components.link]
+    lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+      FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+    val dummyAmount = AmountInPence(0)
+
+    def totalCalculationResult: TotalCalculationResult =
+      TotalCalculationResult(
+        CalculationResults(
+          Seq(CalculationResult(
+            ImportGoods(
+              CategoryQuantityOfGoods("sock", "1"),
+              GoodsVatRates.Twenty,
+              YesNoDontKnow.Yes,
+              PurchaseDetails(purchaseAmount.toString, Currency("GBP", "title.british_pounds_gbp", None, List.empty[String]))
+            ),
+            AmountInPence(purchaseAmount),
+            dummyAmount,
+            dummyAmount,
+            None
+          ))),
+        AmountInPence(purchaseAmount),
+        dummyAmount,
+        dummyAmount,
+        dummyAmount
+      )
+
+    val sessionId = SessionId()
+    val id = DeclarationId("456")
+    val created = LocalDateTime.now.withSecond(0).withNano(0)
+
+    val journey: DeclarationJourney = completedDeclarationJourney
+      .copy(sessionId = sessionId, declarationType = decType, createdAt = created, declarationId = id)
+
+    val persistedDeclaration = journey.declarationIfRequiredAndComplete.map { declaration =>
+      if (decType == DeclarationType.Import) declaration.copy(maybeTotalCalculationResult = Some(totalCalculationResult))
+      else declaration
+    }
+
+    val declarationConfirmationView = new DeclarationConfirmationView(layout, null, link)
+    val result = declarationConfirmationView.apply(persistedDeclaration.get)(fakeRequest, message, appConfig)
+
+    result.body
+  }
+
 }

@@ -18,7 +18,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, TotalCalculationResult}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, DeclarationType, TotalCalculationResult}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -57,7 +57,7 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
         result must include(messages("declarationConfirmation.h2.1"))
         result must include(messages("declarationConfirmation.ul.p"))
         result must include(messages("declarationConfirmation.ul.1"))
-        result must include(messages(s"declarationConfirmation.$importOrExport.ul.3"))
+        result must include(messages(s"declarationConfirmation.$importOrExport.ul.4"))
         result must include(messages("declarationConfirmation.makeAnotherDeclaration"))
         result must include(messages("declarationConfirmation.date"))
         result must include(messages("declarationConfirmation.email", declaration.email.map(_.email).getOrElse("")))
@@ -73,4 +73,23 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
       }
     }
   }
+
+  "Import with value over 1000gbp, add an 'take proof' line" in {
+    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111)
+
+    result must include(messageApi("declarationConfirmation.ul.3"))
+  }
+
+  "Import with value under 1000gbp, DONOT add an 'take proof' line" in {
+    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 100)
+
+    result mustNot include(messageApi("declarationConfirmation.ul.3"))
+  }
+
+  "Export with value over 1000gbp, DONOT add an 'take proof' line" in {
+    val result = generateDeclarationConfirmationPage(DeclarationType.Export, 111111)
+
+    result mustNot include(messageApi("declarationConfirmation.ul.3"))
+  }
+
 }
