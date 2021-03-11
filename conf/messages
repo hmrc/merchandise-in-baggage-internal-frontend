@@ -464,6 +464,16 @@ retrieveDeclaration.eori.hint = For example, GB123456780000
 retrieveDeclaration.eori.error.required = Enter your EORI number
 retrieveDeclaration.eori.error.invalid = EORI number must start with GB followed by 12 numbers
 
+declarationNotFound.title = Declaration not found
+declarationNotFound.heading = Declaration not found
+declarationNotFound.li1 = We cannot find this declaration.
+declarationNotFound.li2 = If you typed the reference, check it is correct.
+declarationNotFound.li3 = If you pasted the reference, check you copied the entire reference.
+declarationNotFound.li4.a.text = You can
+declarationNotFound.li4.b.text = try again
+declarationNotFound.li4.c.text = or
+declarationNotFound.li4.d.text = make a new declaration.
+
 # Countries
 title.afghanistan=Afghanistan
 title.aland_islands=Åland Islands

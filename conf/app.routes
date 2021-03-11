@@ -120,3 +120,5 @@ GET         /declaration-confirmation            uk.gov.hmrc.merchandiseinbaggag
 
 GET        /retrieve-declaration         uk.gov.hmrc.merchandiseinbaggage.controllers.RetrieveDeclarationController.onPageLoad
 POST       /retrieve-declaration         uk.gov.hmrc.merchandiseinbaggage.controllers.RetrieveDeclarationController.onSubmit
+
+GET        /declaration-not-found        uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationNotFoundController.onPageLoad
