@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
-import java.time.LocalDate
-
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{SessionId, YesNo}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.JourneyDetailsPage
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
@@ -35,7 +34,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
+      startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

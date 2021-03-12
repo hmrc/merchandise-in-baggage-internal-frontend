@@ -16,15 +16,6 @@
 
 package uk.gov.hmrc.merchandiseinbaggage
 
-import java.time.{LocalDate, LocalDateTime}
-import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
 import com.softwaremill.quicklens._
 import play.api.Application
 import play.api.i18n.Messages
@@ -32,9 +23,19 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
 import play.api.test.FakeRequest
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
+import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Twenty
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.New
+import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{DeclarationConfirmationView, Layout}
 
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 trait CoreTestData {
@@ -45,9 +46,9 @@ trait CoreTestData {
   val eori = Eori("GB123456780000")
   val aDeclarationId = DeclarationId(UUID.randomUUID().toString)
 
-  val startedImportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Import)
+  val startedImportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Import, New)
 
-  val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export)
+  val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export, New)
 
   val startedExportFromGreatBritain: DeclarationJourney =
     startedExportJourney.copy(maybeGoodsDestination = Some(GreatBritain))

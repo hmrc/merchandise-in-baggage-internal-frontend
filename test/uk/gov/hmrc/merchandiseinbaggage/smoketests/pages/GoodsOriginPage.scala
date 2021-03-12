@@ -15,8 +15,8 @@
  */
 
 package uk.gov.hmrc.merchandiseinbaggage.smoketests.pages
-import org.scalatestplus.selenium.WebBrowser._
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import org.scalatestplus.selenium.WebBrowser._
 
 object GoodsOriginPage extends Page {
   def path(idx: Int) = s"/declare-commercial-goods/goods-origin/$idx"

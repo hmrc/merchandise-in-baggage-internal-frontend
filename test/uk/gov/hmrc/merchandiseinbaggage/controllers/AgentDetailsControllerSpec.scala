@@ -17,8 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
-import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -32,7 +30,7 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => AgentDetailsController =
     declarationJourney => new AgentDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  private val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), Import)
+  private val journey: DeclarationJourney = startedImportJourney
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {

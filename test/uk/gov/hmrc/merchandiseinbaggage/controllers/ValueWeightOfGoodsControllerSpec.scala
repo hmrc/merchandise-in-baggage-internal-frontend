@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -34,7 +33,7 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
   forAll(declarationTypes) { importOrExport =>
     forAll(destinations) { destination =>
       val journey: DeclarationJourney =
-        DeclarationJourney(SessionId("123"), importOrExport).copy(maybeGoodsDestination = Some(destination))
+        startedImportJourney.copy(declarationType = importOrExport, maybeGoodsDestination = Some(destination))
       "onPageLoad" should {
         s"return 200 with radio buttons for $importOrExport to $destination" in {
           givenTheUserIsAuthenticatedAndAuthorised()

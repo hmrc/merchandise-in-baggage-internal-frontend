@@ -21,13 +21,12 @@ import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.merchandiseinbaggage.config.AmendFlagConf
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.{givenFindByDeclarationReturnStatus, givenFindByDeclarationReturnSuccess}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.StrideBackendStub._
+import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, WireMockSupport}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RetrieveDeclarationView
-import uk.gov.hmrc.merchandiseinbaggage.support.WireMockSupport
-import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -42,10 +41,8 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
       override lazy val amendFlagConf: AmendFlagConf = AmendFlagConf(amendFlag)
     }
 
-  val journey: DeclarationJourney = DeclarationJourney(aSessionId, Import)
-
   declarationTypes.foreach { importOrExport: DeclarationType =>
-    val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
+    val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport, Amend)
     "onPageLoad" should {
       s"return 200 with expected content for $importOrExport" in {
 
@@ -67,25 +64,24 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
         result must include(messageApi(s"retrieveDeclaration.eori.hint"))
       }
 
-      // TODO when pages are added
-//      s"redirect to ${routes.CannotAccessPageController.onPageLoad().url} if flag is false for $importOrExport" in {
-//        val request = buildGet(routes.NewOrExistingController.onPageLoad.url, aSessionId)
-//        val eventualResult = controller(journey, false).onPageLoad(request)
-//
-//        status(eventualResult) mustBe 303
-//        redirectLocation(eventualResult) mustBe Some(routes.CannotAccessPageController.onPageLoad().url)
-//      }
+      s"redirect to ${routes.CannotUseServiceController.onPageLoad().url} if flag is false for $importOrExport" in {
+        val request = buildGet(routes.ImportExportChoiceController.onPageLoad.url, aSessionId)
+        val eventualResult = controller(journey, false).onPageLoad(request)
+
+        status(eventualResult) mustBe 303
+        redirectLocation(eventualResult) mustBe Some(routes.CannotUseServiceController.onPageLoad().url)
+      }
     }
   }
 
   "onSubmit" should {
     s"redirect to /previous-declaration-details after successful form submit" in {
       givenStrideAuthorise()
-      givenFindByDeclarationReturnSuccess(mibReference, eori, aDeclarationId)
+      givenFindByDeclarationReturnSuccess(mibReference, eori, declaration)
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
 
-      val eventualResult = controller(journey).onSubmit(request)
+      val eventualResult = controller(startedImportJourney).onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.PreviousDeclarationDetailsController.onPageLoad().url)
     }
@@ -96,10 +92,9 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
 
-      val eventualResult = controller(journey).onSubmit(request)
+      val eventualResult = controller(startedImportJourney).onSubmit(request)
       status(eventualResult) mustBe 303
-      // TODO when pages are added
-//      redirectLocation(eventualResult) mustBe Some(routes.DeclarationNotFoundController.onPageLoad().url)
+      redirectLocation(eventualResult) mustBe Some(routes.DeclarationNotFoundController.onPageLoad().url)
     }
 
     s"redirect to /internal-server-error after successful form submit but some unexpected error is thrown from the BE" in {
@@ -108,7 +103,7 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
 
-      val eventualResult = controller(journey).onSubmit(request)
+      val eventualResult = controller(startedImportJourney).onSubmit(request)
       status(eventualResult) mustBe 500
     }
 
@@ -116,7 +111,7 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
       givenStrideAuthorise()
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> "XAMB0000010", "eori" -> "GB12345")
-      val eventualResult = controller(journey).onSubmit(request)
+      val eventualResult = controller(startedImportJourney).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

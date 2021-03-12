@@ -47,11 +47,12 @@ next.button = Next
 invalidRequest.title = Invalid request
 invalidRequest.heading = Invalid request
 
-declarationType.header = What do you want to do?
-declarationType.title = What do you want to do?
-declarationType.Import = Make an import declaration
-declarationType.Export = Make an export declaration
-declarationType.error.required = Select if you want to make an import or export declaration
+importExportChoice.header = What do you want to do?
+importExportChoice.title = What do you want to do?
+importExportChoice.MakeImport = Make an import declaration
+importExportChoice.MakeExport = Make an export declaration
+importExportChoice.AddToExisting = Add goods to an existing declaration
+importExportChoice.error.required = Select one of the options
 
 # PreviousDeclarationDetails
 previousDeclarationDetails.title = Details of your existing declaration

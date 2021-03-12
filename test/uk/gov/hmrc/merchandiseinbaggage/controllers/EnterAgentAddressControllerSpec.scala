@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.addresslookup.{Address, AddressLookupCountry}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.AddressLookupFrontendStub._
@@ -37,7 +36,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
         givenInitJourney()
-        val journey = DeclarationJourney(SessionId("123"), importOrExport)
+        val journey = startedImportJourney
 
         val request = buildGet(routes.EnterAgentAddressController.onPageLoad().url)
 

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, SessionId}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -31,7 +30,7 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => CustomsAgentController =
     declarationJourney => new CustomsAgentController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  private val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), DeclarationType.Import)
+  private val journey: DeclarationJourney = startedImportJourney
 
   forAll(declarationTypes) { importOrExport =>
     "onPageLoad" should {

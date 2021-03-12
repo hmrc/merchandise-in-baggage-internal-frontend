@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.merchandiseinbaggage.views.html.components
 @import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
 @import uk.gov.hmrc.merchandiseinbaggage.model.api._
+@import uk.gov.hmrc.merchandiseinbaggage.model.core._
 @import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 @import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
@@ -30,16 +31,16 @@
 
 @(form: Form[_])(implicit request: Request[_], messages: Messages, appConf: AppConfig)
 
-@layout(pageTitle = Some(title(form, "declarationType.title")), maybeBackButtonUrl = None) {
+@layout(pageTitle = Some(title(form, "importExportChoice.title")), maybeBackButtonUrl = None) {
     @formHelper(action = ImportExportChoiceController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
 
-        @errorSummary(form.errors, DeclarationType.values.headOption.map(_.entryName))
+        @errorSummary(form.errors, ImportExportChoices.values.headOption.map(_.entryName))
 
         @inputRadio(
             form = form,
-            legend = messages("declarationType.header"),
+            legend = messages("importExportChoice.header"),
             legendAsHeading = true,
-            items = DeclarationType.options(form)
+            items = ImportExportChoices.options(form)
         )
 
         @button("site.continue", name = Some("continue"))

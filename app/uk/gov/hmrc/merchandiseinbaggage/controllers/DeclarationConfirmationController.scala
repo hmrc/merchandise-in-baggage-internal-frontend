@@ -47,6 +47,6 @@ class DeclarationConfirmationController @Inject()(
 
   private def resetJourney()(implicit request: DeclarationJourneyRequest[AnyContent]): Future[DeclarationJourney] = {
     import request.declarationJourney._
-    repo.upsert(DeclarationJourney(sessionId, declarationType))
+    repo.upsert(reset)
   }
 }

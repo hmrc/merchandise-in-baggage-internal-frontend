@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{GoodsDestinations, SessionId}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -34,7 +34,7 @@ class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
       s"return 200 for $importOrExport with expected content" in {
         givenTheUserIsAuthenticatedAndAuthorised()
         val journey =
-          DeclarationJourney(SessionId("123"), importOrExport).copy(maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
+          startedImportJourney.copy(declarationType = importOrExport, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
         val request = buildGet(routes.CannotUseServiceController.onPageLoad().url)
 
         val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)

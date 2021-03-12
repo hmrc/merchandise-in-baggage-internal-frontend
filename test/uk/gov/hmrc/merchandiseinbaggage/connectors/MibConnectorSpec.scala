@@ -68,4 +68,21 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
 
     client.checkEoriNumber(aEoriNumber).futureValue mustBe aCheckResponse
   }
+
+  "findBy query" should {
+    "return declaration as expected" in {
+      givenFindByDeclarationReturnSuccess(mibReference, eori, declaration)
+      client.findBy(mibReference, eori).value.futureValue mustBe Right(Some(declaration))
+    }
+
+    "handle 404 from BE" in {
+      givenFindByDeclarationReturnStatus(mibReference, eori, 404)
+      client.findBy(mibReference, eori).value.futureValue mustBe Right(None)
+    }
+
+    "handle unexpected error from BE" in {
+      givenFindByDeclarationReturnStatus(mibReference, eori, 500)
+      client.findBy(mibReference, eori).value.futureValue.isLeft mustBe true
+    }
+  }
 }

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeExport
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ImportExportChoice
@@ -37,10 +37,11 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
       val eventualResult = controller.onPageLoad(request)
       val result = contentAsString(eventualResult)
       status(eventualResult) mustBe 200
-      result must include(messageApi("declarationType.header"))
-      result must include(messageApi("declarationType.title"))
-      result must include(messageApi("declarationType.Import"))
-      result must include(messageApi("declarationType.Export"))
+      result must include(messageApi("importExportChoice.header"))
+      result must include(messageApi("importExportChoice.title"))
+      result must include(messageApi("importExportChoice.MakeImport"))
+      result must include(messageApi("importExportChoice.MakeExport"))
+      result must include(messageApi("importExportChoice.AddToExisting"))
     }
   }
 
@@ -48,7 +49,7 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
     "redirect to next page after successful form submit" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
-        .withFormUrlEncodedBody("value" -> Export.toString)
+        .withFormUrlEncodedBody("value" -> MakeExport.toString)
 
       val eventualResult = controller.onSubmit(request)
       status(eventualResult) mustBe 303
@@ -65,9 +66,8 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
 
       status(eventualResult) mustBe 400
       result must include(messageApi("error.summary.title"))
-      result must include(messageApi("declarationType.header"))
-      result must include(messageApi("declarationType.title"))
-      result must include(messageApi("declarationType.error.required"))
+      result must include(messageApi("importExportChoice.header"))
+      result must include(messageApi("importExportChoice.error.required"))
     }
   }
 }

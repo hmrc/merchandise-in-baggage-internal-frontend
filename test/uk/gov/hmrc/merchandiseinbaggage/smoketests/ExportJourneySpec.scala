@@ -19,6 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.smoketests
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Email, Name}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeExport
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth._
@@ -30,7 +31,7 @@ class ExportJourneySpec extends BaseUiSpec {
       givenTheUserIsAuthenticatedAndAuthorised()
       goto(ImportExportChoicePage.path)
 
-      submitPage(ImportExportChoicePage, Export.toString)
+      submitPage(ImportExportChoicePage, MakeExport.toString)
 
       submitPage(GoodsDestinationPage, "GreatBritain")
 

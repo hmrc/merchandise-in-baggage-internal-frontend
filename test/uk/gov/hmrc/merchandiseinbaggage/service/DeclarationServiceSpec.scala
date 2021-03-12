@@ -17,12 +17,11 @@
 package uk.gov.hmrc.merchandiseinbaggage.service
 
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Amendment, DeclarationId}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
-import uk.gov.hmrc.merchandiseinbaggage.support.WireMockSupport
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggage.support.{BaseSpecWithApplication, WireMockSupport}
 
 import java.time.LocalDate
 

@@ -24,8 +24,8 @@ import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Eori, MibReference}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResult}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Eori, MibReference}
 
 object MibBackendStub extends MibConfiguration with CoreTestData {
 
@@ -77,12 +77,12 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
         get(urlPathEqualTo(s"$checkEoriUrl$eoriNumber"))
           .willReturn(ok().withBody(Json.toJson(aCheckResponse).toString)))
 
-  def givenFindByDeclarationReturnSuccess(mibReference: MibReference, eori: Eori, declarationId: DeclarationId)(
+  def givenFindByDeclarationReturnSuccess(mibReference: MibReference, eori: Eori, declaration: Declaration = declaration)(
     implicit server: WireMockServer): StubMapping =
     server
       .stubFor(
         get(urlEqualTo(s"$declarationsUrl?mibReference=${mibReference.value}&eori=${eori.value}"))
-          .willReturn(okJson(s"""{"declarationId": "${declarationId.value}"}""")))
+          .willReturn(okJson(Json.toJson(declaration).toString())))
 
   def givenFindByDeclarationReturnStatus(mibReference: MibReference, eori: Eori, aStatus: Int)(
     implicit server: WireMockServer): StubMapping =

@@ -20,7 +20,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -28,14 +27,14 @@ import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EoriNumberView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
 
   private val view = app.injector.instanceOf[EoriNumberView]
   private val client = app.injector.instanceOf[HttpClient]
   private val connector = new MibConnector(client, "some url") {
-    override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
+    override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier): Future[CheckResponse] =
       Future.successful(CheckResponse("123", valid = true, None))
   }
   val controller: DeclarationJourney => EoriNumberController =
@@ -44,7 +43,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
 
   forAll(declarationTypes) { importOrExport =>
     forAll(traderYesOrNoAnswer) { (yesNo, traderOrAgent) =>
-      val journey: DeclarationJourney = DeclarationJourney(SessionId("123"), importOrExport).copy(maybeIsACustomsAgent = Some(yesNo))
+      val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(yesNo))
       "onPageLoad" should {
         s"return 200 with radio buttons for $traderOrAgent $importOrExport" in {
           givenTheUserIsAuthenticatedAndAuthorised()
@@ -103,7 +102,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
         givenTheUserIsAuthenticatedAndAuthorised()
         val client = app.injector.instanceOf[HttpClient]
         val connector = new MibConnector(client, "some url") {
-          override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CheckResponse] =
+          override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier): Future[CheckResponse] =
             Future.successful(CheckResponse("123", valid = false, None))
         }
         val controller = new EoriNumberController(

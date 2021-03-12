@@ -17,30 +17,34 @@
 package uk.gov.hmrc.merchandiseinbaggage.forms
 
 import play.api.data.FormError
-import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsTypeQuantityForm.form
+import uk.gov.hmrc.merchandiseinbaggage.forms.ImportExportChoiceForm.form
 import uk.gov.hmrc.merchandiseinbaggage.forms.behaviours.FieldBehaviours
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices
 
-class GoodsTypeQuantityFormSpec extends FieldBehaviours {
+class ImportExportChoiceFormSpec extends FieldBehaviours {
 
-  ".category" must {
-    val fieldName = "category"
-    val requiredKey = "goodsTypeQuantity.category.error.required"
+  val requiredKey = "importExportChoice.error.required"
+  val invalidKey = "importExportChoice.error.required"
 
-    behave like mandatoryField(
-      form,
-      fieldName,
-      requiredError = FormError(fieldName, requiredKey)
-    )
-  }
+  ".value" must {
 
-  ".quantity" must {
-    val fieldName = "quantity"
-    val requiredKey = "goodsTypeQuantity.quantity.error.required"
+    val fieldName = "value"
 
     behave like mandatoryField(
       form,
       fieldName,
-      requiredError = FormError(fieldName, requiredKey)
+      requiredError = FormError(fieldName, invalidKey)
     )
+
+    "bind all valid values" in {
+      ImportExportChoices.values.foreach { value =>
+        form.bind(Map(fieldName -> value.toString)).errors mustBe Seq.empty
+      }
+    }
+
+    "return error for invalid values" in {
+      form.bind(Map(fieldName -> "invalid_value")).errors mustBe Seq(FormError(fieldName, invalidKey))
+    }
   }
+
 }

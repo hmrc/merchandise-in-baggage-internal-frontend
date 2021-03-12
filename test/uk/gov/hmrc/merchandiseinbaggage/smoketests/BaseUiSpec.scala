@@ -25,6 +25,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.New
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, JourneyType}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeImport
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.Page
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.{BaseSpecWithApplication, WireMockSupport}
@@ -73,7 +74,7 @@ class BaseUiSpec extends BaseSpecWithApplication with WireMockSupport with HtmlU
   def givenAJourneyWithSession(journeyType: JourneyType = New, declarationType: DeclarationType = Import): DeclarationJourney = {
     givenTheUserIsAuthenticatedAndAuthorised()
     goto(routes.ImportExportChoiceController.onPageLoad().url)
-    click.on(IdQuery(Import.toString))
+    click.on(IdQuery(MakeImport.toString))
     click.on(NameQuery("continue"))
 
     (for {

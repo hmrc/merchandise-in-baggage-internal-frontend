@@ -42,11 +42,8 @@ class RetrieveDeclarationController @Inject()(
 
   override val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
     if (amendFlagConf.canBeAmended) {
-      // TODO restore link, using InvalidRequestController until NewOrExistingController working again
-      Ok(view(form, routes.InvalidRequestController.onPageLoad(), request.declarationJourney.declarationType))
-      //     Ok(view(form, routes.NewOrExistingController.onPageLoad(), request.declarationJourney.declarationType))
-    } else Redirect(routes.InvalidRequestController.onPageLoad().url)
-//    } else Redirect(routes.CannotAccessPageController.onPageLoad().url )
+      Ok(view(form, routes.ImportExportChoiceController.onPageLoad(), request.declarationJourney.declarationType))
+    } else Redirect(routes.CannotUseServiceController.onPageLoad().url)
   }
 
   override val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
@@ -54,9 +51,7 @@ class RetrieveDeclarationController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          // TODO restore link, using InvalidRequestController until NewOrExistingController working again
-          BadRequest(view(formWithErrors, routes.InvalidRequestController.onPageLoad(), request.declarationJourney.declarationType)).asFuture,
-//          BadRequest(view(formWithErrors, routes.NewOrExistingController.onPageLoad(), request.declarationJourney.declarationType)).asFuture,
+          BadRequest(view(formWithErrors, routes.ImportExportChoiceController.onPageLoad(), request.declarationJourney.declarationType)).asFuture,
         validData => processRequest(validData)
       )
   }
@@ -67,13 +62,14 @@ class RetrieveDeclarationController @Inject()(
       .findBy(validData.mibReference, validData.eori)
       .fold(
         error => Future successful InternalServerError(error), {
-          case Some(id) =>
-            repo.upsert(request.declarationJourney.copy(declarationId = id)) map { _ =>
+          case Some(declaration) =>
+            repo.upsert(
+              request.declarationJourney
+                .copy(declarationId = declaration.declarationId, declarationType = declaration.declarationType)) map { _ =>
               Redirect(routes.PreviousDeclarationDetailsController.onPageLoad())
             }
-          // TODO url links
-          case None => Future successful Redirect(routes.InvalidRequestController.onPageLoad())
-//          case None => Future successful Redirect(routes.DeclarationNotFoundController.onPageLoad() )
+
+          case None => Future successful Redirect(routes.DeclarationNotFoundController.onPageLoad())
         }
       )
       .flatten

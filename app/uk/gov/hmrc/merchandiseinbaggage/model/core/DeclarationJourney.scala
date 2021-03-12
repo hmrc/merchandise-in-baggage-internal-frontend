@@ -84,7 +84,7 @@ case class DeclarationJourney(
   declarationId: DeclarationId = DeclarationId(UUID.randomUUID().toString))
     extends MibReferenceGenerator {
 
-  lazy val reset: DeclarationJourney = DeclarationJourney(sessionId, declarationType)
+  lazy val reset: DeclarationJourney = DeclarationJourney(sessionId, declarationType, journeyType)
 
   val maybeCustomsAgent: Option[CustomsAgent] =
     for {
@@ -144,20 +144,23 @@ case class DeclarationJourney(
 object DeclarationJourney extends MongoDateTimeFormats {
   implicit val format: OFormat[DeclarationJourney] = Json.format[DeclarationJourney]
 
-  def apply(sessionId: SessionId, declarationType: DeclarationType): DeclarationJourney = declarationType match {
-    case Import =>
-      DeclarationJourney(
-        sessionId = sessionId,
-        declarationType = declarationType,
-        goodsEntries = GoodsEntries(ImportGoodsEntry())
-      )
-    case Export =>
-      DeclarationJourney(
-        sessionId = sessionId,
-        declarationType = declarationType,
-        goodsEntries = GoodsEntries(ExportGoodsEntry())
-      )
-  }
+  def apply(sessionId: SessionId, declarationType: DeclarationType, journeyType: JourneyType): DeclarationJourney =
+    declarationType match {
+      case Import =>
+        DeclarationJourney(
+          sessionId = sessionId,
+          declarationType = declarationType,
+          journeyType = journeyType,
+          goodsEntries = GoodsEntries(ImportGoodsEntry())
+        )
+      case Export =>
+        DeclarationJourney(
+          sessionId = sessionId,
+          declarationType = declarationType,
+          journeyType = journeyType,
+          goodsEntries = GoodsEntries(ExportGoodsEntry())
+        )
+    }
 
   val id = "sessionId"
 }
