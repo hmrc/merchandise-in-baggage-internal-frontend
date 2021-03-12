@@ -42,6 +42,7 @@ trait BaseSpecWithApplication
 
   override implicit lazy val app = fakeApplication()
   lazy val injector: Injector = app.injector
+
   lazy val declarationJourneyRepository: DeclarationJourneyRepository = injector.instanceOf[DeclarationJourneyRepository]
 
   lazy val messageApi: Map[String, String] = injector.instanceOf[MessagesApi].messages("default")
@@ -54,4 +55,6 @@ trait BaseSpecWithApplication
     "microservice.services.merchandise-in-baggage.port"  -> WireMockSupport.port,
     "microservice.services.tps-payments-backend.port"    -> WireMockSupport.port
   )
+
+  override def beforeEach(): Unit = declarationJourneyRepository.deleteAll().futureValue
 }

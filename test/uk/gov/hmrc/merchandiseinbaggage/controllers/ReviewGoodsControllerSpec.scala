@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -44,19 +44,12 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
-        result must include(messageApi("reviewGoods.title"))
-        result must include(messageApi("reviewGoods.heading"))
-        result must include(messageApi("reviewGoods.list.item"))
-        result must include(messageApi("reviewGoods.list.quantity"))
         if (importOrExport == Import) {
           result must include(messageApi("reviewGoods.list.vatRate"))
           result must include(messageApi("reviewGoods.list.producedInEu"))
+        } else {
+          result must include(messageApi("reviewGoods.list.destination"))
         }
-        if (importOrExport == Export) { result must include(messageApi("reviewGoods.list.destination")) }
-        result must include(messageApi("reviewGoods.list.price"))
-        result must include(messageApi("site.change"))
-        result must include(messageApi("site.remove"))
-        result must include(messageApi("reviewGoods.h3"))
       }
     }
 
@@ -87,8 +80,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
       status(eventualResult) mustBe 400
       result must include(messageApi("error.summary.title"))
-      result must include(messageApi("reviewGoods.title"))
-      result must include(messageApi("reviewGoods.heading"))
+      result must include(messageApi("reviewGoods.New.title"))
     }
   }
 }

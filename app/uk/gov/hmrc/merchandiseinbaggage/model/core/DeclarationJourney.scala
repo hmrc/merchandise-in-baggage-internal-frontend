@@ -19,8 +19,9 @@ package uk.gov.hmrc.merchandiseinbaggage.model.core
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.New
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{JourneyType, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.addresslookup.Address
 import uk.gov.hmrc.merchandiseinbaggage.service.{MibReferenceGenerator, PortService}
 
@@ -64,6 +65,7 @@ object GoodsEntries {
 case class DeclarationJourney(
   sessionId: SessionId,
   declarationType: DeclarationType,
+  journeyType: JourneyType = New,
   createdAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC),
   maybeExciseOrRestrictedGoods: Option[YesNo] = None,
   maybeGoodsDestination: Option[GoodsDestination] = None,

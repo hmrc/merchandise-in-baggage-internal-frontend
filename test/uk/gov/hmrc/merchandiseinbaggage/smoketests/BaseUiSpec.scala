@@ -22,10 +22,12 @@ import org.scalatestplus.selenium.{HtmlUnit, WebBrowser}
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.New
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, JourneyType}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.Page
+import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.{BaseSpecWithApplication, WireMockSupport}
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
@@ -43,6 +45,12 @@ class BaseUiSpec extends BaseSpecWithApplication with WireMockSupport with HtmlU
   def fullUrl(path: String) = s"$baseUrl$path"
 
   private val findElement: By => WebElement = webDriver.findElement
+
+  def findById(id: String): WebElement = findElement(By.id(id))
+
+  def findByClassName(name: String): WebElement = findElement(By.className(name))
+
+  def findByLinkText(name: String): WebElement = findElement(By.linkText(name))
 
   def findByXPath(xPath: String): WebElement = findElement(By.xpath(xPath))
 
@@ -62,7 +70,7 @@ class BaseUiSpec extends BaseSpecWithApplication with WireMockSupport with HtmlU
     }
 
   //TODO smarter than before but we still could improve maybe by using a lib to capture/add session id
-  def givenAJourneyWithSession: DeclarationJourney = {
+  def givenAJourneyWithSession(journeyType: JourneyType = New, declarationType: DeclarationType = Import): DeclarationJourney = {
     givenTheUserIsAuthenticatedAndAuthorised()
     goto(routes.ImportExportChoiceController.onPageLoad().url)
     click.on(IdQuery(Import.toString))
@@ -70,7 +78,9 @@ class BaseUiSpec extends BaseSpecWithApplication with WireMockSupport with HtmlU
 
     (for {
       persisted <- declarationJourneyRepository.findAll()
-      updated   <- declarationJourneyRepository.upsert(completedDeclarationJourney.copy(sessionId = persisted.head.sessionId))
+      updated <- declarationJourneyRepository.upsert(
+                  completedDeclarationJourney
+                    .copy(sessionId = persisted.head.sessionId, journeyType = journeyType, declarationType = declarationType))
     } yield updated).futureValue
   }
 }

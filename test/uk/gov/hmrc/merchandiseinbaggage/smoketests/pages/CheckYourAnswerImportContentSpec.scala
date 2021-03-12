@@ -51,7 +51,7 @@ class CheckYourAnswerImportContentSpec extends CheckYourAnswersPage with CoreTes
   }
 
   private def setUp(calculationResult: CalculationResult)(fn: List[WebElement] => Any): Any = fn {
-    givenAJourneyWithSession
+    givenAJourneyWithSession()
     givenAPaymentCalculation(List(calculationResult))
     goToCYAPage
 
