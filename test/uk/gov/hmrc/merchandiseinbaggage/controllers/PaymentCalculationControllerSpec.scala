@@ -56,7 +56,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
       )
 
       val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -84,7 +84,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
           )
 
           val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
 
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must endWith(redirectTo)

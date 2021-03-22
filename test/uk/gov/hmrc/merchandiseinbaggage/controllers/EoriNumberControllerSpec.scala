@@ -49,7 +49,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
           givenTheUserIsAuthenticatedAndAuthorised()
 
           val request = buildGet(routes.EoriNumberController.onPageLoad().url)
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
           val result = contentAsString(eventualResult)
 
           status(eventualResult) mustBe 200
@@ -67,7 +67,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
           val request = buildGet(routes.EoriNumberController.onSubmit().url)
             .withFormUrlEncodedBody("eori" -> "GB123456780000")
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
 
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult) mustBe Some(routes.TravellerDetailsController.onPageLoad().url)
@@ -78,7 +78,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
           val request = buildGet(routes.EoriNumberController.onSubmit().url)
             .withFormUrlEncodedBody("eori" -> "in valid")
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
           val result = contentAsString(eventualResult)
 
           status(eventualResult) mustBe 400
@@ -90,7 +90,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
           val request = buildGet(routes.EoriNumberController.onSubmit().url)
             .withFormUrlEncodedBody("eori" -> "")
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
           val result = contentAsString(eventualResult)
 
           status(eventualResult) mustBe 400

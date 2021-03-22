@@ -40,7 +40,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.ReviewGoodsController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -61,7 +61,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
           val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
             .withFormUrlEncodedBody("value" -> yesOrNo.toString)
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
 
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must include(s"$redirectTo")
@@ -75,7 +75,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
       val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

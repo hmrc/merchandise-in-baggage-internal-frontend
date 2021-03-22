@@ -54,7 +54,7 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
 
     givenTheUserIsAuthenticatedAndAuthorised()
 
-    val repo = stubRepo(givenADeclarationJourneyIsPersisted(exportJourney))
+    val repo = stubRepo(givenADeclarationJourneyIsPersistedWithStub(exportJourney))
 
     lazy val defaultBuilder = injector.instanceOf[DefaultActionBuilder]
     lazy val stride = injector.instanceOf[StrideAuthAction]

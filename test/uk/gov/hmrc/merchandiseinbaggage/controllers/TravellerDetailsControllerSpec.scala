@@ -38,7 +38,7 @@ class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.TravellerDetailsController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -56,7 +56,7 @@ class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.TravellerDetailsController.onSubmit().url)
           .withFormUrlEncodedBody("firstName" -> "Foo", "lastName" -> "Bar")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.EnterEmailController.onPageLoad().url)
       }
@@ -66,7 +66,7 @@ class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.EoriNumberController.onSubmit().url)
           .withFormUrlEncodedBody("firstName" -> "", "lastName" -> "")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

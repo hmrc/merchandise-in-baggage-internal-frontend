@@ -44,7 +44,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.PurchaseDetailsController.onPageLoad(1).url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -65,7 +65,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
         val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
           .withFormUrlEncodedBody("price" -> "20", "currency" -> "EUR")
 
@@ -76,7 +76,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
       s"return 400 with any form errors for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
         val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
           .withFormUrlEncodedBody("abcd" -> "in valid")
 

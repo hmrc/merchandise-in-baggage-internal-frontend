@@ -41,7 +41,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.RemoveGoodsController.onPageLoad(1).url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -58,7 +58,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
           val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
             .withFormUrlEncodedBody("value" -> yesNo.toString)
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
 
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must endWith(redirectTo)
@@ -68,12 +68,12 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
     s"return 400 with any form errors for $importOrExport" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersisted(journey)
+      givenADeclarationJourneyIsPersistedWithStub(journey)
 
       val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

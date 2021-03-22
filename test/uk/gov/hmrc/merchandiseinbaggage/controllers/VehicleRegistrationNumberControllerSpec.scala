@@ -38,7 +38,7 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
         contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.title"))
@@ -54,7 +54,7 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
         val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "business-name")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
 
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
@@ -66,7 +66,7 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
         val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
           .withFormUrlEncodedBody("value123" -> "")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

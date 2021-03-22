@@ -38,7 +38,7 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.GoodsTypeQuantityController.onPageLoad(1).url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -55,7 +55,7 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.GoodsTypeQuantityController.onSubmit(1).url)
           .withFormUrlEncodedBody("category" -> "clothes", "quantity" -> "1")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
         status(eventualResult) mustBe 303
 
         importOrExport match {
@@ -69,7 +69,7 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.GoodsTypeQuantityController.onSubmit(1).url)
           .withFormUrlEncodedBody("xyz" -> "clothes", "abc" -> "1")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

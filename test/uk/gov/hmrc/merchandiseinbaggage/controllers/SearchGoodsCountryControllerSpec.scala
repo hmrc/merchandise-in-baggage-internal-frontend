@@ -43,7 +43,7 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
       givenTheUserIsAuthenticatedAndAuthorised()
 
       val request = buildGet(routes.SearchGoodsCountryController.onPageLoad(1).url)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -60,7 +60,7 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
       val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
         .withFormUrlEncodedBody("country" -> "AF")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
 
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.PurchaseDetailsController.onPageLoad(1).url)
@@ -71,7 +71,7 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
       val request = buildGet(routes.SearchGoodsCountryController.onSubmit(1).url)
         .withFormUrlEncodedBody("country" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

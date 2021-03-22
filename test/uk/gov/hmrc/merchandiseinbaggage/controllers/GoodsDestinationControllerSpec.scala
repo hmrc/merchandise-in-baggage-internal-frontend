@@ -37,7 +37,7 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.GoodsDestinationController.onPageLoad.url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -55,7 +55,7 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec {
           val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
             .withFormUrlEncodedBody("value" -> destination.entryName)
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must endWith(redirectTo)
         }
@@ -66,7 +66,7 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "in valid")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

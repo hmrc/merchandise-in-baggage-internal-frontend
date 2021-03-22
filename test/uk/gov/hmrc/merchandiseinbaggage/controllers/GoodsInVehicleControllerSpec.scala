@@ -38,7 +38,7 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.GoodsInVehicleController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
         contentAsString(eventualResult) must include(messages(s"goodsInVehicle.$importOrExport.title"))
@@ -54,7 +54,7 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
           val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
             .withFormUrlEncodedBody("value" -> yesOrNo.entryName)
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
 
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must endWith(redirectTo)
@@ -67,7 +67,7 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.GoodsInVehicleController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "in valid")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

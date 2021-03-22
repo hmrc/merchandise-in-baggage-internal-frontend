@@ -69,7 +69,7 @@ class CheckYourAnswersAmendHandlerSpec
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
         givenPersistedDeclarationIsFound(declaration.copy(maybeTotalCalculationResult = Some(aTotalCalculationResult)), id)
 
         implicit val request: Request[_] = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
@@ -98,7 +98,7 @@ class CheckYourAnswersAmendHandlerSpec
         val exportOverThresholdDeclaration = declaration.copy(
           maybeTotalCalculationResult = Some(aTotalCalculationResult.modify(_.totalGbpValue).setTo(AmountInPence(150000001))))
 
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
         givenPersistedDeclarationIsFound(exportOverThresholdDeclaration, id)
 
         val amendment = completedAmendment(importOrExport)

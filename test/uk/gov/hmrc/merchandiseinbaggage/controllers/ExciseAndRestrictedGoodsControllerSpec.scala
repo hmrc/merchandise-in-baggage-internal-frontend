@@ -38,7 +38,7 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.ExciseAndRestrictedGoodsController.onPageLoad.url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -55,7 +55,7 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
           val request = buildGet(routes.ExciseAndRestrictedGoodsController.onSubmit().url)
             .withFormUrlEncodedBody("value" -> yesOrNo.toString)
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
           status(eventualResult) mustBe 303
           redirectLocation(eventualResult).get must endWith(redirectTo)
         }
@@ -66,7 +66,7 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
         val request = buildGet(routes.ExciseAndRestrictedGoodsController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "in valid")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

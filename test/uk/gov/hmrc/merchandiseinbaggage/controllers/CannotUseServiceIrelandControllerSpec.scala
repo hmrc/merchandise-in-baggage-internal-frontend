@@ -35,7 +35,7 @@ class CannotUseServiceIrelandControllerSpec extends DeclarationJourneyController
 
         val journey = startedImportJourney.copy(declarationType = importOrExport)
         val request = buildGet(routes.CannotUseServiceIrelandController.onPageLoad.url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200

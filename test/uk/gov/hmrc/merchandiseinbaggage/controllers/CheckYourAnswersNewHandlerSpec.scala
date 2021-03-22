@@ -75,7 +75,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
 
         implicit val request: Request[_] = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
@@ -92,7 +92,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
-        givenADeclarationJourneyIsPersisted(journey)
+        givenADeclarationJourneyIsPersistedWithStub(journey)
 
         val overThresholdGoods = aCalculationResults
           .modify(_.calculationResults.each)
@@ -116,7 +116,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(sessionId = sessionId, createdAt = created, declarationId = id)
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       (mockTpsPaymentsService
         .createTpsPayments(_: String, _: Declaration, _: CalculationResults)(_: HeaderCarrier))
@@ -136,7 +136,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(sessionId = sessionId, createdAt = created, declarationId = id)
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       val eventualResult = newHandler(aCalculationResultsWithNoTax).onSubmit(declaration, "123")
 
@@ -151,7 +151,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       val exportJourney: DeclarationJourney = completedDeclarationJourney
         .copy(sessionId = sessionId, declarationType = Export, createdAt = created, declarationId = stubbedId)
 
-      givenADeclarationJourneyIsPersisted(exportJourney)
+      givenADeclarationJourneyIsPersistedWithStub(exportJourney)
 
       val eventualResult = newHandler().onSubmit(declaration.copy(declarationType = Export), "345")
 

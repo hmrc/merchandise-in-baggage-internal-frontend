@@ -42,7 +42,7 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
       givenTheUserIsAuthenticatedAndAuthorised()
 
       val request = buildGet(routes.GoodsVatRateController.onPageLoad(1).url)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -61,7 +61,7 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
       val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "Zero")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
 
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.SearchGoodsCountryController.onPageLoad(1).url)
@@ -72,7 +72,7 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec {
       val request = buildGet(routes.GoodsVatRateController.onSubmit(1).url)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(1)(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

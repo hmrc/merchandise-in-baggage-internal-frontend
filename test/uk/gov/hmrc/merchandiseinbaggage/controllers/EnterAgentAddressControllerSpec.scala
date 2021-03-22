@@ -40,7 +40,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
 
         val request = buildGet(routes.EnterAgentAddressController.onPageLoad().url)
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some("/blah")
       }
@@ -58,7 +58,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
             givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
-            val result = controller(givenADeclarationJourneyIsPersisted(startedImportJourney)).returnFromAddressLookup("id")(request)
+            val result = controller(givenADeclarationJourneyIsPersistedWithStub(startedImportJourney)).returnFromAddressLookup("id")(request)
 
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).get mustEqual routes.EoriNumberController.onPageLoad().url
@@ -70,7 +70,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
             givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
-            val result = controller(givenADeclarationJourneyIsPersisted(completedDeclarationJourney)).returnFromAddressLookup("id")(request)
+            val result = controller(givenADeclarationJourneyIsPersistedWithStub(completedDeclarationJourney)).returnFromAddressLookup("id")(request)
 
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).get mustEqual routes.CheckYourAnswersController.onPageLoad().url

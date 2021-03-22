@@ -37,7 +37,7 @@ class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
           startedImportJourney.copy(declarationType = importOrExport, maybeGoodsDestination = Some(GoodsDestinations.GreatBritain))
         val request = buildGet(routes.CannotUseServiceController.onPageLoad().url)
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200

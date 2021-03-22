@@ -40,7 +40,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(routes.JourneyDetailsController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -64,7 +64,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
             "dateOfTravel.year"  -> today.getYear.toString
           )
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.GoodsInVehicleController.onPageLoad().url)
       }
@@ -74,7 +74,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
         val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
           .withFormUrlEncodedBody("port111" -> "ABZ")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

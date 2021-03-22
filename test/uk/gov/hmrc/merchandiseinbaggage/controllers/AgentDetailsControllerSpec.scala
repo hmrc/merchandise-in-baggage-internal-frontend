@@ -37,7 +37,7 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec {
       givenTheUserIsAuthenticatedAndAuthorised()
 
       val request = buildGet(routes.AgentDetailsController.onPageLoad().url)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
@@ -54,7 +54,7 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec {
       val request = buildGet(routes.AgentDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "business-name")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.EnterAgentAddressController.onPageLoad().url)
     }
@@ -64,7 +64,7 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec {
       val request = buildGet(routes.AgentDetailsController.onSubmit().url)
         .withFormUrlEncodedBody("value123" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400

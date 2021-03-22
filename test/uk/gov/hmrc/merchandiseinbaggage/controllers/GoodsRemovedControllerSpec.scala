@@ -35,7 +35,7 @@ class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
         val journey = startedImportJourney.copy(declarationType = importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
 
         val request = buildGet(routes.GoodsRemovedController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onPageLoad()(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
         contentAsString(eventualResult) must include(messages("goodsRemoved.title"))

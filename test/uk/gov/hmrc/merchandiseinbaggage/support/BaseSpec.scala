@@ -29,6 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MongoConfiguration
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 
 trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
@@ -58,6 +59,9 @@ trait BaseSpecWithApplication
     "microservice.services.merchandise-in-baggage.port"  -> WireMockSupport.port,
     "microservice.services.tps-payments-backend.port"    -> WireMockSupport.port
   )
+
+  def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
+    declarationJourneyRepository.insert(declarationJourney).futureValue
 
   override def beforeEach(): Unit = declarationJourneyRepository.deleteAll().futureValue
 }

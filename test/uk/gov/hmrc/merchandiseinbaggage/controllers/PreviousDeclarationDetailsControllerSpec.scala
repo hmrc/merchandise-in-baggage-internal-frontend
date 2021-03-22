@@ -60,12 +60,12 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
       givenTheUserIsAuthenticatedAndAuthorised()
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       givenPersistedDeclarationIsFound(importJourney.declarationIfRequiredAndComplete.get, aDeclarationId)
 
       val request = buildGet(routes.PreviousDeclarationDetailsController.onPageLoad().url, aSessionId)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(importJourney)).onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(importJourney)).onPageLoad()(request)
       status(eventualResult) mustBe 200
 
       contentAsString(eventualResult) must include("cheese")
@@ -93,7 +93,7 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
       givenTheUserIsAuthenticatedAndAuthorised()
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       givenPersistedDeclarationIsFound(importJourney.declarationIfRequiredAndComplete.get, aDeclarationId)
 
@@ -129,7 +129,7 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
       givenTheUserIsAuthenticatedAndAuthorised()
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       val persistedDeclaration = importJourney.declarationIfRequiredAndComplete.map { declaration =>
         declaration
@@ -139,7 +139,7 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
       givenPersistedDeclarationIsFound(persistedDeclaration.get, aDeclarationId)
 
       val request = buildGet(routes.PreviousDeclarationDetailsController.onPageLoad().url, aSessionId)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(importJourney)).onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(importJourney)).onPageLoad()(request)
       status(eventualResult) mustBe 200
 
       contentAsString(eventualResult) must include("cheese")
@@ -172,7 +172,7 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
       givenTheUserIsAuthenticatedAndAuthorised()
 
-      givenADeclarationJourneyIsPersisted(importJourney)
+      givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       val persistedDeclaration = importJourney.declarationIfRequiredAndComplete.map { declaration =>
         declaration
@@ -185,7 +185,7 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
       givenPersistedDeclarationIsFound(persistedDeclaration.get, aDeclarationId)
 
       val request = buildGet(routes.PreviousDeclarationDetailsController.onPageLoad().url, aSessionId)
-      val eventualResult = controller(givenADeclarationJourneyIsPersisted(importJourney)).onPageLoad()(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(importJourney)).onPageLoad()(request)
       status(eventualResult) mustBe 200
 
       contentAsString(eventualResult) must include("cheese")

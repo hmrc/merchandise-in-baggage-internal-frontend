@@ -61,7 +61,7 @@ trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication with Prop
   lazy val stubProvider: DeclarationJourney => DeclarationJourneyActionProvider = declarationJourney =>
     new DeclarationJourneyActionProvider(defaultBuilder, stubRepo(declarationJourney), strideAuth)
 
-  def givenADeclarationJourneyIsPersisted(declarationJourney: DeclarationJourney): DeclarationJourney =
+  def givenADeclarationJourneyIsPersistedWithStub(declarationJourney: DeclarationJourney): DeclarationJourney =
     stubRepo(declarationJourney).findBySessionId(declarationJourney.sessionId).futureValue.get
 
   def buildPost(url: String, sessionId: SessionId = SessionId("123")): FakeRequest[AnyContentAsEmpty.type] =
