@@ -26,6 +26,7 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.DeclarationConfirmationController
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Amendment, Declaration, DeclarationId, DeclarationType}
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
@@ -110,8 +111,22 @@ class CheckYourAnswersAmendHandler @Inject()(
       val updatedDeclaration = originalDeclaration.copy(amendments = originalDeclaration.amendments :+ updatedAmendment)
 
       for {
-        _ <- calculationService.amendDeclaration(updatedDeclaration)
-        _ <- tpsPaymentsService.createTpsPayments(request.pid, originalDeclaration, calculationResults)
-      } yield Redirect(routes.DeclarationConfirmationController.onPageLoad()) //TODO not sure about navigation. Ask
+        _        <- calculationService.amendDeclaration(updatedDeclaration)
+        redirect <- redirectToPaymentsIfNecessary(calculationResults, originalDeclaration, request.pid)
+      } yield redirect
+    }
+
+  def redirectToPaymentsIfNecessary(calculations: CalculationResults, declaration: Declaration, pid: String)(
+    implicit rh: RequestHeader,
+    hc: HeaderCarrier): Future[Result] =
+    if (calculations.totalTaxDue.value == 0L) {
+      Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
+    } else {
+      tpsPaymentsService
+        .createTpsPayments(pid, declaration, calculations)
+        .map(
+          tpsId =>
+            Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")
+              .addingToSession("TPS_ID" -> tpsId.value))
     }
 }

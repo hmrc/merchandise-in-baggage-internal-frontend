@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
@@ -44,6 +44,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
   private lazy val importView = injector.instanceOf[CheckYourAnswersImportView]
   private lazy val exportView = injector.instanceOf[CheckYourAnswersExportView]
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val request: Request[_] = buildGet(routes.CheckYourAnswersController.onPageLoad().url)
 
   private lazy val testMibConnector = new MibConnector(httpClient, "") {
     override def persistDeclaration(declaration: Declaration)(implicit hc: HeaderCarrier): Future[DeclarationId] =
@@ -120,12 +121,12 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       (mockTpsPaymentsService
         .createTpsPayments(_: String, _: Declaration, _: CalculationResults)(_: HeaderCarrier))
         .expects("123", *, *, *)
-        .returning(Future.successful(TpsId("some id")))
+        .returning(Future.successful(TpsId("someid")))
         .once()
       val eventualResult = newHandler().onSubmit(declaration, "123")
 
       status(eventualResult) mustBe 303
-      redirectLocation(eventualResult) mustBe Some(routes.DeclarationConfirmationController.onPageLoad().url)
+      redirectLocation(eventualResult) mustBe Some("http://localhost:9124/tps-payments/make-payment/mib/someid")
     }
 
     "will redirect to confirmation if totalTax is £0 and should not call pay api" in {
@@ -136,11 +137,6 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
         .copy(sessionId = sessionId, createdAt = created, declarationId = id)
 
       givenADeclarationJourneyIsPersisted(importJourney)
-      (mockTpsPaymentsService
-        .createTpsPayments(_: String, _: Declaration, _: CalculationResults)(_: HeaderCarrier))
-        .expects("123", *, *, *)
-        .returning(Future.successful(TpsId("some id")))
-        .once()
 
       val eventualResult = newHandler(aCalculationResultsWithNoTax).onSubmit(declaration, "123")
 

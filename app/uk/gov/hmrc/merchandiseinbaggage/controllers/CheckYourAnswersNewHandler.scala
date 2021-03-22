@@ -26,6 +26,7 @@ import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
@@ -62,7 +63,7 @@ class CheckYourAnswersNewHandler @Inject()(
       Future successful Redirect(routes.GoodsOverThresholdController.onPageLoad())
     else Future successful Ok(exportView(form, declaration))
 
-  def onSubmit(declaration: Declaration, pid: String)(implicit hc: HeaderCarrier): Future[Result] =
+  def onSubmit(declaration: Declaration, pid: String)(implicit rh: RequestHeader, hc: HeaderCarrier): Future[Result] =
     declaration.declarationType match {
       case Export =>
         persistAndRedirect(declaration)
@@ -73,10 +74,26 @@ class CheckYourAnswersNewHandler @Inject()(
   private def persistAndRedirect(declaration: Declaration)(implicit hc: HeaderCarrier) =
     mibConnector.persistDeclaration(declaration).map(_ => Redirect(routes.DeclarationConfirmationController.onPageLoad()))
 
-  private def persistAndRedirectToPayments(declaration: Declaration, pid: String)(implicit hc: HeaderCarrier): Future[Result] =
+  private def persistAndRedirectToPayments(declaration: Declaration, pid: String)(
+    implicit rh: RequestHeader,
+    hc: HeaderCarrier): Future[Result] =
     for {
-      taxDue <- calculationService.paymentCalculations(declaration.declarationGoods.importGoods)
-      _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
-      _      <- tpsPaymentsService.createTpsPayments(pid, declaration, taxDue)
-    } yield Redirect(routes.DeclarationConfirmationController.onPageLoad()) //TODO not sure about navigation. Ask
+      taxDue   <- calculationService.paymentCalculations(declaration.declarationGoods.importGoods)
+      _        <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
+      redirect <- redirectToPaymentsIfNecessary(taxDue, declaration, pid)
+    } yield redirect
+
+  def redirectToPaymentsIfNecessary(calculations: CalculationResults, declaration: Declaration, pid: String)(
+    implicit rh: RequestHeader,
+    hc: HeaderCarrier): Future[Result] =
+    if (calculations.totalTaxDue.value == 0L) {
+      Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
+    } else {
+      tpsPaymentsService
+        .createTpsPayments(pid, declaration, calculations)
+        .map(
+          tpsId =>
+            Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")
+              .addingToSession("TPS_ID" -> tpsId.value))
+    }
 }
