@@ -17,30 +17,32 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import java.time.LocalDateTime
+
 import com.softwaremill.quicklens._
+import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
-import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationId, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
-import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView}
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, WireMockSupport}
+import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CheckYourAnswersAmendHandlerSpec extends DeclarationJourneyControllerSpec with MibConfiguration with WireMockSupport {
+class CheckYourAnswersAmendHandlerSpec
+    extends DeclarationJourneyControllerSpec with MibConfiguration with WireMockSupport with MockFactory {
 
   lazy val actionBuilder: DeclarationJourneyActionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
 
   private lazy val importView = injector.instanceOf[CheckYourAnswersAmendImportView]
   private lazy val exportView = injector.instanceOf[CheckYourAnswersAmendExportView]
-  override lazy val mibConnector = injector.instanceOf[MibConnector]
+  private lazy val mockTpsPaymentsService = mock[TpsPaymentsService]
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private lazy val stubbedCalculation: CalculationResults => CalculationService = aPaymentCalculations =>
@@ -53,7 +55,7 @@ class CheckYourAnswersAmendHandlerSpec extends DeclarationJourneyControllerSpec 
     new CheckYourAnswersAmendHandler(
       actionBuilder,
       stubbedCalculation(paymentCalcs),
-      mibConnector,
+      mockTpsPaymentsService,
       importView,
       exportView,
     )

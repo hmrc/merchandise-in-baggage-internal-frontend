@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -26,7 +27,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.api.payapi.{JourneyId, PayApiRequest, PayApiResponse}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, URL}
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, PaymentService}
+import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, PaymentService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenDeclarationIsPersistedInBackend
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.TpsPaymentsBackendStub._
@@ -36,34 +37,22 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportV
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec with WireMockSupport {
+class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec with WireMockSupport with MockFactory {
 
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
   lazy val controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val actionBuilder: DeclarationJourneyActionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
+  private lazy val mockTpsPaymentsService = mock[TpsPaymentsService]
   private lazy val amendImportView = injector.instanceOf[CheckYourAnswersAmendImportView]
   private lazy val amendExportView = injector.instanceOf[CheckYourAnswersAmendExportView]
 
+  //TODO replace with a mock for consistency
   private lazy val stubbedCalculation: CalculationResults => CalculationService = aPaymentCalculations =>
     new CalculationService(mibConnector) {
       override def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
         Future.successful(aPaymentCalculations)
   }
-
-//  def controller(
-//    declarationJourney: DeclarationJourney,
-//    paymentCalcs: CalculationResults = aCalculationResults): CheckYourAnswersController =
-//    new CheckYourAnswersController(
-//      component,
-//      stubProvider(declarationJourney),
-//      stubbedCalculation(paymentCalcs),
-//      tpsPaymentsService,
-//      mibConnector,
-//      stubRepo(declarationJourney),
-//      importView,
-//      exportView
-//    )
 
   private lazy val httpClient = injector.instanceOf[HttpClient]
 
@@ -85,7 +74,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
     new CheckYourAnswersAmendHandler(
       actionBuilder,
       stubbedCalculation(paymentCalcs),
-      mibConnector,
+      mockTpsPaymentsService,
       amendImportView,
       amendExportView,
     )
@@ -99,6 +88,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       stubRepo(declarationJourney)
     )
 
+  //TODO find out why are commented out
   forAll(declarationTypes) { importOrExport =>
     "onPageLoad" should {
 //      s"return 200 for type $importOrExport" in {

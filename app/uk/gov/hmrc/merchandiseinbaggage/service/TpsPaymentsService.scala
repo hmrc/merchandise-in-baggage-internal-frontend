@@ -51,5 +51,4 @@ class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector)(impli
 
     connector.createTpsPayments(request)
   }
-
 }

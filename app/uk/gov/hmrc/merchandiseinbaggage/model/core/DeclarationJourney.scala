@@ -142,7 +142,7 @@ case class DeclarationJourney(
 
   val amendmentIfRequiredAndComplete: Option[Amendment] = journeyType match {
     case New   => None
-    case Amend => goodsEntries.declarationGoodsIfComplete.map(goods => Amendment(LocalDateTime.now, goods))
+    case Amend => goodsEntries.declarationGoodsIfComplete.map(goods => Amendment(1, LocalDateTime.now, goods))
   }
 
 }

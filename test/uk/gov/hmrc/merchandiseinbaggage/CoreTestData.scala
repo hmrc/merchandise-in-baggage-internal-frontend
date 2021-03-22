@@ -219,6 +219,7 @@ trait CoreTestData {
   val aCheckResponse: CheckResponse = CheckResponse(aEoriNumber, valid = true, Some(aCompanyDetails))
 
   val aAmendment = Amendment(
+    123,
     LocalDateTime.now,
     DeclarationGoods(aGoods.copy(categoryQuantityOfGoods = CategoryQuantityOfGoods("more cheese", "123")) :: Nil),
     Some(TotalCalculationResult(aCalculationResults, AmountInPence(100), AmountInPence(100), AmountInPence(100), AmountInPence(100))),

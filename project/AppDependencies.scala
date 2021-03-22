@@ -5,6 +5,8 @@ import sbt._
 
 object AppDependencies {
 
+  private val pactVersion = "3.2.0"
+
   val compile = Seq(
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-27" % "3.0.0",
     "uk.gov.hmrc"                %% "play-frontend-hmrc"         % "0.31.0-play-27",
@@ -30,5 +32,18 @@ object AppDependencies {
     "com.vladsch.flexmark"    %  "flexmark-all"             % "0.35.10"               % "test, it",
     "org.scalatestplus.play"  %% "scalatestplus-play"       % "4.0.3"                 % "test, it",
     "com.github.tomakehurst"  %  "wiremock-standalone"      % "2.27.1"                % Test
+  ) ++ pact ++ mocks
+
+  private lazy val pact = Seq(
+    "com.itv"                  %% "scalapact-circe-0-13"    % pactVersion    % Test,
+    "com.itv"                  %% "scalapact-http4s-0-21"   % pactVersion    % Test,
+    "com.itv"                  %% "scalapact-scalatest"     % pactVersion    % Test,
+    "org.scalaj"               %% "scalaj-http"             % "2.4.2"    % Test,
+    "org.json4s"               %% "json4s-native"           % "3.6.9"    % Test
+  )
+
+  private lazy val mocks = Seq(
+    "org.scalamock"            %% "scalamock" % "5.1.0"     % Test,
+    "com.github.tomakehurst"   %  "wiremock-standalone"     % "2.27.1"   % Test
   )
 }
