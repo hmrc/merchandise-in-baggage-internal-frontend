@@ -61,9 +61,7 @@ class DeclarationJourneyActionProvider @Inject()(
                   val declarationJourneyRequest = new DeclarationJourneyRequest(declarationJourney, request)
                   DeclarationJourneyLogger.info("journeyActionRefiner success")(declarationJourneyRequest)
                   Right(declarationJourneyRequest)
-                case _ =>
-                  println(s"=====> $sessionId ----\n${lt}")
-                  Left(invalidRequest(s"Persisted declaration journey not found for session: $sessionId")(request))
+                case _ => Left(invalidRequest(s"Persisted declaration journey not found for session: $sessionId")(request))
               }
             }
         }
