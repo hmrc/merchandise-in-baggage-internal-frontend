@@ -26,7 +26,7 @@ import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, PaymentService}
+import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersExportView, CheckYourAnswersImportView}
 
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckYourAnswersNewHandler @Inject()(
   calculationService: CalculationService,
-  paymentService: PaymentService,
+  tpsPaymentsService: TpsPaymentsService,
   mibConnector: MibConnector,
   importView: CheckYourAnswersImportView,
   exportView: CheckYourAnswersExportView
@@ -62,22 +62,21 @@ class CheckYourAnswersNewHandler @Inject()(
       Future successful Redirect(routes.GoodsOverThresholdController.onPageLoad())
     else Future successful Ok(exportView(form, declaration))
 
-  def onSubmit(declaration: Declaration)(implicit hc: HeaderCarrier): Future[Result] =
+  def onSubmit(declaration: Declaration, pid: String)(implicit hc: HeaderCarrier): Future[Result] =
     declaration.declarationType match {
       case Export =>
         persistAndRedirect(declaration)
       case Import =>
-        persistAndRedirectToPayments(declaration)
+        persistAndRedirectToPayments(declaration, pid)
     }
 
   private def persistAndRedirect(declaration: Declaration)(implicit hc: HeaderCarrier) =
     mibConnector.persistDeclaration(declaration).map(_ => Redirect(routes.DeclarationConfirmationController.onPageLoad()))
 
-  private def persistAndRedirectToPayments(declaration: Declaration)(implicit hc: HeaderCarrier): Future[Result] =
+  private def persistAndRedirectToPayments(declaration: Declaration, pid: String)(implicit hc: HeaderCarrier): Future[Result] =
     for {
-      taxDue      <- calculationService.paymentCalculations(declaration.declarationGoods.importGoods)
-      _           <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
-      redirectUrl <- paymentService.sendPaymentRequest(declaration.mibReference, taxDue)
-
-    } yield Redirect(redirectUrl)
+      taxDue <- calculationService.paymentCalculations(declaration.declarationGoods.importGoods)
+      _      <- mibConnector.persistDeclaration(declaration.copy(maybeTotalCalculationResult = Some(taxDue.totalCalculationResult)))
+      _      <- tpsPaymentsService.createTpsPayments(pid, declaration, taxDue)
+    } yield Redirect(routes.DeclarationConfirmationController.onPageLoad()) //TODO not sure about navigation. Ask
 }

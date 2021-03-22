@@ -18,19 +18,12 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.MessagesControllerComponents
-import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.merchandiseinbaggage.connectors.{MibConnector, PaymentConnector}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{ImportGoods, payapi}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.api.payapi.{JourneyId, PayApiRequest, PayApiResponse}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{ImportGoods, payapi}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, URL}
-import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, PaymentService, TpsPaymentsService}
-import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenDeclarationIsPersistedInBackend
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
-import uk.gov.hmrc.merchandiseinbaggage.support.TpsPaymentsBackendStub._
+import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView, CheckYourAnswersExportView, CheckYourAnswersImportView}
 
@@ -56,15 +49,10 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
 
   private lazy val httpClient = injector.instanceOf[HttpClient]
 
-  private lazy val testPaymentConnector = new PaymentConnector(httpClient, "") {
-    override def sendPaymentRequest(requestBody: PayApiRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PayApiResponse] =
-      Future.successful(payapi.PayApiResponse(JourneyId("5f3b"), URL("http://host")))
-  }
-
   private def newHandler(paymentCalcs: CalculationResults) =
     new CheckYourAnswersNewHandler(
       stubbedCalculation(paymentCalcs),
-      new PaymentService(testPaymentConnector),
+      mockTpsPaymentsService,
       mibConnector,
       importView,
       exportView,
