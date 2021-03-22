@@ -55,14 +55,12 @@ class DeclarationJourneyActionProvider @Inject()(
         request.session.get(SessionKeys.sessionId) match {
           case None => Future successful Left(invalidRequest("Session Id not found")(request))
           case Some(sessionId) =>
-            repo.findAll().flatMap { lt =>
-              repo.findBySessionId(SessionId(sessionId)).map {
-                case Some(declarationJourney) =>
-                  val declarationJourneyRequest = new DeclarationJourneyRequest(declarationJourney, request)
-                  DeclarationJourneyLogger.info("journeyActionRefiner success")(declarationJourneyRequest)
-                  Right(declarationJourneyRequest)
-                case _ => Left(invalidRequest(s"Persisted declaration journey not found for session: $sessionId")(request))
-              }
+            repo.findBySessionId(SessionId(sessionId)).map {
+              case Some(declarationJourney) =>
+                val declarationJourneyRequest = new DeclarationJourneyRequest(declarationJourney, request)
+                DeclarationJourneyLogger.info("journeyActionRefiner success")(declarationJourneyRequest)
+                Right(declarationJourneyRequest)
+              case _ => Left(invalidRequest(s"Persisted declaration journey not found for session: $sessionId")(request))
             }
         }
 
