@@ -18,7 +18,7 @@ package uk.gov.hmrc.merchandiseinbaggage.model.tpspayments
 
 import play.api.libs.json.{Json, OFormat}
 
-case class PaymentSpecificData(chargeReference: String, vat: BigDecimal, customs: BigDecimal)
+case class PaymentSpecificData(chargeReference: String, amendmentReference: Option[Int], vat: BigDecimal, customs: BigDecimal)
 
 object PaymentSpecificData {
   implicit val format: OFormat[PaymentSpecificData] = Json.format[PaymentSpecificData]

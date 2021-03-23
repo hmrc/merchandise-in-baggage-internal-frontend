@@ -60,7 +60,7 @@ class CheckYourAnswersController @Inject()(
       case Amend =>
         request.declarationJourney.amendmentIfRequiredAndComplete
           .fold(actionProvider.invalidRequestF(incompleteMessage)) { amendment =>
-            amendHandler.onSubmit(request.declarationJourney.declarationId, amendment: Amendment)
+            amendHandler.onSubmit(request.declarationJourney.declarationId, request.pid, amendment: Amendment)
           }
     }
   }

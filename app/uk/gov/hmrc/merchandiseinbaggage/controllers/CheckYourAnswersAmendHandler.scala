@@ -81,16 +81,16 @@ class CheckYourAnswersAmendHandler @Inject()(
       }
     }
 
-  def onSubmit(declarationId: DeclarationId, newAmendment: Amendment)(
+  def onSubmit(declarationId: DeclarationId, pid: String, newAmendment: Amendment)(
     implicit hc: HeaderCarrier,
-    request: DeclarationJourneyRequest[_]): Future[Result] =
+    request: Request[_]): Future[Result] =
     calculationService.findDeclaration(declarationId).flatMap { maybeOriginalDeclaration =>
       maybeOriginalDeclaration.fold(Future.successful(actionProvider.invalidRequest(declarationNotFoundMessage))) { originalDeclaration =>
         originalDeclaration.declarationType match {
           case Export =>
             persistAndRedirect(newAmendment, originalDeclaration)
           case Import =>
-            persistAndRedirectToPayments(newAmendment, originalDeclaration)
+            persistAndRedirectToPayments(newAmendment, pid, originalDeclaration)
         }
       }
     }
@@ -100,8 +100,8 @@ class CheckYourAnswersAmendHandler @Inject()(
     calculationService.amendDeclaration(amendedDeclaration).map(_ => Redirect(DeclarationConfirmationController.onPageLoad()))
   }
 
-  private def persistAndRedirectToPayments(amendment: Amendment, originalDeclaration: Declaration)(
-    implicit request: DeclarationJourneyRequest[_],
+  private def persistAndRedirectToPayments(amendment: Amendment, pid: String, originalDeclaration: Declaration)(
+    implicit request: Request[_],
     hc: HeaderCarrier): Future[Result] =
     calculationService.paymentCalculations(amendment.goods.importGoods).flatMap { calculationResults =>
       val amendmentRef = originalDeclaration.amendments.size + 1
@@ -112,18 +112,18 @@ class CheckYourAnswersAmendHandler @Inject()(
 
       for {
         _        <- calculationService.amendDeclaration(updatedDeclaration)
-        redirect <- redirectToPaymentsIfNecessary(calculationResults, originalDeclaration, request.pid)
+        redirect <- redirectToPaymentsIfNecessary(calculationResults, originalDeclaration, pid, amendmentRef)
       } yield redirect
     }
 
-  def redirectToPaymentsIfNecessary(calculations: CalculationResults, declaration: Declaration, pid: String)(
+  def redirectToPaymentsIfNecessary(calculations: CalculationResults, declaration: Declaration, pid: String, amendmentRef: Int)(
     implicit rh: RequestHeader,
     hc: HeaderCarrier): Future[Result] =
     if (calculations.totalTaxDue.value == 0L) {
       Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
     } else {
       tpsPaymentsService
-        .createTpsPayments(pid, declaration, calculations)
+        .createTpsPayments(pid, Some(amendmentRef), declaration, calculations)
         .map(
           tpsId =>
             Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")

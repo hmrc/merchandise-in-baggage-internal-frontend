@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
-import play.api.mvc.{Request, RequestHeader}
+import play.api.mvc.Request
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
@@ -119,8 +119,8 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       givenADeclarationJourneyIsPersistedWithStub(importJourney)
 
       (mockTpsPaymentsService
-        .createTpsPayments(_: String, _: Declaration, _: CalculationResults)(_: HeaderCarrier))
-        .expects("123", *, *, *)
+        .createTpsPayments(_: String, _: Option[Int], _: Declaration, _: CalculationResults)(_: HeaderCarrier))
+        .expects("123", None, *, *, *)
         .returning(Future.successful(TpsId("someid")))
         .once()
       val eventualResult = newHandler().onSubmit(declaration, "123")

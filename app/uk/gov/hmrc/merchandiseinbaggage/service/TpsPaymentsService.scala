@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector)(implicit ec: ExecutionContext, appConfig: AppConfig) {
 
-  def createTpsPayments(pid: String, declaration: Declaration, paymentDue: CalculationResults)(
+  def createTpsPayments(pid: String, amendmentRef: Option[Int], declaration: Declaration, paymentDue: CalculationResults)(
     implicit hc: HeaderCarrier): Future[TpsId] = {
     val request = TpsPaymentsRequest(
       pid = pid,
@@ -41,6 +41,7 @@ class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector)(impli
           amount = paymentDue.totalTaxDue.inPounds,
           paymentSpecificData = PaymentSpecificData(
             declaration.mibReference.value,
+            amendmentRef,
             paymentDue.totalVatDue.inPounds,
             paymentDue.totalDutyDue.inPounds
           )

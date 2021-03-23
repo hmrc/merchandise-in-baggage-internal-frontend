@@ -90,7 +90,7 @@ class CheckYourAnswersNewHandler @Inject()(
       Future.successful(Redirect(routes.DeclarationConfirmationController.onPageLoad()))
     } else {
       tpsPaymentsService
-        .createTpsPayments(pid, declaration, calculations)
+        .createTpsPayments(pid, None, declaration, calculations)
         .map(
           tpsId =>
             Redirect(s"${appConfig.tpsFrontendBaseUrl}/tps-payments/make-payment/mib/${tpsId.value}")

@@ -19,13 +19,11 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, ImportGoods, payapi}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
-import uk.gov.hmrc.merchandiseinbaggage.model.api.payapi.{JourneyId, PayApiRequest, PayApiResponse}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, URL}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, ImportGoods}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenDeclarationIsPersistedInBackend
@@ -35,7 +33,7 @@ import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView, CheckYourAnswersExportView, CheckYourAnswersImportView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec with WireMockSupport with MockFactory {
 
@@ -53,8 +51,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       override def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
         Future.successful(aPaymentCalculations)
   }
-
-  private lazy val httpClient = injector.instanceOf[HttpClient]
 
   private def newHandler(paymentCalcs: CalculationResults) =
     new CheckYourAnswersNewHandler(
@@ -150,8 +146,8 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       val request = buildPost(routes.CheckYourAnswersController.onSubmit().url, completedDeclarationJourney.sessionId)
 
       (mockTpsPaymentsService
-        .createTpsPayments(_: String, _: Declaration, _: CalculationResults)(_: HeaderCarrier))
-        .expects("userId", *, *, *)
+        .createTpsPayments(_: String, _: Option[Int], _: Declaration, _: CalculationResults)(_: HeaderCarrier))
+        .expects("userId", None, *, *, *)
         .returning(Future.successful(TpsId("userId")))
         .once()
 

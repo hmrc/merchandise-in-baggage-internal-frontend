@@ -58,7 +58,8 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
             givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
-            val result = controller(givenADeclarationJourneyIsPersistedWithStub(startedImportJourney)).returnFromAddressLookup("id")(request)
+            val result =
+              controller(givenADeclarationJourneyIsPersistedWithStub(startedImportJourney)).returnFromAddressLookup("id")(request)
 
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).get mustEqual routes.EoriNumberController.onPageLoad().url
@@ -70,7 +71,8 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
             givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
-            val result = controller(givenADeclarationJourneyIsPersistedWithStub(completedDeclarationJourney)).returnFromAddressLookup("id")(request)
+            val result =
+              controller(givenADeclarationJourneyIsPersistedWithStub(completedDeclarationJourney)).returnFromAddressLookup("id")(request)
 
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).get mustEqual routes.CheckYourAnswersController.onPageLoad().url
