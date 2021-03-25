@@ -31,7 +31,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[RemoveGoodsView]
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val controller: DeclarationJourney => RemoveGoodsController =
       declarationJourney => new RemoveGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
     val journey: DeclarationJourney =

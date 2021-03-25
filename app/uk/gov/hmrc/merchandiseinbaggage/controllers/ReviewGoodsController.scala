@@ -16,14 +16,21 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import cats.data.OptionT
+
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.goodsDeclarationIncompleteMessage
+import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{declarationNotFoundMessage, goodsDeclarationIncompleteMessage}
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.ReviewGoodsController
 import uk.gov.hmrc.merchandiseinbaggage.forms.ReviewGoodsForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.GoodsEntries
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
+import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +40,9 @@ class ReviewGoodsController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
-  view: ReviewGoodsView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  view: ReviewGoodsView,
+  calculationService: CalculationService,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   private def backButtonUrl(implicit request: DeclarationJourneyRequest[_]) =
@@ -55,15 +64,37 @@ class ReviewGoodsController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, goods, backButtonUrl, declarationType, journeyType))),
-            declareMoreGoods =>
-              if (declareMoreGoods == Yes) {
-                val updatedGoodsEntries: GoodsEntries = request.declarationJourney.goodsEntries.addEmptyIfNecessary()
-
-                repo.upsert(request.declarationJourney.copy(goodsEntries = updatedGoodsEntries)).map { _ =>
-                  Redirect(routes.GoodsTypeQuantityController.onPageLoad(updatedGoodsEntries.entries.size))
-                }
-              } else Future.successful(Redirect(routes.PaymentCalculationController.onPageLoad()))
+            redirectTo
           )
       }
   }
+
+  private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] = {
+    val updatedGoodsEntries: GoodsEntries = request.declarationJourney.updateGoodsEntries().goodsEntries
+    (for {
+      check <- checkThresholdIfAmending
+      call <- OptionT.liftF(
+               navigator.nextPageWithCallBack(
+                 RequestWithCallBack(
+                   ReviewGoodsController.onPageLoad().url,
+                   declareMoreGoods,
+                   updatedGoodsEntries,
+                   request.declarationJourney,
+                   check.isOverThreshold,
+                   repo.upsert
+                 )
+               ))
+    } yield call).fold(actionProvider.invalidRequest(declarationNotFoundMessage))(Redirect)
+  }
+
+  //TODO clean up the if festival
+  private def checkThresholdIfAmending(
+    implicit request: DeclarationJourneyRequest[_],
+    hc: HeaderCarrier): OptionT[Future, AmendCalculationResult] =
+    if (request.declarationJourney.amendmentRequiredAndComplete && request.declarationJourney.declarationType == Import)
+      calculationService.isAmendPlusOriginalOverThreshold(request.declarationJourney)
+    else if (request.declarationJourney.amendmentRequiredAndComplete && request.declarationJourney.declarationType == Export)
+      calculationService.isAmendPlusOriginalOverThresholdExport(request.declarationJourney)
+    else
+      OptionT.pure[Future](AmendCalculationResult(isOverThreshold = false, CalculationResults(Seq.empty)))
 }

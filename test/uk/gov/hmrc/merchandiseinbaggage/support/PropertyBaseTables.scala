@@ -22,16 +22,17 @@ import play.api.mvc.Call
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, GoodsDestination, YesNo}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, GoodsDestination, JourneyType, YesNo}
 
 trait PropertyBaseTables extends ScalaCheckPropertyChecks {
 
-  val declarationTypes: TableFor1[DeclarationType] = Table("declarationType", Import, Export)
+  val declarationTypesTable: TableFor1[DeclarationType] = Table("declarationType", Import, Export)
 
-  val destinations: TableFor1[GoodsDestination] = Table("destination", GreatBritain, NorthernIreland)
+  val journeyTypesTable: TableFor1[JourneyType] = Table("journeyType", New, Amend)
 
-  val traderYesOrNoAnswer = Table(
+  val traderYesOrNoAnswer: TableFor2[YesNo, String] = Table(
     ("answer", "trader or agent"),
     (Yes, "agent"),
     (No, "trader")

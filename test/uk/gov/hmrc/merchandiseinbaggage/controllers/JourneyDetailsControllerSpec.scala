@@ -32,7 +32,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
   private val controller: DeclarationJourney => JourneyDetailsController =
     declarationJourney => new JourneyDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =
       startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
     "onPageLoad" should {

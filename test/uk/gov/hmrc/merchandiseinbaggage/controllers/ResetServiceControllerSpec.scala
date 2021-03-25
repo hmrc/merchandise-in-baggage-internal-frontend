@@ -27,7 +27,7 @@ class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   val controller = new ResetServiceController(component, actionProvider, repo)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with expected content for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

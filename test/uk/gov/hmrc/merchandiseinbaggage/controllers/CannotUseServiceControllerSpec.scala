@@ -29,7 +29,7 @@ class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => CannotUseServiceController =
     declarationJourney => new CannotUseServiceController(component, stubProvider(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for $importOrExport with expected content" in {
         givenTheUserIsAuthenticatedAndAuthorised()

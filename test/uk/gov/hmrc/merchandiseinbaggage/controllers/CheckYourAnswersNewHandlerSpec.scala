@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import java.time.LocalDateTime
-
 import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
@@ -66,7 +65,7 @@ class CheckYourAnswersNewHandlerSpec extends DeclarationJourneyControllerSpec wi
       exportView,
     )
 
-  declarationTypes.foreach { importOrExport: DeclarationType =>
+  declarationTypesTable.foreach { importOrExport: DeclarationType =>
     "onPageLoad" should {
       s"return Ok with correct page content for $importOrExport" in {
         val sessionId = SessionId()

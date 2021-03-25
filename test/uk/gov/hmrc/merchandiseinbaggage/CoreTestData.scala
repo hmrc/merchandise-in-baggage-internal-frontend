@@ -51,6 +51,8 @@ trait CoreTestData {
 
   val aSessionId: SessionId = SessionId()
 
+  val declarationTypes = List(Import, Export)
+
   val mibReference = MibReference("XAMB0000010000")
   val eori = Eori("GB123456780000")
   val aDeclarationId = DeclarationId(UUID.randomUUID().toString)
@@ -310,4 +312,9 @@ trait CoreTestData {
     case Export => completeAmendExportJourney.amendmentIfRequiredAndComplete.get
   }
 
+  def completedGoodsEntries(declarationType: DeclarationType): GoodsEntries =
+    declarationType match {
+      case Import => GoodsEntries(completedImportGoods)
+      case Export => GoodsEntries(completedExportGoods)
+    }
 }

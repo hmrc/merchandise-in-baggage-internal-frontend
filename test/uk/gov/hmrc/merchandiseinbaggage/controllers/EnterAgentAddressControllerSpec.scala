@@ -31,7 +31,7 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
     declarationJourney =>
       new EnterAgentAddressController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), addressLookupConnector)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

@@ -16,71 +16,123 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import cats.data.OptionT
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeQuantityController, ReviewGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
+import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec {
+class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   private val view = app.injector.instanceOf[ReviewGoodsView]
-  private val controller: DeclarationJourney => ReviewGoodsController =
-    declarationJourney => new ReviewGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+  private val mockNavigator = mock[Navigator]
+  private val mockCalculationService = mock[CalculationService]
 
-  forAll(declarationTypes) { importOrExport =>
+  def controller(declarationJourney: DeclarationJourney) =
+    new ReviewGoodsController(
+      component,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      view,
+      mockCalculationService,
+      mockNavigator)
+
+  declarationTypes.foreach { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = dynamicCompletedGoodsEntries(importOrExport))
+      DeclarationJourney(aSessionId, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
+
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
+
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.ReviewGoodsController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
+        val request = buildGet(ReviewGoodsController.onPageLoad().url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
         if (importOrExport == Import) {
           result must include(messageApi("reviewGoods.list.vatRate"))
           result must include(messageApi("reviewGoods.list.producedInEu"))
-        } else {
-          result must include(messageApi("reviewGoods.list.destination"))
         }
+        if (importOrExport == Export) { result must include(messageApi("reviewGoods.list.destination")) }
       }
     }
 
-    forAll(reviewGoodsAnswer) { (yesOrNo, redirectTo) =>
-      "onSubmit" should {
-        s"redirect to next page after successful form submit with $yesOrNo for $importOrExport" in {
-          givenTheUserIsAuthenticatedAndAuthorised()
+    "onSubmit" should {
+      s"redirect to next page after successful form submit with Yes for $importOrExport by delegating to Navigator" in {
 
-          val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
-            .withFormUrlEncodedBody("value" -> yesOrNo.toString)
+        givenTheUserIsAuthenticatedAndAuthorised()
 
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+        val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
+          .withFormUrlEncodedBody("value" -> "Yes")
 
-          status(eventualResult) mustBe 303
-          redirectLocation(eventualResult).get must include(s"$redirectTo")
-        }
+        (mockNavigator
+          .nextPageWithCallBack(_: RequestWithCallBack)(_: ExecutionContext))
+          .expects(*, *)
+          .returning(Future.successful(GoodsTypeQuantityController.onPageLoad(2)))
+          .once()
+
+        controller(journey).onSubmit(request).futureValue
       }
     }
 
     s"return 400 with any form errors for $importOrExport" in {
+
       givenTheUserIsAuthenticatedAndAuthorised()
 
-      val request = buildGet(routes.ReviewGoodsController.onSubmit().url)
+      val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      val eventualResult = controller(journey).onSubmit(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400
       result must include(messageApi("error.summary.title"))
       result must include(messageApi("reviewGoods.New.title"))
+      result must include(messageApi("reviewGoods.New.heading"))
     }
+  }
+
+  s"redirect to next page after successful form submit with No for $Export" in {
+    val id = aSessionId
+    val journey: DeclarationJourney =
+      DeclarationJourney(id, Export, goodsEntries = completedGoodsEntries(Export))
+        .copy(journeyType = Amend)
+
+    val controller =
+      new ReviewGoodsController(
+        component,
+        stubProvider(journey),
+        stubRepo(journey),
+        view,
+        mockCalculationService,
+        injector.instanceOf[Navigator])
+
+    givenTheUserIsAuthenticatedAndAuthorised()
+
+    (mockCalculationService
+      .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(OptionT.pure[Future](AmendCalculationResult(false, CalculationResults(Seq.empty))))
+
+    val request = buildPost(ReviewGoodsController.onSubmit().url, id)
+      .withFormUrlEncodedBody("value" -> "No")
+
+    val eventualResult = controller.onSubmit()(request)
+
+    status(eventualResult) mustBe 303
+    redirectLocation(eventualResult) mustBe Some(CheckYourAnswersController.onPageLoad().url)
   }
 }

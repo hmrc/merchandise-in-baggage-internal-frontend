@@ -41,7 +41,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
     declarationJourney =>
       new EoriNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, connector)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     forAll(traderYesOrNoAnswer) { (yesNo, traderOrAgent) =>
       val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(yesNo))
       "onPageLoad" should {

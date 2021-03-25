@@ -31,7 +31,7 @@ class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => VehicleSizeController =
     declarationJourney => new VehicleSizeController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =
       DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = dynamicCompletedGoodsEntries(importOrExport))
     "onPageLoad" should {

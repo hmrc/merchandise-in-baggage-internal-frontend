@@ -33,7 +33,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => PurchaseDetailsController = declarationJourney =>
     new PurchaseDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), importView, exportView)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney = DeclarationJourney(
       SessionId("123"),
       importOrExport,

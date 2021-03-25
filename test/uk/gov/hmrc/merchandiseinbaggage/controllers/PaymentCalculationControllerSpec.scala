@@ -71,7 +71,7 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
       result must include(messages("paymentCalculation.h3"))
     }
 
-    forAll(declarationTypes) { importOrExport =>
+    forAll(declarationTypesTable) { importOrExport =>
       forAll(paymentCalculationThreshold) { (thresholdValue, redirectTo) =>
         s"redirect to $redirectTo for $importOrExport if threshold is $thresholdValue" in {
           givenTheUserIsAuthenticatedAndAuthorised()

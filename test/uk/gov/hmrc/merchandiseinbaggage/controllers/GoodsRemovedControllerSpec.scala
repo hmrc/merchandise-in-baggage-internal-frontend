@@ -28,7 +28,7 @@ class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => GoodsRemovedController =
     declarationJourney => new GoodsRemovedController(component, stubProvider(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

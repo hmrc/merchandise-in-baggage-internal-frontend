@@ -41,7 +41,7 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
       override lazy val amendFlagConf: AmendFlagConf = AmendFlagConf(amendFlag)
     }
 
-  declarationTypes.foreach { importOrExport: DeclarationType =>
+  declarationTypesTable.foreach { importOrExport: DeclarationType =>
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport, Amend)
     "onPageLoad" should {
       s"return 200 with expected content for $importOrExport" in {

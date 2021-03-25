@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsTypeQuantityForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsTypeQuantityView
@@ -32,18 +32,23 @@ class GoodsTypeQuantityController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
-  view: GoodsTypeQuantityView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  view: GoodsTypeQuantityView,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends IndexedDeclarationJourneyUpdateController {
 
-  private def backButtonUrl(idx: Int)(implicit request: DeclarationGoodsRequest[_]) =
-    if (request.declarationJourney.declarationRequiredAndComplete) routes.CheckYourAnswersController.onPageLoad()
-    else if (request.declarationJourney.goodsEntries.declarationGoodsComplete) routes.ReviewGoodsController.onPageLoad()
+  private def backButtonUrl(implicit request: DeclarationGoodsRequest[_]): Call = {
+    val referer = request.headers.get(REFERER).getOrElse("")
+
+    if (referer.contains(routes.CheckYourAnswersController.onPageLoad().url)) routes.CheckYourAnswersController.onPageLoad()
+    else if (referer.contains(routes.ReviewGoodsController.onPageLoad().url)) routes.ReviewGoodsController.onPageLoad()
+    else if (request.declarationJourney.journeyType == Amend) routes.ExciseAndRestrictedGoodsController.onPageLoad()
     else routes.ValueWeightOfGoodsController.onPageLoad()
+  }
 
   def onPageLoad(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx) { implicit request =>
     val preparedForm = request.goodsEntry.maybeCategoryQuantityOfGoods.fold(form)(form.fill)
 
-    Ok(view(preparedForm, idx, request.declarationJourney.declarationType, backButtonUrl(idx)))
+    Ok(view(preparedForm, idx, request.declarationJourney.declarationType, backButtonUrl))
   }
 
   def onSubmit(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx).async { implicit request =>
@@ -51,19 +56,19 @@ class GoodsTypeQuantityController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, idx, request.declarationJourney.declarationType, backButtonUrl(idx)))),
+          Future.successful(BadRequest(view(formWithErrors, idx, request.declarationJourney.declarationType, backButtonUrl))),
         categoryQuantityOfGoods => {
           val updatedGoodsEntry = request.goodsEntry match {
             case entry: ImportGoodsEntry => entry.copy(maybeCategoryQuantityOfGoods = Some(categoryQuantityOfGoods))
             case entry: ExportGoodsEntry => entry.copy(maybeCategoryQuantityOfGoods = Some(categoryQuantityOfGoods))
           }
 
-          val next: Call = request.declarationType match {
-            case Import => routes.GoodsVatRateController.onPageLoad(idx)
-            case Export => routes.SearchGoodsCountryController.onPageLoad(idx)
-          }
-
-          persistAndRedirect(updatedGoodsEntry, idx, next)
+          persistAndRedirect(
+            updatedGoodsEntry,
+            idx,
+            navigator
+              .nextPage(RequestWithDeclarationType(routes.GoodsTypeQuantityController.onPageLoad(idx).url, request.declarationType, idx))
+          )
         }
       )
   }

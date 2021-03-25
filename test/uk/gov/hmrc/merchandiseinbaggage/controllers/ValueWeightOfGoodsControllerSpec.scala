@@ -17,6 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -30,65 +31,63 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
   val controller: DeclarationJourney => ValueWeightOfGoodsController =
     declarationJourney => new ValueWeightOfGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
-    forAll(destinations) { destination =>
-      val journey: DeclarationJourney =
-        startedImportJourney.copy(declarationType = importOrExport, maybeGoodsDestination = Some(destination))
-      "onPageLoad" should {
-        s"return 200 with radio buttons for $importOrExport to $destination" in {
+  forAll(declarationTypesTable) { importOrExport =>
+    val journey: DeclarationJourney =
+      startedImportJourney.copy(declarationType = importOrExport, maybeGoodsDestination = Some(GreatBritain))
+    "onPageLoad" should {
+      s"return 200 with radio buttons for $importOrExport to GreatBritain" in {
+        givenTheUserIsAuthenticatedAndAuthorised()
+
+        val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad().url)
+        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
+        val result = contentAsString(eventualResult)
+
+        status(eventualResult) mustBe 200
+        result must include(messageApi(s"valueWeightOfGoods.GreatBritain.title"))
+        result must include(messageApi(s"valueWeightOfGoods.GreatBritain.heading"))
+      }
+    }
+
+    forAll(valueOfWeighOfGoodsAnswer) { (yesOrNo, redirectTo) =>
+      "onSubmit" should {
+        s"redirect to $redirectTo after successful form submit with $yesOrNo for $importOrExport to GreatBritain" in {
           givenTheUserIsAuthenticatedAndAuthorised()
+          val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+            .withFormUrlEncodedBody("value" -> yesOrNo.toString)
 
-          val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad().url)
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
-          val result = contentAsString(eventualResult)
+          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
 
-          status(eventualResult) mustBe 200
-          result must include(messageApi(s"valueWeightOfGoods.$destination.title"))
-          result must include(messageApi(s"valueWeightOfGoods.$destination.heading"))
+          status(eventualResult) mustBe 303
+          redirectLocation(eventualResult).get must endWith(redirectTo)
         }
       }
+    }
 
-      forAll(valueOfWeighOfGoodsAnswer) { (yesOrNo, redirectTo) =>
-        "onSubmit" should {
-          s"redirect to $redirectTo after successful form submit with $yesOrNo for $importOrExport to $destination" in {
-            givenTheUserIsAuthenticatedAndAuthorised()
-            val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
-              .withFormUrlEncodedBody("value" -> yesOrNo.toString)
+    s"return 400 with any form errors for $importOrExport to GreatBritain" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+        .withFormUrlEncodedBody("value" -> "in valid")
 
-            val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      val result = contentAsString(eventualResult)
 
-            status(eventualResult) mustBe 303
-            redirectLocation(eventualResult).get must endWith(redirectTo)
-          }
-        }
-      }
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi(s"valueWeightOfGoods.GreatBritain.title"))
+      result must include(messageApi(s"valueWeightOfGoods.GreatBritain.heading"))
+    }
 
-      s"return 400 with any form errors for $importOrExport to $destination" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
-          .withFormUrlEncodedBody("value" -> "in valid")
+    s"return 400 with required form error for $importOrExport to GreatBritain" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
+        .withFormUrlEncodedBody("value" -> "")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        val result = contentAsString(eventualResult)
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      val result = contentAsString(eventualResult)
 
-        status(eventualResult) mustBe 400
-        result must include(messageApi("error.summary.title"))
-        result must include(messageApi(s"valueWeightOfGoods.$destination.title"))
-        result must include(messageApi(s"valueWeightOfGoods.$destination.heading"))
-      }
-
-      s"return 400 with required form error for $importOrExport to $destination" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.ValueWeightOfGoodsController.onSubmit().url)
-          .withFormUrlEncodedBody("value" -> "")
-
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        val result = contentAsString(eventualResult)
-
-        status(eventualResult) mustBe 400
-        result must include(messageApi("error.summary.title"))
-        result must include(messageApi(s"valueWeightOfGoods.$destination.error.required"))
-      }
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi(s"valueWeightOfGoods.GreatBritain.error.required"))
     }
   }
 }

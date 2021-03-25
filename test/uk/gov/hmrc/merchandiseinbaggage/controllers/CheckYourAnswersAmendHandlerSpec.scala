@@ -58,7 +58,7 @@ class CheckYourAnswersAmendHandlerSpec
     exportView,
   )
 
-  forAll(declarationTypes) { importOrExport: DeclarationType =>
+  forAll(declarationTypesTable) { importOrExport: DeclarationType =>
     "onPageLoad" should {
       s"return Ok with correct page content for $importOrExport" in {
         val id = DeclarationId("abc")

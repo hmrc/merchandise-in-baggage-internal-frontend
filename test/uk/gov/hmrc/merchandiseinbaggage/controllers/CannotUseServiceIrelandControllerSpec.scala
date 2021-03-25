@@ -28,7 +28,7 @@ class CannotUseServiceIrelandControllerSpec extends DeclarationJourneyController
   val controller: DeclarationJourney => CannotUseServiceIrelandController =
     declarationJourney => new CannotUseServiceIrelandController(component, stubProvider(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for type $importOrExport with expected content" in {
         givenTheUserIsAuthenticatedAndAuthorised()

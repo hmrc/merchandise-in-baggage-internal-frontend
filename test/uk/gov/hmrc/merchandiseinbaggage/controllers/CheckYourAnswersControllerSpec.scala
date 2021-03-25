@@ -80,7 +80,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
     )
 
   //TODO find out why are commented out
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for type $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()

@@ -145,6 +145,7 @@ case class DeclarationJourney(
     case Amend => goodsEntries.declarationGoodsIfComplete.map(goods => Amendment(1, LocalDateTime.now, goods))
   }
 
+  val amendmentRequiredAndComplete: Boolean = amendmentIfRequiredAndComplete.isDefined
 }
 
 object DeclarationJourney extends MongoDateTimeFormats {
@@ -172,4 +173,9 @@ object DeclarationJourney extends MongoDateTimeFormats {
     apply(sessionId, declarationType, New)
 
   val id = "sessionId"
+
+  implicit class UpdateGoodsEntries(declarationJourney: DeclarationJourney) {
+    def updateGoodsEntries(): DeclarationJourney =
+      declarationJourney.copy(goodsEntries = declarationJourney.goodsEntries.addEmptyIfNecessary())
+  }
 }

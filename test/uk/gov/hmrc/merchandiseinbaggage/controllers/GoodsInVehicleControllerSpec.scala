@@ -30,7 +30,7 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
   val controller: DeclarationJourney => GoodsInVehicleController =
     declarationJourney => new GoodsInVehicleController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =
       startedImportJourney.copy(declarationType = importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
     "onPageLoad" should {

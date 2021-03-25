@@ -32,7 +32,7 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val journey: DeclarationJourney = startedImportJourney
 
-  forAll(declarationTypes) { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with radio buttons on $importOrExport answer" in {
         givenTheUserIsAuthenticatedAndAuthorised()
