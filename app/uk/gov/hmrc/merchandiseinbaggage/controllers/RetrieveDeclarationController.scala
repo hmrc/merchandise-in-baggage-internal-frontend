@@ -22,7 +22,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.{AmendDeclarationConfiguration, AppConfig}
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.RetrieveDeclarationForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, GoodsEntries, ImportGoodsEntry, RetrieveDeclaration}
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.utils.Utils.FutureOps
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RetrieveDeclarationView
@@ -63,9 +64,17 @@ class RetrieveDeclarationController @Inject()(
       .fold(
         error => Future successful InternalServerError(error), {
           case Some(declaration) =>
+            val goodsEntries = declaration.declarationType match {
+              case Import => GoodsEntries(ImportGoodsEntry())
+              case Export => GoodsEntries(ExportGoodsEntry())
+            }
+
             repo.upsert(
               request.declarationJourney
-                .copy(declarationId = declaration.declarationId, declarationType = declaration.declarationType)) map { _ =>
+                .copy(
+                  declarationId = declaration.declarationId,
+                  declarationType = declaration.declarationType,
+                  goodsEntries = goodsEntries)) map { _ =>
               Redirect(routes.PreviousDeclarationDetailsController.onPageLoad())
             }
 
