@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CannotUseServiceController, ExciseAndRestrictedGoodsController, ValueWeightOfGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.Yes
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -24,12 +27,13 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.ExciseAndRestrictedGoodsView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControllerSpec {
+class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   val view = app.injector.instanceOf[ExciseAndRestrictedGoodsView]
+  val mockNavigator = mock[Navigator]
   val controller: DeclarationJourney => ExciseAndRestrictedGoodsController =
     declarationJourney =>
-      new ExciseAndRestrictedGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+      new ExciseAndRestrictedGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, mockNavigator)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport)
@@ -52,6 +56,13 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
       forAll(exciseAndRestrictedGoodsYesOrNoAnswer) { (yesOrNo, redirectTo) =>
         s"redirect to $redirectTo after successful form submit with $yesOrNo for $importOrExport" in {
           givenTheUserIsAuthenticatedAndAuthorised()
+
+          //not worth to mock Navigator in these cases
+          (mockNavigator
+            .nextPage(_: RequestWithIndex))
+            .expects(RequestWithIndex(ExciseAndRestrictedGoodsController.onPageLoad().url, yesOrNo, journey.journeyType, 1))
+            .returning(if (yesOrNo == Yes) CannotUseServiceController.onPageLoad() else ValueWeightOfGoodsController.onPageLoad())
+
           val request = buildGet(routes.ExciseAndRestrictedGoodsController.onSubmit().url)
             .withFormUrlEncodedBody("value" -> yesOrNo.toString)
 

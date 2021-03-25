@@ -18,6 +18,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.ExciseAndRestrictedGoodsController
 import uk.gov.hmrc.merchandiseinbaggage.forms.ExciseAndRestrictedGoodsForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.Yes
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
@@ -31,7 +32,8 @@ class ExciseAndRestrictedGoodsController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
-  view: ExciseAndRestrictedGoodsView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  view: ExciseAndRestrictedGoodsView,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   private def backButtonUrl(implicit request: DeclarationJourneyRequest[_]): Call =
@@ -53,10 +55,11 @@ class ExciseAndRestrictedGoodsController @Inject()(
       .fold(
         formWithErrors => Future successful BadRequest(view(formWithErrors, request.declarationJourney.declarationType, backButtonUrl)),
         value => {
+          import request.declarationJourney._
           persistAndRedirect(
             request.declarationJourney.copy(maybeExciseOrRestrictedGoods = Some(value)),
-            if (value == Yes) routes.CannotUseServiceController.onPageLoad()
-            else routes.ValueWeightOfGoodsController.onPageLoad()
+            navigator.nextPage(
+              RequestWithIndex(ExciseAndRestrictedGoodsController.onPageLoad().url, value, journeyType, goodsEntries.entries.size))
           )
         }
       )
