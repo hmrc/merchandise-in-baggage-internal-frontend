@@ -50,6 +50,7 @@ class AppConfig @Inject()(val config: Configuration, val env: Environment) exten
   }
 
   val gaTrackingId: String = configSource("google-analytics.trackingId").loadOrThrow[String]
+  val gaDimensionId: String = configSource("google-analytics.dimensionId").loadOrThrow[String]
 }
 
 object AppConfigSource {
