@@ -24,7 +24,6 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyRequest
 import uk.gov.hmrc.merchandiseinbaggage.model.api.Country
 import uk.gov.hmrc.merchandiseinbaggage.service.CountryService
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched.CountryEnriched
-import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 
 object ViewUtils {
 
@@ -46,9 +45,8 @@ object ViewUtils {
     CountryService.getAllCountries.filterNot(_.code == "GB")
 
   def googleAnalyticsJourneyType(request: Request[_]): String = request match {
-    case r: DeclarationJourneyRequest[_] if r.declarationJourney.journeyType == New   => "new"
-    case r: DeclarationJourneyRequest[_] if r.declarationJourney.journeyType == Amend => "amend"
-    case _                                                                            => ""
+    case r: DeclarationJourneyRequest[_] => r.declarationJourney.journeyType.entryName.toLowerCase
+    case _                               => ""
   }
 
 }
