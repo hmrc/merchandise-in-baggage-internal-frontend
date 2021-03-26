@@ -79,7 +79,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       stubRepo(declarationJourney)
     )
 
-  //TODO find out why are commented out
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for type $importOrExport" in {

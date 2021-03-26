@@ -26,11 +26,14 @@ import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MongoConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
+import play.api.test.CSRFTokenHelper._
 
 trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
 
@@ -41,6 +44,8 @@ trait BaseSpecWithApplication
     PatienceConfig(scaled(Span(5L, Seconds)), scaled(Span(500L, Milliseconds)))
 
   implicit val headerCarrier = HeaderCarrier()
+  lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(configMap).build()
 

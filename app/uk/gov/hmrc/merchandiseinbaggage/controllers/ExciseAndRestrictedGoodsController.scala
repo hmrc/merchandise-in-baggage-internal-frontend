@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.ExciseAndRestrictedGoodsController
 import uk.gov.hmrc.merchandiseinbaggage.forms.ExciseAndRestrictedGoodsForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.Yes
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ExciseAndRestrictedGoodsView
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

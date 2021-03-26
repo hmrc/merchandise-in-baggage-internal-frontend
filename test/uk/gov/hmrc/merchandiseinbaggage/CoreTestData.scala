@@ -16,28 +16,28 @@
 
 package uk.gov.hmrc.merchandiseinbaggage
 
+import java.time.{LocalDate, LocalDateTime}
+import java.util.UUID
+
 import com.softwaremill.quicklens._
 import play.api.Application
 import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
-import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Twenty
-import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.payapi.PayApiRequest
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, _}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{ConversionRatePeriod, Country, payapi, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{DeclarationConfirmationView, Layout}
-
-import java.time.{LocalDate, LocalDateTime}
-import java.util.UUID
 
 trait CoreTestData {
   val payApiRequest: PayApiRequest = payapi.PayApiRequest(
@@ -49,17 +49,17 @@ trait CoreTestData {
     "http://localhost:8281/declare-commercial-goods/check-your-answers"
   )
 
-  val aSessionId: SessionId = SessionId()
-
   val declarationTypes = List(Import, Export)
+
+  val aSessionId: SessionId = SessionId()
 
   val mibReference = MibReference("XAMB0000010000")
   val eori = Eori("GB123456780000")
   val aDeclarationId = DeclarationId(UUID.randomUUID().toString)
 
-  val startedImportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Import, New)
+  val startedImportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
-  val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export, New)
+  val startedExportJourney: DeclarationJourney = DeclarationJourney(aSessionId, Export)
 
   val startedExportFromGreatBritain: DeclarationJourney =
     startedExportJourney.copy(maybeGoodsDestination = Some(GreatBritain))
@@ -70,9 +70,9 @@ trait CoreTestData {
   val startedImportToNorthernIrelandJourney: DeclarationJourney =
     startedImportJourney.copy(maybeGoodsDestination = Some(NorthernIreland))
 
-  val aCategoryQuantityOfGoods: CategoryQuantityOfGoods = CategoryQuantityOfGoods("test good", "123")
-
   val completedImportGoods: ImportGoodsEntry = TestOnlyController.completedGoodsEntry
+
+  val aCategoryQuantityOfGoods: CategoryQuantityOfGoods = CategoryQuantityOfGoods("test good", "123")
 
   val completedExportGoods: ExportGoodsEntry = ExportGoodsEntry(
     Some(aCategoryQuantityOfGoods),
@@ -98,6 +98,13 @@ trait CoreTestData {
       completedImportGoods.maybeGoodsVatRate.get,
       completedImportGoods.maybeProducedInEu.get,
       completedImportGoods.maybePurchaseDetails.get
+    )
+
+  val aExportGoods =
+    ExportGoods(
+      completedExportGoods.maybeCategoryQuantityOfGoods.get,
+      completedExportGoods.maybeDestination.get,
+      completedExportGoods.maybePurchaseDetails.get
     )
 
   def overThresholdGoods(declarationType: DeclarationType = Import): GoodsEntries =
@@ -164,12 +171,12 @@ trait CoreTestData {
       .copy(maybeIsACustomsAgent = Some(No), maybeJourneyDetailsEntry = Some(JourneyDetailsEntry("LHR", journeyDate)))
 
   val startedAmendImportJourney: DeclarationJourney =
-    DeclarationJourney(aSessionId, Import, journeyType = Amend)
+    DeclarationJourney(aSessionId, Import).copy(journeyType = Amend)
 
   val startedAmendExportJourney: DeclarationJourney =
-    DeclarationJourney(aSessionId, Export, journeyType = Amend)
+    DeclarationJourney(aSessionId, Export).copy(journeyType = Amend)
 
-  val completeAmendImportJourney: DeclarationJourney =
+  val amendImportJourneyWithGoodsEntries: DeclarationJourney =
     startedAmendImportJourney.copy(goodsEntries = GoodsEntries(completedImportGoods))
 
   val completeAmendExportJourney: DeclarationJourney =
@@ -182,11 +189,6 @@ trait CoreTestData {
   val aConversionRatePeriod: ConversionRatePeriod = ConversionRatePeriod(journeyDate, journeyDate, "EUR", BigDecimal(1.2))
   val aCalculationResult: CalculationResult =
     CalculationResult(aImportGoods, AmountInPence(10L), AmountInPence(5), AmountInPence(7), Some(aConversionRatePeriod))
-
-  val aCalculationResultWithNoTax: CalculationResult =
-    CalculationResult(aImportGoods, AmountInPence(100), AmountInPence(0), AmountInPence(0), Some(aConversionRatePeriod))
-
-  val aCalculationResultsWithNoTax: CalculationResults = CalculationResults(Seq(aCalculationResultWithNoTax))
 
   val aCalculationResultOverThousand: CalculationResult = aCalculationResult
     .modify(_.goods.producedInEu)
@@ -208,11 +210,12 @@ trait CoreTestData {
     .modify(_.gbpAmount.value)
     .setTo(0)
 
-  val aCalculationResults = CalculationResults(Seq(aCalculationResult))
+  val aCalculationResultWithNoTax: CalculationResult =
+    CalculationResult(aImportGoods, AmountInPence(100), AmountInPence(0), AmountInPence(0), Some(aConversionRatePeriod))
+  val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aGoods))
+  val aCalculationResults: CalculationResults = CalculationResults(Seq(aCalculationResult))
 
-  val aTotalCalculationResult =
-    TotalCalculationResult(aCalculationResults, AmountInPence(100), AmountInPence(100), AmountInPence(100), AmountInPence(100))
-  val aDeclarationGood: DeclarationGoods = DeclarationGoods(Seq(aImportGoods))
+  val aCalculationResultsWithNoTax: CalculationResults = CalculationResults(Seq(aCalculationResultWithNoTax))
 
   val aEoriNumber: String = "GB025115110987654"
   val aCheckEoriAddress: CheckEoriAddress = CheckEoriAddress("999 High Street", "CityName", "SS99 1AA")
@@ -221,7 +224,7 @@ trait CoreTestData {
   val aCheckResponse: CheckResponse = CheckResponse(aEoriNumber, valid = true, Some(aCompanyDetails))
 
   val aAmendment = Amendment(
-    123,
+    1,
     LocalDateTime.now,
     DeclarationGoods(aGoods.copy(categoryQuantityOfGoods = CategoryQuantityOfGoods("more cheese", "123")) :: Nil),
     Some(TotalCalculationResult(aCalculationResults, AmountInPence(100), AmountInPence(100), AmountInPence(100), AmountInPence(100))),
@@ -251,6 +254,12 @@ trait CoreTestData {
        |  },
        |  "processingDate": "2021-01-27T11:00:22.522Z[Europe/London]"
        |}""".stripMargin
+
+  def completedGoodsEntries(declarationType: DeclarationType): GoodsEntries =
+    declarationType match {
+      case Import => GoodsEntries(completedImportGoods)
+      case Export => GoodsEntries(completedExportGoods)
+    }
 
   def generateDeclarationConfirmationPage(
     decType: DeclarationType,
@@ -307,14 +316,41 @@ trait CoreTestData {
     result.body
   }
 
+  def completedAmendedJourney(declarationType: DeclarationType): DeclarationJourney = declarationType match {
+    case Import => amendImportJourneyWithGoodsEntries
+    case Export => completeAmendExportJourney
+  }
+
   def completedAmendment(declarationType: DeclarationType) = declarationType match {
-    case Import => completeAmendImportJourney.amendmentIfRequiredAndComplete.get
+    case Import => amendImportJourneyWithGoodsEntries.amendmentIfRequiredAndComplete.get
     case Export => completeAmendExportJourney.amendmentIfRequiredAndComplete.get
   }
 
-  def completedGoodsEntries(declarationType: DeclarationType): GoodsEntries =
-    declarationType match {
-      case Import => GoodsEntries(completedImportGoods)
-      case Export => GoodsEntries(completedExportGoods)
-    }
+  val aTotalCalculationResult =
+    TotalCalculationResult(aCalculationResults, AmountInPence(100), AmountInPence(100), AmountInPence(100), AmountInPence(100))
+
+  val declarationWithAmendment = declaration.copy(amendments = Seq(completedAmendment(declaration.declarationType)))
+
+  implicit class JourneyToDeclaration(declarationJourney: DeclarationJourney) {
+    import declarationJourney._
+    def toDeclaration =
+      Declaration(
+        declarationId,
+        sessionId,
+        declarationType,
+        maybeGoodsDestination.get,
+        goodsEntries.declarationGoodsIfComplete.get,
+        maybeNameOfPersonCarryingTheGoods.getOrElse(Name("xx", "yy")),
+        maybeEmailAddress,
+        maybeCustomsAgent,
+        maybeEori.getOrElse(Eori("GB123")),
+        JourneyInSmallVehicle(
+          Port("DVR", "title.dover", isGB = true, List("Port of Dover")),
+          maybeJourneyDetailsEntry.getOrElse(JourneyDetailsEntry("BH", LocalDate.now)).dateOfTravel,
+          maybeRegistrationNumber.getOrElse("Lx123")
+        ),
+        createdAt,
+        MibReference("xx")
+      )
+  }
 }

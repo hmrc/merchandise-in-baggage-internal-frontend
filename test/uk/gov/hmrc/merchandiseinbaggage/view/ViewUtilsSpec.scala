@@ -27,38 +27,38 @@ import uk.gov.hmrc.merchandiseinbaggage.views.ViewUtils
 
 class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {
 
-  val fakeRequest: AuthRequest[AnyContentAsEmpty.type] = AuthRequest(FakeRequest("", ""), None)
+  val fakeAuthRequest: AuthRequest[AnyContentAsEmpty.type] = AuthRequest(FakeRequest("", ""), None)
 
   "new import journey" in {
-    val request = new DeclarationJourneyRequest(startedImportJourney, fakeRequest)
+    val request = new DeclarationJourneyRequest(startedImportJourney, fakeAuthRequest)
     val result = ViewUtils.googleAnalyticsJourneyType(request)
 
     result mustBe ("new")
   }
 
   "new export journey" in {
-    val request = new DeclarationJourneyRequest(startedExportJourney, fakeRequest)
+    val request = new DeclarationJourneyRequest(startedExportJourney, fakeAuthRequest)
     val result = ViewUtils.googleAnalyticsJourneyType(request)
 
     result mustBe ("new")
   }
 
   "amend import journey" in {
-    val request = new DeclarationJourneyRequest(startedImportJourney.copy(journeyType = Amend), fakeRequest)
+    val request = new DeclarationJourneyRequest(startedImportJourney.copy(journeyType = Amend), fakeAuthRequest)
     val result = ViewUtils.googleAnalyticsJourneyType(request)
 
     result mustBe ("amend")
   }
 
   "amend export journey" in {
-    val request = new DeclarationJourneyRequest(startedExportJourney.copy(journeyType = Amend), fakeRequest)
+    val request = new DeclarationJourneyRequest(startedExportJourney.copy(journeyType = Amend), fakeAuthRequest)
     val result = ViewUtils.googleAnalyticsJourneyType(request)
 
     result mustBe ("amend")
   }
 
   "unknown journey" in {
-    val request = fakeRequest
+    val request = fakeAuthRequest
     val result = ViewUtils.googleAnalyticsJourneyType(request)
 
     result mustBe ("")
