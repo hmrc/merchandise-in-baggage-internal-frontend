@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggage.smoketests.content
+package uk.gov.hmrc.merchandiseinbaggage.content
 
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.Assertion
