@@ -30,7 +30,7 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.testonly.TestOnlyController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritain, NorthernIreland}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsVatRates.Twenty
-import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.No
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.{CheckEoriAddress, CheckResponse, CompanyDetails}
@@ -261,9 +261,10 @@ trait CoreTestData {
       case Export => GoodsEntries(completedExportGoods)
     }
 
-  def generateDeclarationConfirmationPage(
-    decType: DeclarationType,
-    purchaseAmount: Long)(implicit app: Application, message: Messages, appConfig: AppConfig): String = {
+  def generateDeclarationConfirmationPage(decType: DeclarationType, purchaseAmount: Long, journeyType: JourneyType = New)(
+    implicit app: Application,
+    message: Messages,
+    appConfig: AppConfig): String = {
     val layout = app.injector.instanceOf[Layout]
     val link = app.injector.instanceOf[uk.gov.hmrc.merchandiseinbaggage.views.html.components.link]
     lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
@@ -311,7 +312,7 @@ trait CoreTestData {
     }
 
     val declarationConfirmationView = new DeclarationConfirmationView(layout, null, link)
-    val result = declarationConfirmationView.apply(persistedDeclaration.get)(fakeRequest, message, appConfig)
+    val result = declarationConfirmationView.apply(persistedDeclaration.get, journeyType)(fakeRequest, message, appConfig)
 
     result.body
   }

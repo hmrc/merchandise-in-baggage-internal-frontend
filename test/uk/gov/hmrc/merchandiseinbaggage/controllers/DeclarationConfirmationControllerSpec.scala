@@ -22,6 +22,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
@@ -103,6 +104,18 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
     val result = generateDeclarationConfirmationPage(DeclarationType.Export, 111111)
 
     result mustNot include(messageApi("declarationConfirmation.ul.3"))
+  }
+
+  "New declaration displays 'take this declaration with you'" in {
+    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111, New)
+
+    result must include(messageApi("declarationConfirmation.ul.2.New"))
+  }
+
+  "Amended declaration displays 'take this UPDATED declaration with you'" in {
+    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111, Amend)
+
+    result must include(messageApi("declarationConfirmation.ul.2.Amend"))
   }
 
   "Import should display the destination country" in {
