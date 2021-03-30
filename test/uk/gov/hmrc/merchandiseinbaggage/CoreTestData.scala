@@ -339,6 +339,8 @@ trait CoreTestData {
       .copy(paymentStatus = Some(Paid), maybeTotalCalculationResult = Some(aTotalCalculationResult), amendments = Seq(paidAmendment))
   }
 
+  val journeyPort = Port("DVR", "title.dover", isGB = true, List("Port of Dover"))
+
   implicit class JourneyToDeclaration(declarationJourney: DeclarationJourney) {
 
     import declarationJourney._
@@ -355,7 +357,7 @@ trait CoreTestData {
         maybeCustomsAgent,
         maybeEori.getOrElse(Eori("GB123")),
         JourneyInSmallVehicle(
-          Port("DVR", "title.dover", isGB = true, List("Port of Dover")),
+          journeyPort,
           maybeJourneyDetailsEntry.getOrElse(JourneyDetailsEntry("BH", LocalDate.now)).dateOfTravel,
           maybeRegistrationNumber.getOrElse("Lx123")
         ),

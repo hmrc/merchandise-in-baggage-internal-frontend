@@ -22,7 +22,6 @@ import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, Paid, SessionId}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.service.DeclarationService
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, WireMockSupport}
@@ -38,7 +37,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
   "creating a page" should {
     "return 200 if declaration exists" in {
       val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
-      val previousDeclarationDetailsService = app.injector.instanceOf[DeclarationService]
       val mibConnector = injector.instanceOf[MibConnector]
 
       val controller: DeclarationJourney => PreviousDeclarationDetailsController =
@@ -47,7 +45,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
             controllerComponents,
             stubProvider(declarationJourney),
             stubRepo(declarationJourney),
-            previousDeclarationDetailsService,
             mibConnector,
             view)
 
@@ -73,16 +70,9 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
     "return 303 if declaration does NOT exist" in {
       val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
-      val previousDeclarationDetailsService = app.injector.instanceOf[DeclarationService]
       val mibConnector = injector.instanceOf[MibConnector]
       val controller =
-        new PreviousDeclarationDetailsController(
-          controllerComponents,
-          actionBuilder,
-          declarationJourneyRepository,
-          previousDeclarationDetailsService,
-          mibConnector,
-          view)
+        new PreviousDeclarationDetailsController(controllerComponents, actionBuilder, declarationJourneyRepository, mibConnector, view)
 
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
@@ -107,7 +97,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
     "return 200 if import declaration with an amendment exists" in {
       val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
-      val previousDeclarationDetailsService = app.injector.instanceOf[DeclarationService]
       val mibConnector = injector.instanceOf[MibConnector]
 
       val controller: DeclarationJourney => PreviousDeclarationDetailsController =
@@ -116,7 +105,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
             controllerComponents,
             stubProvider(declarationJourney),
             stubRepo(declarationJourney),
-            previousDeclarationDetailsService,
             mibConnector,
             view)
 
@@ -150,7 +138,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
 
     "return 200 if import declaration with amendments exists" in {
       val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
-      val previousDeclarationDetailsService = app.injector.instanceOf[DeclarationService]
       val mibConnector = injector.instanceOf[MibConnector]
 
       val controller: DeclarationJourney => PreviousDeclarationDetailsController =
@@ -159,7 +146,6 @@ class PreviousDeclarationDetailsControllerSpec extends DeclarationJourneyControl
             controllerComponents,
             stubProvider(declarationJourney),
             stubRepo(declarationJourney),
-            previousDeclarationDetailsService,
             mibConnector,
             view)
 

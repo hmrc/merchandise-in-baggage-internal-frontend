@@ -20,8 +20,8 @@ import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.merchandiseinbaggage.config.AmendFlagConf
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, Paid}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.{givenFindByDeclarationReturnStatus, givenFindByDeclarationReturnSuccess}
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -75,9 +75,9 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
   }
 
   "onSubmit" should {
-    s"redirect to /previous-declaration-details after successful form submit" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-      givenFindByDeclarationReturnSuccess(mibReference, eori, declaration)
+    s"redirect to /previous-declaration-details after successful form submit if existing declaration is valid" in {
+      val paidDeclaration = declaration.copy(paymentStatus = Some(Paid))
+      givenFindByDeclarationReturnSuccess(mibReference, eori, paidDeclaration)
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
 
@@ -89,6 +89,17 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
     s"redirect to /declaration-not-found after successful form submit but no declaration found in the BE" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       givenFindByDeclarationReturnStatus(mibReference, eori, 404)
+      val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
+        .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
+
+      val eventualResult = controller(startedImportJourney).onSubmit(request)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe Some(routes.DeclarationNotFoundController.onPageLoad().url)
+    }
+
+    s"redirect to /declaration-not-found after successful form submit but original declaration is not paid for Import" in {
+      val unPaidDeclaration = declaration
+      givenFindByDeclarationReturnSuccess(mibReference, eori, unPaidDeclaration)
       val request = buildPost(routes.RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
 
