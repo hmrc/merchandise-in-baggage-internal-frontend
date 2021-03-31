@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeExport
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeExport}
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ImportExportChoice
@@ -46,7 +46,7 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
   }
 
   "onSubmit" should {
-    "redirect to next page after successful form submit" in {
+    "redirect to /goods-destination after successful form submit for New journeys" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> MakeExport.toString)
@@ -54,6 +54,18 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
       val eventualResult = controller.onSubmit(request)
       status(eventualResult) mustBe 303
       redirectLocation(eventualResult) mustBe Some(routes.GoodsDestinationController.onPageLoad().url)
+      session(eventualResult).get("journeyType") mustBe Some("new")
+    }
+
+    "redirect to /retrieve-declaration after successful form submit for Amend journeys" in {
+      givenTheUserIsAuthenticatedAndAuthorised()
+      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+        .withFormUrlEncodedBody("value" -> AddToExisting.toString)
+
+      val eventualResult = controller.onSubmit(request)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe Some(routes.RetrieveDeclarationController.onPageLoad().url)
+      session(eventualResult).get("journeyType") mustBe Some("amend")
     }
 
     "return 400 with required form error" in {

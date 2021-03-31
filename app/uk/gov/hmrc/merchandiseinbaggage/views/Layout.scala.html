@@ -52,6 +52,15 @@
             ga('send', 'pageview');
     </script>
     <!-- End Google Analytics -->
+
+    @maybeDeclarationType.map { declarationType =>
+    <script>
+            dataLayer = [{
+                'MIB_URL': 'call-handler/' + '@declarationType.toString.toLowerCase' + window.location.pathname,
+                'MIB_JOURNEY_TYPE': '@request.session.get("journeyType").getOrElse("")'
+            }];
+    </script>
+    }
 }
 
 @defaultScripts = {

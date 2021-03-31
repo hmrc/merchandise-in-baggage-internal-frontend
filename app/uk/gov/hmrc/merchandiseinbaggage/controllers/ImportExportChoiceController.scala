@@ -59,8 +59,8 @@ class ImportExportChoiceController @Inject()(
             .upsert(DeclarationJourney(SessionId(request.session(SessionKeys.sessionId)), declarationType, journeyType))
             .map { _ =>
               journeyType match {
-                case New   => Redirect(routes.GoodsDestinationController.onPageLoad())
-                case Amend => Redirect(routes.RetrieveDeclarationController.onPageLoad())
+                case New   => Redirect(routes.GoodsDestinationController.onPageLoad()).addingToSession("journeyType"    -> "new")
+                case Amend => Redirect(routes.RetrieveDeclarationController.onPageLoad()).addingToSession("journeyType" -> "amend")
               }
             }
         }
