@@ -18,8 +18,11 @@ package uk.gov.hmrc.merchandiseinbaggage.smoketests.pages
 
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.scalatest.Assertions.fail
+import org.scalatest.{Assertion, Suite}
 import org.scalatestplus.selenium.WebBrowser._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.BaseUiSpec
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.RetrieveDeclarationPage.{path, title}
 
 object RetrieveDeclarationPage extends Page {
   val path = "/declare-commercial-goods/retrieve-declaration"
@@ -36,5 +39,12 @@ object RetrieveDeclarationPage extends Page {
     find(NameQuery("mibReference")).get.underlying.sendKeys(rd.mibReference.value)
     find(NameQuery("eori")).get.underlying.sendKeys(rd.eori.value)
     click.on(NameQuery("continue"))
+  }
+}
+
+trait RetrieveDeclarationPage extends BaseUiSpec { this: Suite =>
+  def goToRetrieveDeclarationPage(): Assertion = {
+    goto(path)
+    pageTitle must startWith(title)
   }
 }

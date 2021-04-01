@@ -81,6 +81,7 @@ case class DeclarationJourney(
   maybeTravellingByVehicle: Option[YesNo] = None,
   maybeTravellingBySmallVehicle: Option[YesNo] = None,
   maybeRegistrationNumber: Option[String] = None,
+  maybeRetrieveDeclaration: Option[RetrieveDeclaration] = None,
   declarationId: DeclarationId = DeclarationId(UUID.randomUUID().toString))
     extends MibReferenceGenerator {
 

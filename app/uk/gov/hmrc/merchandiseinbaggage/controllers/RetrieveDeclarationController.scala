@@ -44,7 +44,8 @@ class RetrieveDeclarationController @Inject()(
 
   override val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
     if (amendFlagConf.canBeAmended) {
-      Ok(view(form, routes.ImportExportChoiceController.onPageLoad(), request.declarationJourney.declarationType))
+      val preFilledForm = request.declarationJourney.maybeRetrieveDeclaration.fold(form)(form.fill)
+      Ok(view(preFilledForm, routes.ImportExportChoiceController.onPageLoad(), request.declarationJourney.declarationType))
     } else Redirect(routes.CannotUseServiceController.onPageLoad().url)
   }
 
@@ -54,14 +55,16 @@ class RetrieveDeclarationController @Inject()(
       .fold(
         formWithErrors =>
           BadRequest(view(formWithErrors, routes.ImportExportChoiceController.onPageLoad(), request.declarationJourney.declarationType)).asFuture,
-        validData => processRequest(validData)
+        retrieveDeclaration => processRequest(retrieveDeclaration)
       )
   }
 
-  private def processRequest(
-    validData: RetrieveDeclaration)(implicit request: DeclarationJourneyRequest[AnyContent], hc: HeaderCarrier, ec: ExecutionContext) =
+  private def processRequest(retrieveDeclaration: RetrieveDeclaration)(
+    implicit request: DeclarationJourneyRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext) =
     mibConnector
-      .findBy(validData.mibReference, validData.eori)
+      .findBy(retrieveDeclaration.mibReference, retrieveDeclaration.eori)
       .fold(
         error => Future successful InternalServerError(error), {
           case Some(declaration) if isValid(declaration) =>
@@ -74,7 +77,9 @@ class RetrieveDeclarationController @Inject()(
                 .copy(
                   declarationId = declaration.declarationId,
                   declarationType = declaration.declarationType,
-                  goodsEntries = goodsEntries)) map { _ =>
+                  goodsEntries = goodsEntries,
+                  maybeRetrieveDeclaration = Some(retrieveDeclaration)
+                )) map { _ =>
               Redirect(routes.PreviousDeclarationDetailsController.onPageLoad())
             }
           case _ => Future successful Redirect(routes.DeclarationNotFoundController.onPageLoad())
