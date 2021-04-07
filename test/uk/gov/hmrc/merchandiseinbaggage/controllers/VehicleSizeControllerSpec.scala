@@ -29,7 +29,8 @@ class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[VehicleSizeView]
   val controller: DeclarationJourney => VehicleSizeController =
-    declarationJourney => new VehicleSizeController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new VehicleSizeController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =

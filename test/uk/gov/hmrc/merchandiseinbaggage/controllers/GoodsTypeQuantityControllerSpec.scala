@@ -19,31 +19,37 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsTypeQuantityController, GoodsVatRateController, SearchGoodsCountryController}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsTypeQuantityRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsTypeQuantityView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   private val view = app.injector.instanceOf[GoodsTypeQuantityView]
   val mockNavigator = mock[Navigator]
+  def controller(declarationJourney: DeclarationJourney) =
+    new GoodsTypeQuantityController(
+      controllerComponents,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      view,
+      mockNavigator)
 
-  val controller: DeclarationJourney => GoodsTypeQuantityController =
-    declarationJourney =>
-      new GoodsTypeQuantityController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, mockNavigator)
-
-  forAll(declarationTypesTable) { importOrExport =>
-    val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport)
+  declarationTypes.foreach { importOrExport: DeclarationType =>
+    val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.GoodsTypeQuantityController.onPageLoad(1).url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
+        val request = buildGet(GoodsTypeQuantityController.onPageLoad(1).url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad(1)(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -64,9 +70,9 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec w
           else SearchGoodsCountryController.onPageLoad(1)
 
         (mockNavigator
-          .nextPage(_: RequestWithDeclarationType))
-          .expects(RequestWithDeclarationType(GoodsTypeQuantityController.onPageLoad(1).url, importOrExport, 1))
-          .returning(page)
+          .nextPage(_: GoodsTypeQuantityRequest)(_: ExecutionContext))
+          .expects(*, *)
+          .returning(Future successful page)
           .once()
 
         controller(journey).onSubmit(1)(request).futureValue

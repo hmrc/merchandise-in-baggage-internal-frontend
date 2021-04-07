@@ -16,22 +16,25 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.SearchGoodsCountryForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, ImportGoodsEntry}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.SearchGoodsCountryRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.CountryService
 import uk.gov.hmrc.merchandiseinbaggage.views.html.SearchGoodsCountryView
+import com.softwaremill.quicklens._
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SearchGoodsCountryController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
-  override val repo: DeclarationJourneyRepository,
+  repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: SearchGoodsCountryView
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends IndexedDeclarationJourneyUpdateController {
@@ -62,10 +65,15 @@ class SearchGoodsCountryController @Inject()(
             CountryService
               .getCountryByCode(countryCode)
               .fold(actionProvider.invalidRequestF(s"country [$countryCode] not found")) { country =>
-                persistAndRedirect(
-                  request.goodsEntry.asInstanceOf[ExportGoodsEntry].copy(maybeDestination = Some(country)),
-                  idx,
-                  routes.PurchaseDetailsController.onPageLoad(idx))
+                navigator
+                  .nextPage(
+                    SearchGoodsCountryRequest(
+                      request.declarationJourney,
+                      request.goodsEntry.modify(_.when[ExportGoodsEntry].maybeDestination).setTo(Some(country)),
+                      idx,
+                      repo.upsert
+                    ))
+                  .map(Redirect)
             }
         )
     }

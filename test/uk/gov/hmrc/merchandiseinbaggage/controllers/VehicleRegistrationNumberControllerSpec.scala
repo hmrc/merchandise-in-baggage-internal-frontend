@@ -29,7 +29,7 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
   val view = app.injector.instanceOf[VehicleRegistrationNumberView]
   val controller: DeclarationJourney => VehicleRegistrationNumberController =
     declarationJourney =>
-      new VehicleRegistrationNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+      new VehicleRegistrationNumberController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport)

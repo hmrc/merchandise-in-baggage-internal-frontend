@@ -25,10 +25,11 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Impor
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
+import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,20 +42,19 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
 
   def controller(declarationJourney: DeclarationJourney) =
     new ReviewGoodsController(
-      component,
+      controllerComponents,
       stubProvider(declarationJourney),
       stubRepo(declarationJourney),
       view,
       mockCalculationService,
       mockNavigator)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
 
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(ReviewGoodsController.onPageLoad().url, aSessionId)
@@ -72,14 +72,13 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
 
     "onSubmit" should {
       s"redirect to next page after successful form submit with Yes for $importOrExport by delegating to Navigator" in {
-
         givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "Yes")
 
         (mockNavigator
-          .nextPageWithCallBack(_: RequestWithCallBack)(_: ExecutionContext))
+          .nextPage(_: ReviewGoodsRequest)(_: ExecutionContext))
           .expects(*, *)
           .returning(Future.successful(GoodsTypeQuantityController.onPageLoad(2)))
           .once()
@@ -89,7 +88,6 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-
       givenTheUserIsAuthenticatedAndAuthorised()
 
       val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
@@ -113,14 +111,12 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
 
     val controller =
       new ReviewGoodsController(
-        component,
+        controllerComponents,
         stubProvider(journey),
         stubRepo(journey),
         view,
         mockCalculationService,
         injector.instanceOf[Navigator])
-
-    givenTheUserIsAuthenticatedAndAuthorised()
 
     (mockCalculationService
       .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))

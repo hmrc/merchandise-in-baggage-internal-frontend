@@ -19,12 +19,13 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.ExciseAndRestrictedGoodsController
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
 import uk.gov.hmrc.merchandiseinbaggage.forms.ExciseAndRestrictedGoodsForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ExciseAndRestrictedGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ExciseAndRestrictedGoodsView
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -62,12 +63,11 @@ class ExciseAndRestrictedGoodsController @Inject()(
       .fold(
         formWithErrors => Future successful BadRequest(view(formWithErrors, request.declarationJourney.declarationType, backButtonUrl)),
         value => {
-          import request.declarationJourney._
-          persistAndRedirect(
-            request.declarationJourney.copy(maybeExciseOrRestrictedGoods = Some(value)),
-            navigator.nextPage(
-              RequestWithIndex(ExciseAndRestrictedGoodsController.onPageLoad().url, value, journeyType, goodsEntries.entries.size))
-          )
+          import request._
+          val updated = declarationJourney.copy(maybeExciseOrRestrictedGoods = Some(value))
+          navigator
+            .nextPage(ExciseAndRestrictedGoodsRequest(value, updated, repo.upsert, updated.declarationRequiredAndComplete))
+            .map(Redirect)
         }
       )
   }

@@ -28,7 +28,8 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[GoodsInVehicleView]
   val controller: DeclarationJourney => GoodsInVehicleController =
-    declarationJourney => new GoodsInVehicleController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new GoodsInVehicleController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =

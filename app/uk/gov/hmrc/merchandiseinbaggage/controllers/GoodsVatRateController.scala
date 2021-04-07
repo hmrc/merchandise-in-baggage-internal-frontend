@@ -23,16 +23,18 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsVatRateView
-
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsVatRateRequest
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GoodsVatRateController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
-  override val repo: DeclarationJourneyRepository,
-  view: GoodsVatRateView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  repo: DeclarationJourneyRepository,
+  view: GoodsVatRateView,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends IndexedDeclarationJourneyUpdateController {
 
   private def backButtonUrl(index: Int)(implicit request: DeclarationGoodsRequest[_]) =
@@ -57,10 +59,15 @@ class GoodsVatRateController @Inject()(
         .fold(
           formWithErrors => Future.successful(BadRequest(view(formWithErrors, idx, category, Import, backButtonUrl(idx)))),
           goodsVatRate =>
-            persistAndRedirect(
-              request.goodsEntry.asInstanceOf[ImportGoodsEntry].copy(maybeGoodsVatRate = Some(goodsVatRate)),
-              idx,
-              routes.SearchGoodsCountryController.onPageLoad(idx))
+            navigator
+              .nextPage(
+                GoodsVatRateRequest(
+                  request.declarationJourney,
+                  request.goodsEntry.asInstanceOf[ImportGoodsEntry].copy(maybeGoodsVatRate = Some(goodsVatRate)),
+                  idx,
+                  repo.upsert
+                ))
+              .map(Redirect)
         )
     }
   }

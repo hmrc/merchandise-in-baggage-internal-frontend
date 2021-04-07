@@ -26,7 +26,7 @@ class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[GoodsRemovedView]
   val controller: DeclarationJourney => GoodsRemovedController =
-    declarationJourney => new GoodsRemovedController(component, stubProvider(declarationJourney), view)
+    declarationJourney => new GoodsRemovedController(controllerComponents, stubProvider(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
-import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.merchandiseinbaggage.config.AmendFlagConf
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
@@ -34,7 +33,6 @@ class RetrieveDeclarationControllerSpec extends DeclarationJourneyControllerSpec
 
   val view = injector.instanceOf[RetrieveDeclarationView]
   val connector = injector.instanceOf[MibConnector]
-  lazy val controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
 
   def controller(declarationJourney: DeclarationJourney, amendFlag: Boolean = true) =
     new RetrieveDeclarationController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), connector, view) {

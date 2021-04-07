@@ -30,7 +30,8 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[JourneyDetailsPage]
   private val controller: DeclarationJourney => JourneyDetailsController =
-    declarationJourney => new JourneyDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new JourneyDetailsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =

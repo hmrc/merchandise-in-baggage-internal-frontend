@@ -42,7 +42,11 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
 
   val controller: DeclarationJourney => PaymentCalculationController =
     declarationJourney =>
-      new PaymentCalculationController(component, stubProvider(declarationJourney), stubbedCalculation(aCalculationResults), view)
+      new PaymentCalculationController(
+        controllerComponents,
+        stubProvider(declarationJourney),
+        stubbedCalculation(aCalculationResults),
+        view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {

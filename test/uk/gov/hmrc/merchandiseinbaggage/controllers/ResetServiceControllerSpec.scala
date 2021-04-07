@@ -25,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
-  val controller = new ResetServiceController(component, actionProvider, repo)
+  val controller = new ResetServiceController(controllerComponents, actionProvider, repo)
 
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {

@@ -31,7 +31,12 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec {
   private val importView = app.injector.instanceOf[PurchaseDetailsImportView]
   private val exportView = app.injector.instanceOf[PurchaseDetailsExportView]
   val controller: DeclarationJourney => PurchaseDetailsController = declarationJourney =>
-    new PurchaseDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), importView, exportView)
+    new PurchaseDetailsController(
+      controllerComponents,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      importView,
+      exportView)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney = DeclarationJourney(

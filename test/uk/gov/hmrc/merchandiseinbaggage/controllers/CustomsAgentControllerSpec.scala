@@ -28,7 +28,8 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = app.injector.instanceOf[CustomsAgentView]
   val controller: DeclarationJourney => CustomsAgentController =
-    declarationJourney => new CustomsAgentController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new CustomsAgentController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   private val journey: DeclarationJourney = startedImportJourney
 

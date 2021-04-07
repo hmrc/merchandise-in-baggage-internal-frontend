@@ -29,7 +29,8 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[EnterEmailView]
   val controller: DeclarationJourney => EnterEmailController =
-    declarationJourney => new EnterEmailController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new EnterEmailController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =

@@ -33,7 +33,8 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
 
   forAll(declarationTypesTable) { importOrExport =>
     val controller: DeclarationJourney => RemoveGoodsController =
-      declarationJourney => new RemoveGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+      declarationJourney =>
+        new RemoveGoodsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
     val journey: DeclarationJourney =
       DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
     "onPageLoad" should {
@@ -83,7 +84,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
     }
   }
   "on submit if answer No" should {
-    val controller = new RemoveGoodsController(component, actionProvider, repo, view)
+    val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, view)
     s"redirect x back to ${routes.CheckYourAnswersController.onPageLoad().url} if journey was completed" in {
       val result = controller.removeGoodOrRedirect(1, completedDeclarationJourney, No)
 
@@ -100,7 +101,7 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
   }
 
   "on submit if answer yes" should {
-    val controller = new RemoveGoodsController(component, actionProvider, repo, view)
+    val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, view)
     s"redirect to ${routes.GoodsRemovedController.onPageLoad()} if goods contains an entry" in {
       val result = controller.removeGoodOrRedirect(1, importJourneyWithStartedGoodsEntry, Yes)
 

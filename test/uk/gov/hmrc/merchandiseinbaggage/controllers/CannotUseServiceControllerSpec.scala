@@ -27,7 +27,7 @@ class CannotUseServiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = injector.instanceOf[CannotUseServiceView]
   val controller: DeclarationJourney => CannotUseServiceController =
-    declarationJourney => new CannotUseServiceController(component, stubProvider(declarationJourney), view)
+    declarationJourney => new CannotUseServiceController(controllerComponents, stubProvider(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {

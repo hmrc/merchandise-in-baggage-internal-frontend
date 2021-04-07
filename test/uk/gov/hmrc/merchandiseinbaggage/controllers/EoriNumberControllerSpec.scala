@@ -39,7 +39,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
   }
   val controller: DeclarationJourney => EoriNumberController =
     declarationJourney =>
-      new EoriNumberController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, connector)
+      new EoriNumberController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view, connector)
 
   forAll(declarationTypesTable) { importOrExport =>
     forAll(traderYesOrNoAnswer) { (yesNo, traderOrAgent) =>
@@ -106,7 +106,7 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Cor
             Future.successful(CheckResponse("123", valid = false, None))
         }
         val controller = new EoriNumberController(
-          component,
+          controllerComponents,
           stubProvider(completedDeclarationJourney),
           stubRepo(completedDeclarationJourney),
           view,

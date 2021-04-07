@@ -38,7 +38,7 @@ import scala.concurrent.Future
 trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication with PropertyBaseTables {
   implicit lazy val appConf: AppConfig = injector.instanceOf[AppConfig]
 
-  lazy val component: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
+  lazy val controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val strideAuth: StrideAuthAction = injector.instanceOf[StrideAuthAction]
 
   lazy val repo = injector.instanceOf[DeclarationJourneyRepository]

@@ -16,22 +16,25 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsOriginForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, ImportGoodsEntry}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsOriginRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsOriginView
+import com.softwaremill.quicklens._
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GoodsOriginController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
-  override val repo: DeclarationJourneyRepository,
-  view: GoodsOriginView)(implicit ec: ExecutionContext, appConfig: AppConfig)
+  repo: DeclarationJourneyRepository,
+  view: GoodsOriginView,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends IndexedDeclarationJourneyUpdateController {
 
   private def backButtonUrl(index: Int)(implicit request: DeclarationGoodsRequest[_]) =
@@ -56,10 +59,15 @@ class GoodsOriginController @Inject()(
         .fold(
           formWithErrors => Future.successful(BadRequest(view(formWithErrors, idx, category, backButtonUrl(idx)))),
           producedInEu =>
-            persistAndRedirect(
-              request.goodsEntry.asInstanceOf[ImportGoodsEntry].copy(maybeProducedInEu = Some(producedInEu)),
-              idx,
-              routes.PurchaseDetailsController.onPageLoad(idx))
+            navigator
+              .nextPage(
+                GoodsOriginRequest(
+                  request.declarationJourney,
+                  request.goodsEntry.modify(_.when[ImportGoodsEntry].maybeProducedInEu).setTo(Some(producedInEu)),
+                  idx,
+                  repo.upsert
+                ))
+              .map(Redirect)
         )
     }
   }

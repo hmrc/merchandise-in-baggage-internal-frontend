@@ -22,12 +22,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{declarationNotFoundMessage, goodsDeclarationIncompleteMessage}
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.ReviewGoodsController
 import uk.gov.hmrc.merchandiseinbaggage.forms.ReviewGoodsForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
@@ -68,23 +68,19 @@ class ReviewGoodsController @Inject()(
       }
   }
 
-  private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] = {
-    val updatedGoodsEntries: GoodsEntries = request.declarationJourney.updateGoodsEntries().goodsEntries
+  private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] =
     (for {
       check <- checkThresholdIfAmending(request.declarationJourney)
       call <- OptionT.liftF(
-               navigator.nextPageWithCallBack(
-                 RequestWithCallBack(
-                   ReviewGoodsController.onPageLoad().url,
+               navigator.nextPage(
+                 ReviewGoodsRequest(
                    declareMoreGoods,
-                   updatedGoodsEntries,
                    request.declarationJourney,
                    check.isOverThreshold,
                    repo.upsert
                  )
                ))
     } yield call).fold(actionProvider.invalidRequest(declarationNotFoundMessage))(Redirect)
-  }
 
   private def checkThresholdIfAmending(declarationJourney: DeclarationJourney)(
     implicit hc: HeaderCarrier): OptionT[Future, AmendCalculationResult] =

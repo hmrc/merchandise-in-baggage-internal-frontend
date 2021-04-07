@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import org.scalamock.scalatest.MockFactory
-import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
@@ -39,7 +38,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
 
   val importView: CheckYourAnswersImportView = app.injector.instanceOf[CheckYourAnswersImportView]
   val exportView: CheckYourAnswersExportView = app.injector.instanceOf[CheckYourAnswersExportView]
-  lazy val controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   lazy val actionBuilder: DeclarationJourneyActionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
   private lazy val mockTpsPaymentsService = mock[TpsPaymentsService]
   private lazy val amendImportView = injector.instanceOf[CheckYourAnswersAmendImportView]

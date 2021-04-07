@@ -18,31 +18,37 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CannotUseServiceController, ExciseAndRestrictedGoodsController, ValueWeightOfGoodsController}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.Yes
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{ExciseAndRestrictedGoodsController, ValueWeightOfGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ExciseAndRestrictedGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ExciseAndRestrictedGoodsView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   val view = app.injector.instanceOf[ExciseAndRestrictedGoodsView]
   val mockNavigator = mock[Navigator]
-  val controller: DeclarationJourney => ExciseAndRestrictedGoodsController =
-    declarationJourney =>
-      new ExciseAndRestrictedGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view, mockNavigator)
+  def controller(declarationJourney: DeclarationJourney) =
+    new ExciseAndRestrictedGoodsController(
+      controllerComponents,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      view,
+      mockNavigator)
 
-  forAll(declarationTypesTable) { importOrExport =>
-    val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport)
+  forAll(declarationTypesTable) { importOrExport: DeclarationType =>
+    val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
         givenTheUserIsAuthenticatedAndAuthorised()
 
-        val request = buildGet(routes.ExciseAndRestrictedGoodsController.onPageLoad.url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
+        val request = buildGet(ExciseAndRestrictedGoodsController.onPageLoad.url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -53,38 +59,31 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
     }
 
     "onSubmit" should {
-      forAll(exciseAndRestrictedGoodsYesOrNoAnswer) { (yesOrNo, redirectTo) =>
-        s"redirect to $redirectTo after successful form submit with $yesOrNo for $importOrExport" in {
-          givenTheUserIsAuthenticatedAndAuthorised()
+      s"redirect by delegating to the Navigator for $importOrExport" in {
+        val request = buildPost(ExciseAndRestrictedGoodsController.onSubmit().url, aSessionId)
+          .withFormUrlEncodedBody("value" -> "No")
 
-          //not worth to mock Navigator in these cases
-          (mockNavigator
-            .nextPage(_: RequestWithIndex))
-            .expects(RequestWithIndex(ExciseAndRestrictedGoodsController.onPageLoad().url, yesOrNo, journey.journeyType, 1))
-            .returning(if (yesOrNo == Yes) CannotUseServiceController.onPageLoad() else ValueWeightOfGoodsController.onPageLoad())
+        (mockNavigator
+          .nextPage(_: ExciseAndRestrictedGoodsRequest)(_: ExecutionContext))
+          .expects(*, *)
+          .returning(Future.successful(ValueWeightOfGoodsController.onPageLoad()))
+          .once()
 
-          val request = buildGet(routes.ExciseAndRestrictedGoodsController.onSubmit().url)
-            .withFormUrlEncodedBody("value" -> yesOrNo.toString)
-
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-          status(eventualResult) mustBe 303
-          redirectLocation(eventualResult).get must endWith(redirectTo)
-        }
+        controller(journey).onSubmit(request).futureValue
       }
+    }
 
-      s"return 400 with any form errors for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.ExciseAndRestrictedGoodsController.onSubmit().url)
-          .withFormUrlEncodedBody("value" -> "in valid")
+    s"return 400 with any form errors for $importOrExport" in {
+      val request = buildPost(ExciseAndRestrictedGoodsController.onSubmit().url, aSessionId)
+        .withFormUrlEncodedBody("value" -> "in valid")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        val result = contentAsString(eventualResult)
+      val eventualResult = controller(journey).onSubmit(request)
+      val result = contentAsString(eventualResult)
 
-        status(eventualResult) mustBe 400
-        result must include(messageApi("error.summary.title"))
-        result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.title"))
-        result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.heading"))
-      }
+      status(eventualResult) mustBe 400
+      result must include(messageApi("error.summary.title"))
+      result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.title"))
+      result must include(messageApi(s"exciseAndRestrictedGoods.$importOrExport.heading"))
     }
   }
 }

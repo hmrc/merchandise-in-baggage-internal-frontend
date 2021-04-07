@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec {
 
   val view = injector.instanceOf[ImportExportChoice]
-  val controller = new ImportExportChoiceController(component, view, actionProvider, repo)
+  val controller = new ImportExportChoiceController(controllerComponents, view, actionProvider, repo)
 
   "onPageLoad" should {
     "return 200 with radio button" in {

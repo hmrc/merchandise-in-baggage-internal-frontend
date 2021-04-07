@@ -29,7 +29,8 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
 
   private val view = app.injector.instanceOf[ValueWeightOfGoodsView]
   val controller: DeclarationJourney => ValueWeightOfGoodsController =
-    declarationJourney => new ValueWeightOfGoodsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new ValueWeightOfGoodsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney =

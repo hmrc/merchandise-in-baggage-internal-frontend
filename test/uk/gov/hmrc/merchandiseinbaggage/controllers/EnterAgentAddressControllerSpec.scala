@@ -29,7 +29,11 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
 
   val controller: DeclarationJourney => EnterAgentAddressController =
     declarationJourney =>
-      new EnterAgentAddressController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), addressLookupConnector)
+      new EnterAgentAddressController(
+        controllerComponents,
+        stubProvider(declarationJourney),
+        stubRepo(declarationJourney),
+        addressLookupConnector)
 
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {

@@ -29,7 +29,8 @@ class TravellerDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
   private val view = app.injector.instanceOf[TravellerDetailsPage]
   val controller: DeclarationJourney => TravellerDetailsController =
-    declarationJourney => new TravellerDetailsController(component, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+    declarationJourney =>
+      new TravellerDetailsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
 
   forAll(declarationTypesTable) { importOrExport =>
     val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
