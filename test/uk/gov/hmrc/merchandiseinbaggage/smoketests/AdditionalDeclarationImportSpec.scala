@@ -17,13 +17,11 @@
 package uk.gov.hmrc.merchandiseinbaggage.smoketests
 
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, DeclarationType, Paid, SessionId}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, PurchaseDetailsInput, RetrieveDeclaration}
-import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.{CheckYourAnswersPage, ExciseAndRestrictedGoodsPage, GoodsOriginPage, GoodsTypeQuantityPage, GoodsVatRatePage, ImportExportChoicePage, PaymentCalculationPage, PreviousDeclarationDetailsPage, PurchaseDetailsPage, RetrieveDeclarationPage, ReviewGoodsPage, ValueWeightOfGoodsPage}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Paid}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{PurchaseDetailsInput, RetrieveDeclaration}
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
-
-import java.time.LocalDateTime
 
 class AdditionalDeclarationImportSpec extends BaseUiSpec {
 

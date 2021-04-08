@@ -16,19 +16,17 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.ImportExportChoiceForm._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
-import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeExport, MakeImport}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.AddToExisting
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ImportExportChoiceRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ImportExportChoice
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,7 +34,8 @@ class ImportExportChoiceController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   view: ImportExportChoice,
   actionProvider: DeclarationJourneyActionProvider,
-  val repo: DeclarationJourneyRepository)(implicit ec: ExecutionContext, appConf: AppConfig)
+  val repo: DeclarationJourneyRepository,
+  navigator: Navigator)(implicit ec: ExecutionContext, appConf: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   val onPageLoad = actionProvider.initJourneyAction { implicit request =>
@@ -48,22 +47,15 @@ class ImportExportChoiceController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future successful BadRequest(view(formWithErrors)),
-        choice => {
-          val (declarationType, journeyType) = choice match {
-            case MakeImport    => (Import, New)
-            case MakeExport    => (Export, New)
-            case AddToExisting => (Import, Amend) //defaults to Import, will be set correctly in the next page
-          }
-
-          repo
-            .upsert(DeclarationJourney(SessionId(request.session(SessionKeys.sessionId)), declarationType, journeyType))
-            .map { _ =>
-              journeyType match {
-                case New   => Redirect(routes.GoodsDestinationController.onPageLoad()).addingToSession("journeyType"    -> "new")
-                case Amend => Redirect(routes.RetrieveDeclarationController.onPageLoad()).addingToSession("journeyType" -> "amend")
+        choice =>
+          navigator
+            .nextPage(ImportExportChoiceRequest(choice, SessionId(request.session(SessionKeys.sessionId)), repo.upsert))
+            .map { call =>
+              choice match {
+                case AddToExisting => Redirect(call).addingToSession("journeyType" -> "amend")
+                case _             => Redirect(call).addingToSession("journeyType" -> "new")
               }
-            }
-        }
+          }
       )
   }
 }

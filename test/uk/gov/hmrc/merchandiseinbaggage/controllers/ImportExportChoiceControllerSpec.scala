@@ -16,23 +16,28 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeExport}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.ImportExportChoiceRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ImportExportChoice
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec {
+class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   val view = injector.instanceOf[ImportExportChoice]
-  val controller = new ImportExportChoiceController(controllerComponents, view, actionProvider, repo)
+  val mockNavigator = mock[Navigator]
+  val controller = new ImportExportChoiceController(controllerComponents, view, actionProvider, repo, mockNavigator)
 
   "onPageLoad" should {
     "return 200 with radio button" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = buildGet(routes.ImportExportChoiceController.onPageLoad.url)
+      val request = buildGet(ImportExportChoiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
       val result = contentAsString(eventualResult)
@@ -46,31 +51,39 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
   }
 
   "onSubmit" should {
-    "redirect to /goods-destination after successful form submit for New journeys" in {
+    "redirect with navigator adding 'new' to header" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+      val request = buildGet(ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> MakeExport.toString)
 
+      (mockNavigator
+        .nextPage(_: ImportExportChoiceRequest)(_: ExecutionContext))
+        .expects(*, *)
+        .returning(Future successful GoodsDestinationController.onPageLoad())
+        .once()
+
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 303
-      redirectLocation(eventualResult) mustBe Some(routes.GoodsDestinationController.onPageLoad().url)
       session(eventualResult).get("journeyType") mustBe Some("new")
     }
 
-    "redirect to /retrieve-declaration after successful form submit for Amend journeys" in {
+    "redirect with navigator adding 'amend' to header" in {
       givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> AddToExisting.toString)
 
+      (mockNavigator
+        .nextPage(_: ImportExportChoiceRequest)(_: ExecutionContext))
+        .expects(*, *)
+        .returning(Future successful GoodsDestinationController.onPageLoad())
+        .once()
+
       val eventualResult = controller.onSubmit(request)
-      status(eventualResult) mustBe 303
-      redirectLocation(eventualResult) mustBe Some(routes.RetrieveDeclarationController.onPageLoad().url)
       session(eventualResult).get("journeyType") mustBe Some("amend")
     }
 
     "return 400 with required form error" in {
       givenTheUserIsAuthenticatedAndAuthorised()
-      val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
+      val request = buildGet(ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "")
 
       val eventualResult = controller.onSubmit(request)

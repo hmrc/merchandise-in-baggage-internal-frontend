@@ -28,6 +28,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEnt
 import uk.gov.hmrc.merchandiseinbaggage.navigation._
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, PropertyBaseTables}
 import com.softwaremill.quicklens._
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeImport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -249,16 +250,24 @@ class NavigatorSpec extends DeclarationJourneyControllerSpec with PropertyBaseTa
         result.futureValue mustBe ReviewGoodsController.onPageLoad()
       }
 
-      //TODO add to navigator
-//      if (newOrAmend == New) {
-//        s"from ${ImportExportChoiceController.onPageLoad().url} navigates to ${GoodsDestinationController
-//          .onPageLoad()} for $newOrAmend & $importOrExport" in new Navigator {
-//          val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
-//          val result = nextPage(NewOrExistingRequest(journey, _ => Future(journey), false))
-//
-//          result.futureValue mustBe GoodsDestinationController.onPageLoad()
-//        }
-//      }
+      s"from ${ImportExportChoiceController.onPageLoad()}" must {
+        if (newOrAmend == New) {
+          s"navigates to ${GoodsDestinationController.onPageLoad()} for $newOrAmend & $importOrExport" in new Navigator {
+            val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
+            val result = nextPage(ImportExportChoiceRequest(MakeImport, aSessionId, _ => Future(journey)))
+
+            result.futureValue mustBe GoodsDestinationController.onPageLoad()
+          }
+        }
+        if (newOrAmend == Amend) {
+          s"navigates to ${RetrieveDeclarationController.onPageLoad()} for $newOrAmend & $importOrExport" in new Navigator {
+            val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
+            val result = nextPage(ImportExportChoiceRequest(AddToExisting, aSessionId, _ => Future(journey)))
+
+            result.futureValue mustBe RetrieveDeclarationController.onPageLoad()
+          }
+        }
+      }
 
       s"from ${ReviewGoodsController.onPageLoad().url} navigates to /declare-commercial-goods/goods-type-quantity/idx + 1 " +
         s"for $newOrAmend & $importOrExport" in new Navigator {

@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.navigation
 
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Declaration, GoodsDestination, YesNo}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntry, PurchaseDetailsInput}
+import uk.gov.hmrc.merchandiseinbaggage.model.api._
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntry, ImportExportChoice, PurchaseDetailsInput}
 
 import scala.concurrent.Future
 
@@ -125,10 +125,10 @@ final case class VehicleSizeRequest(
   declarationRequiredAndComplete: Boolean)
     extends NavigationRequestsAsync
 
-final case class NewOrExistingRequest(
-  updatedDeclarationJourney: DeclarationJourney,
-  upsert: DeclarationJourney => Future[DeclarationJourney],
-  declarationRequiredAndComplete: Boolean)
+final case class ImportExportChoiceRequest(
+  choice: ImportExportChoice,
+  sessionId: SessionId,
+  upsert: DeclarationJourney => Future[DeclarationJourney])
     extends NavigationRequestsAsync
 
 final case class AgentDetailsRequest(

@@ -23,6 +23,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.{GreatBritai
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{YesNo, _}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeExport, MakeImport}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, _}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.{NavigationRequestsAsync, _}
 import uk.gov.hmrc.merchandiseinbaggage.service.CurrencyService
@@ -33,6 +34,7 @@ class Navigator {
   import NavigatorMapping._
 
   def nextPage(request: NavigationRequestsAsync)(implicit ec: ExecutionContext): Future[Call] = request match {
+    case ImportExportChoiceRequest(choice, sessionId, upsert)              => importExportChoice(choice, sessionId, upsert)
     case ReviewGoodsRequest(value, journey, overThresholdCheck, upsert)    => reviewGoods(value, journey, overThresholdCheck, upsert)
     case PurchaseDetailsRequest(input, idx, journey, entries, upsert)      => purchaseDetails(input, idx, entries, journey, upsert)
     case RemoveGoodsRequest(idx, journey, value, upsert)                   => removeGoodOrRedirect(idx, journey, value, upsert)
@@ -48,7 +50,6 @@ class Navigator {
     case TravellerDetailsRequest(journey, upsert, complete)                => travellerDetails(journey, upsert, complete)
     case ValueWeightOfGoodsRequest(value, idx, journey, upsert, complete)  => valueWeightOfGoods(value, idx, journey, upsert, complete)
     case VehicleSizeRequest(value, journey, upsert, complete)              => vehicleSizeController(value, journey, upsert, complete)
-    case NewOrExistingRequest(journey, upsert, complete)                   => newOrExisting(journey, upsert, complete)
     case AgentDetailsRequest(agentName, journey, upsert)                   => agentDetails(agentName, journey, upsert)
     case PreviousDeclarationDetailsRequest(journey, declaration, upsert)   => previousDeclarationDetails(journey, declaration, upsert)
     case GoodsTypeQuantityRequest(journey, entries, idx, category, upsert) => goodsTypeQuantity(journey, entries, idx, category, upsert)
@@ -185,17 +186,6 @@ object NavigatorMapping {
     upsert: DeclarationJourney => Future[DeclarationJourney],
     declarationRequiredAndComplete: Boolean)(implicit ec: ExecutionContext): Future[Call] =
     persistAndRedirect(updatedDeclarationJourney, declarationRequiredAndComplete, EnterEmailController.onPageLoad(), upsert)
-
-  def newOrExisting(
-    updatedDeclarationJourney: DeclarationJourney,
-    upsert: DeclarationJourney => Future[DeclarationJourney],
-    declarationRequiredAndComplete: Boolean)(implicit ec: ExecutionContext): Future[Call] = {
-    val redirectTo = updatedDeclarationJourney.journeyType match {
-      case New   => GoodsDestinationController.onPageLoad()
-      case Amend => RetrieveDeclarationController.onPageLoad()
-    }
-    persistAndRedirect(updatedDeclarationJourney, declarationRequiredAndComplete, redirectTo, upsert)
-  }
 
   private def persistAndRedirect(
     updatedDeclarationJourney: DeclarationJourney,
@@ -341,5 +331,22 @@ object NavigatorMapping {
         case (false, false) => redirectIfNotComplete // normal journey flow / user is adding more goods from /review-goods
       }
     }
+  }
+
+  def importExportChoice(choice: ImportExportChoice, sessionId: SessionId, upsert: DeclarationJourney => Future[DeclarationJourney])(
+    implicit ec: ExecutionContext): Future[Call] = {
+    val (declarationType, journeyType) = choice match {
+      case MakeImport    => (Import, New)
+      case MakeExport    => (Export, New)
+      case AddToExisting => (Import, Amend) //defaults to Import, will be set correctly in the next page
+    }
+
+    upsert(DeclarationJourney(sessionId, declarationType, journeyType))
+      .map { _ =>
+        journeyType match {
+          case New   => GoodsDestinationController.onPageLoad()
+          case Amend => RetrieveDeclarationController.onPageLoad()
+        }
+      }
   }
 }
