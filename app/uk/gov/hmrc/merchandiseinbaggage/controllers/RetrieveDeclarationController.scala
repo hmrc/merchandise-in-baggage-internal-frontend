@@ -17,19 +17,18 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import cats.implicits._
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.{AmendDeclarationConfiguration, AppConfig}
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.RetrieveDeclarationForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, NotRequired, Paid}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, GoodsEntries, ImportGoodsEntry, RetrieveDeclaration}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
+import uk.gov.hmrc.merchandiseinbaggage.navigation.RetrieveDeclarationRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.utils.Utils.FutureOps
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RetrieveDeclarationView
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -38,6 +37,7 @@ class RetrieveDeclarationController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
   mibConnector: MibConnector,
+  navigator: Navigator,
   view: RetrieveDeclarationView
 )(implicit appConfig: AppConfig, val ec: ExecutionContext)
     extends DeclarationJourneyUpdateController with AmendDeclarationConfiguration {
@@ -66,33 +66,15 @@ class RetrieveDeclarationController @Inject()(
     mibConnector
       .findBy(retrieveDeclaration.mibReference, retrieveDeclaration.eori)
       .fold(
-        error => Future successful InternalServerError(error), {
-          case Some(declaration) if isValid(declaration) =>
-            val goodsEntries = declaration.declarationType match {
-              case Import => GoodsEntries(ImportGoodsEntry())
-              case Export => GoodsEntries(ExportGoodsEntry())
-            }
-            repo.upsert(
-              request.declarationJourney
-                .copy(
-                  declarationId = declaration.declarationId,
-                  declarationType = declaration.declarationType,
-                  goodsEntries = goodsEntries,
-                  maybeRetrieveDeclaration = Some(retrieveDeclaration)
-                )) map { _ =>
-              Redirect(routes.PreviousDeclarationDetailsController.onPageLoad())
-            }
-          case _ =>
-            repo.upsert(request.declarationJourney.copy(maybeRetrieveDeclaration = Some(retrieveDeclaration))) map { _ =>
-              Redirect(routes.DeclarationNotFoundController.onPageLoad())
-            }
+        error => Future successful InternalServerError(error), { maybeDeclaration =>
+          navigator
+            .nextPage(
+              RetrieveDeclarationRequest(
+                maybeDeclaration,
+                request.declarationJourney.copy(maybeRetrieveDeclaration = Some(retrieveDeclaration)),
+                repo.upsert))
+            .map(Redirect)
         }
       )
       .flatten
-
-  private def isValid(declaration: Declaration) =
-    declaration.declarationType match {
-      case Export => true
-      case Import => declaration.paymentStatus.contains(Paid) || declaration.paymentStatus.contains(NotRequired)
-    }
 }

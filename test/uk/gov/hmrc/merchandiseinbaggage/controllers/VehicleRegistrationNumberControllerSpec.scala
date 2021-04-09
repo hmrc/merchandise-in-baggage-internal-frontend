@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
@@ -24,21 +25,27 @@ import uk.gov.hmrc.merchandiseinbaggage.views.html.VehicleRegistrationNumberView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControllerSpec {
+class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
-  val view = app.injector.instanceOf[VehicleRegistrationNumberView]
-  val controller: DeclarationJourney => VehicleRegistrationNumberController =
-    declarationJourney =>
-      new VehicleRegistrationNumberController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+  val view = injector.instanceOf[VehicleRegistrationNumberView]
+  val navigator = injector.instanceOf[Navigator]
 
-  forAll(declarationTypesTable) { importOrExport =>
-    val journey: DeclarationJourney = startedImportJourney.copy(declarationType = importOrExport)
+  def controller(declarationJourney: DeclarationJourney) =
+    new VehicleRegistrationNumberController(
+      controllerComponents,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      navigator,
+      view)
+
+  declarationTypes.foreach { importOrExport =>
+    val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
+
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
-        val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
         contentAsString(eventualResult) must include(messages("vehicleRegistrationNumber.title"))
@@ -49,24 +56,22 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
 
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildPost(routes.VehicleRegistrationNumberController.onSubmit().url, aSessionId)
+          .withFormUrlEncodedBody("value" -> "KM04 123")
 
-        val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
-          .withFormUrlEncodedBody("value" -> "business-name")
-
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
+        val eventualResult = controller(journey).onSubmit()(request)
 
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
       }
 
       s"return 400 with required form error for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
-        val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url)
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value123" -> "")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
+        val eventualResult = controller(journey).onSubmit()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

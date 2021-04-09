@@ -57,11 +57,10 @@ class GoodsTypeQuantityController @Inject()(
       .fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, idx, request.declarationJourney.declarationType, backButtonUrl))),
-        categoryQuantityOfGoods => {
+        categoryQuantityOfGoods =>
           navigator
             .nextPage(GoodsTypeQuantityRequest(request.declarationJourney, request.goodsEntry, idx, categoryQuantityOfGoods, repo.upsert))
             .map(Redirect)
-        }
       )
   }
 }

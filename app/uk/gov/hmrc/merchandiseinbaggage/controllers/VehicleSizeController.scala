@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.VehicleSizeForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo._
+import uk.gov.hmrc.merchandiseinbaggage.navigation.VehicleSizeRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.VehicleSizeView
 
@@ -30,6 +30,7 @@ class VehicleSizeController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: VehicleSizeView,
 )(implicit ec: ExecutionContext, appConf: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -52,12 +53,18 @@ class VehicleSizeController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future successful BadRequest(view(formWithErrors, request.declarationJourney.declarationType, backButtonUrl)),
-        isSmallVehicle =>
-          persistAndRedirect(
-            request.declarationJourney.copy(maybeTravellingBySmallVehicle = Some(isSmallVehicle)),
-            if (isSmallVehicle == Yes) routes.VehicleRegistrationNumberController.onPageLoad()
-            else routes.CannotUseServiceController.onPageLoad()
-        )
+        isSmallVehicle => {
+          val updated = request.declarationJourney.copy(maybeTravellingBySmallVehicle = Some(isSmallVehicle))
+          navigator
+            .nextPage(
+              VehicleSizeRequest(
+                isSmallVehicle,
+                updated,
+                repo.upsert,
+                updated.declarationRequiredAndComplete
+              ))
+            .map(Redirect)
+        }
       )
   }
 }

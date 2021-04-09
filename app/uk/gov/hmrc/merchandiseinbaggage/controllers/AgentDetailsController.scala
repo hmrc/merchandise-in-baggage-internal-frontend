@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.AgentDetailsForm.form
+import uk.gov.hmrc.merchandiseinbaggage.navigation.AgentDetailsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.AgentDetailsView
 
@@ -30,6 +31,7 @@ class AgentDetailsController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: AgentDetailsView
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -48,15 +50,10 @@ class AgentDetailsController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, backButtonUrl, request.declarationType))),
-        value => {
-          repo
-            .upsert(
-              request.declarationJourney.copy(maybeCustomsAgentName = Some(value))
-            )
-            .map { _ =>
-              Redirect(routes.EnterAgentAddressController.onPageLoad())
-            }
-        }
+        value =>
+          navigator
+            .nextPage(AgentDetailsRequest(value, request.declarationJourney, repo.upsert))
+            .map(Redirect)
       )
   }
 }

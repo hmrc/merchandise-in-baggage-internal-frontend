@@ -16,32 +16,43 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import java.time.LocalDate
+
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsInVehicleController, JourneyDetailsController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.navigation.JourneyDetailsRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.JourneyDetailsPage
 
-import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
+class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   private val view = app.injector.instanceOf[JourneyDetailsPage]
+  private val mockNavigator = mock[Navigator]
   private val controller: DeclarationJourney => JourneyDetailsController =
     declarationJourney =>
-      new JourneyDetailsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+      new JourneyDetailsController(
+        controllerComponents,
+        stubProvider(declarationJourney),
+        stubRepo(declarationJourney),
+        mockNavigator,
+        view)
 
-  forAll(declarationTypesTable) { importOrExport =>
+  declarationTypes.foreach { importOrExport =>
     val journey: DeclarationJourney =
-      startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
-    "onPageLoad" should {
-      s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
+      DeclarationJourney(aSessionId, importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
 
-        val request = buildGet(routes.JourneyDetailsController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
+    "onPageLoad" should {
+      s"return 200 with correct content for $importOrExport" in {
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildGet(JourneyDetailsController.onPageLoad().url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -55,9 +66,9 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
 
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
+        givenTheUserIsAuthenticatedAndAuthorised
         val today = LocalDate.now()
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
+        val request = buildPost(JourneyDetailsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody(
             "port"               -> "ABZ",
             "dateOfTravel.day"   -> today.getDayOfMonth.toString,
@@ -65,17 +76,20 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec {
             "dateOfTravel.year"  -> today.getYear.toString
           )
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(routes.GoodsInVehicleController.onPageLoad().url)
+        (mockNavigator
+          .nextPage(_: JourneyDetailsRequest)(_: ExecutionContext))
+          .expects(*, *)
+          .returning(Future.successful(GoodsInVehicleController.onPageLoad()))
+
+        controller(journey).onSubmit(request).futureValue
       }
 
       s"return 400 with any form errors for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.JourneyDetailsController.onSubmit().url)
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildPost(JourneyDetailsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("port111" -> "ABZ")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey)).onSubmit(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 400

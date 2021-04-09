@@ -23,6 +23,7 @@ import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.EoriNumberForm.{form, formWithError}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, Eori, YesNo}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.EoriNumberRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EoriNumberView
 
@@ -34,7 +35,8 @@ class EoriNumberController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
   view: EoriNumberView,
-  mibConnector: MibConnector
+  mibConnector: MibConnector,
+  navigator: Navigator
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
@@ -74,9 +76,12 @@ class EoriNumberController @Inject()(
 
   private def validateEoriAndRedirect(eori: String, isAgent: YesNo, declarationType: DeclarationType, response: CheckResponse)(
     implicit request: DeclarationJourneyRequest[AnyContent]): Future[Result] =
-    if (response.valid)
-      persistAndRedirect(request.declarationJourney.copy(maybeEori = Some(Eori(eori))), routes.TravellerDetailsController.onPageLoad())
-    else
+    if (response.valid) {
+      val updated = request.declarationJourney.copy(maybeEori = Some(Eori(eori)))
+      navigator
+        .nextPage(EoriNumberRequest(updated, repo.upsert, updated.declarationRequiredAndComplete))
+        .map(Redirect)
+    } else
       Future.successful(badRequestResult(isAgent, declarationType, eori))
 
   private def badRequestResult(isAgent: YesNo, declarationType: DeclarationType, eori: String)(

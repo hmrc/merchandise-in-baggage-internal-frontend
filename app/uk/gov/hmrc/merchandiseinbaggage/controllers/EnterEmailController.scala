@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.EnterEmailForm.form
+import uk.gov.hmrc.merchandiseinbaggage.navigation.EnterEmailRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EnterEmailView
 
@@ -30,6 +31,7 @@ class EnterEmailController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: EnterEmailView
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -48,8 +50,10 @@ class EnterEmailController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, request.declarationType, backButtonUrl))),
-        email =>
-          persistAndRedirect(request.declarationJourney.copy(maybeEmailAddress = email), routes.JourneyDetailsController.onPageLoad())
+        email => {
+          val updated = request.declarationJourney.copy(maybeEmailAddress = email)
+          navigator.nextPage(EnterEmailRequest(updated, repo.upsert, updated.declarationRequiredAndComplete))
+        }.map(Redirect)
       )
   }
 }

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -27,20 +26,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
 
-  private val view = app.injector.instanceOf[VehicleSizeView]
-  val controller: DeclarationJourney => VehicleSizeController =
-    declarationJourney =>
-      new VehicleSizeController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+  private val view = injector.instanceOf[VehicleSizeView]
+  private val navigator = injector.instanceOf[Navigator]
 
-  forAll(declarationTypesTable) { importOrExport =>
+  def controller(declarationJourney: DeclarationJourney) =
+    new VehicleSizeController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), navigator, view)
+
+  declarationTypes.foreach { importOrExport =>
     val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = dynamicCompletedGoodsEntries(importOrExport))
+      DeclarationJourney(aSessionId, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
+
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
-        val request = buildGet(routes.VehicleSizeController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildGet(routes.VehicleSizeController.onPageLoad().url, aSessionId)
+        val eventualResult = controller(journey).onPageLoad()(request)
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
@@ -50,28 +50,24 @@ class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
       }
     }
 
-    forAll(vehicleRegistrationNumberAnswer) { (yesOrNo, redirectTo) =>
-      "onSubmit" should {
-        s"redirect to $redirectTo after successful form submit with $yesOrNo for $importOrExport" in {
-          givenTheUserIsAuthenticatedAndAuthorised()
+    "onSubmit" should {
+      s"redirect to /vehicle-registration-number after successful form submit with Yes for $importOrExport" in {
+        givenTheUserIsAuthenticatedAndAuthorised
+        val request = buildPost(routes.VehicleSizeController.onSubmit().url, aSessionId)
+          .withFormUrlEncodedBody("value" -> "Yes")
+        val eventualResult = controller(journey).onSubmit()(request)
 
-          val request = buildGet(routes.VehicleSizeController.onSubmit().url)
-            .withFormUrlEncodedBody("value" -> yesOrNo.toString)
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
-
-          status(eventualResult) mustBe 303
-          redirectLocation(eventualResult).get must endWith(redirectTo)
-        }
+        status(eventualResult) mustBe 303
+        redirectLocation(eventualResult) mustBe Some(routes.VehicleRegistrationNumberController.onPageLoad().url)
       }
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
-      val request = buildGet(routes.VehicleSizeController.onSubmit().url)
+      givenTheUserIsAuthenticatedAndAuthorised
+      val request = buildGet(routes.VehicleSizeController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 
-      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
+      val eventualResult = controller(journey).onSubmit()(request)
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 400
@@ -79,20 +75,6 @@ class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
       result must include(messages(s"vehicleSize.$importOrExport.title"))
       result must include(messages(s"vehicleSize.$importOrExport.heading"))
       result must include(messages("vehicleSize.hint"))
-    }
-
-    s"return 400 with required form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
-      val request = buildGet(routes.VehicleSizeController.onSubmit().url)
-        .withFormUrlEncodedBody("value" -> "")
-
-      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit()(request)
-      val result = contentAsString(eventualResult)
-
-      status(eventualResult) mustBe 400
-      result must include(messageApi("error.summary.title"))
-      result must include(messages(s"vehicleSize.error.$importOrExport.required"))
     }
   }
 }

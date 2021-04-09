@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsDestinationForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.NorthernIreland
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsDestinationRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsDestinationView
 
@@ -31,6 +31,7 @@ class GoodsDestinationController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: GoodsDestinationView
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -53,13 +54,16 @@ class GoodsDestinationController @Inject()(
           Future.successful(
             BadRequest(view(formWithErrors, request.declarationJourney.declarationType, routes.ImportExportChoiceController.onSubmit()))),
         value => {
-          val redirectIfNotComplete =
-            if (value == NorthernIreland)
-              routes.CannotUseServiceIrelandController.onPageLoad()
-            else
-              routes.ExciseAndRestrictedGoodsController.onPageLoad()
-
-          persistAndRedirect(request.declarationJourney.copy(maybeGoodsDestination = Some(value)), redirectIfNotComplete)
+          val updated = request.declarationJourney.copy(maybeGoodsDestination = Some(value))
+          navigator
+            .nextPage(
+              GoodsDestinationRequest(
+                value,
+                updated,
+                repo.upsert,
+                updated.declarationRequiredAndComplete
+              ))
+            .map(Redirect)
         }
       )
   }

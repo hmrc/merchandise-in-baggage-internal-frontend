@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsInVehicleForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.Yes
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsInVehicleRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsInVehicleView
 
@@ -30,6 +30,7 @@ class GoodsInVehicleController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: GoodsInVehicleView,
 )(implicit ec: ExecutionContext, appConf: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -52,12 +53,12 @@ class GoodsInVehicleController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future successful BadRequest(view(formWithErrors, request.declarationType, backButtonUrl)),
-        goodsInVehicle =>
-          persistAndRedirect(
-            request.declarationJourney.copy(maybeTravellingByVehicle = Some(goodsInVehicle)),
-            if (goodsInVehicle == Yes) routes.VehicleSizeController.onPageLoad()
-            else routes.CheckYourAnswersController.onPageLoad()
-        )
+        goodsInVehicle => {
+          val updated = request.declarationJourney.copy(maybeTravellingByVehicle = Some(goodsInVehicle))
+          navigator
+            .nextPage(GoodsInVehicleRequest(goodsInVehicle, updated, repo.upsert, updated.declarationRequiredAndComplete))
+            .map(Redirect)
+        }
       )
   }
 }

@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.JourneyDetailsForm.form
+import uk.gov.hmrc.merchandiseinbaggage.navigation.JourneyDetailsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.JourneyDetailsPage
 
@@ -30,6 +31,7 @@ class JourneyDetailsController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: JourneyDetailsPage)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
@@ -50,11 +52,17 @@ class JourneyDetailsController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, request.declarationType, backButtonUrl))),
-        journeyDetailsEntry =>
-          persistAndRedirect(
-            request.declarationJourney.copy(maybeJourneyDetailsEntry = Some(journeyDetailsEntry)),
-            routes.GoodsInVehicleController.onPageLoad()
-        )
+        journeyDetailsEntry => {
+          val updated = request.declarationJourney.copy(maybeJourneyDetailsEntry = Some(journeyDetailsEntry))
+          navigator
+            .nextPage(
+              JourneyDetailsRequest(
+                updated,
+                repo.upsert,
+                updated.declarationRequiredAndComplete
+              ))
+            .map(Redirect)
+        }
       )
   }
 }

@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
+import uk.gov.hmrc.merchandiseinbaggage.navigation.PreviousDeclarationDetailsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PreviousDeclarationDetailsView
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -31,6 +32,7 @@ class PreviousDeclarationDetailsController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
   mibConnector: MibConnector,
+  navigator: Navigator,
   view: PreviousDeclarationDetailsView)(implicit ec: ExecutionContext, appConf: AppConfig)
     extends DeclarationJourneyUpdateController {
 
@@ -46,9 +48,10 @@ class PreviousDeclarationDetailsController @Inject()(
       maybeOriginalDeclaration
         .fold(actionProvider.invalidRequestF(s"declaration not found for id:${request.declarationJourney.declarationId.value}")) {
           originalDeclaration =>
-            repo.upsert(request.declarationJourney.copy(maybeGoodsDestination = Some(originalDeclaration.goodsDestination))).map { _ =>
-              Redirect(routes.ExciseAndRestrictedGoodsController.onPageLoad())
-            }
+            navigator
+              .nextPage(PreviousDeclarationDetailsRequest(request.declarationJourney, originalDeclaration, repo.upsert))
+              .map(Redirect)
+
         }
     }
   }

@@ -16,76 +16,74 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{EnterEmailController, JourneyDetailsController}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.navigation.EnterEmailRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EnterEmailView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec {
+class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   private val view = app.injector.instanceOf[EnterEmailView]
-  val controller: DeclarationJourney => EnterEmailController =
-    declarationJourney =>
-      new EnterEmailController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+  val mockNavigator = mock[Navigator]
 
-  forAll(declarationTypesTable) { importOrExport =>
-    val journey: DeclarationJourney =
-      startedImportJourney.copy(declarationType = importOrExport, maybeIsACustomsAgent = Some(YesNo.No))
-    "onPageLoad" should {
-      s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
+  def controller(declarationJourney: DeclarationJourney) =
+    new EnterEmailController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), mockNavigator, view)
 
-        val request = buildGet(routes.EnterEmailController.onPageLoad().url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
-        val result = contentAsString(eventualResult)
+  val journey: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
-        status(eventualResult) mustBe 200
-        result must include(messageApi("enterEmail.title"))
-        result must include(messageApi("enterEmail.heading"))
-        result must include(messageApi("enterEmail.hint"))
-        result must include(messageApi("enterEmail.email"))
-      }
+  //TODO move content test in UI
+  "onPageLoad" should {
+    s"return 200 with correct content" in {
+      givenTheUserIsAuthenticatedAndAuthorised
+      val request = buildGet(EnterEmailController.onPageLoad().url, aSessionId)
+      val eventualResult = controller(journey).onPageLoad()(request)
+      val result = contentAsString(eventualResult)
+
+      status(eventualResult) mustBe 200
+      result must include(messages("enterEmail.title"))
+      result must include(messages("enterEmail.heading"))
+      result must include(messages("enterEmail.email"))
+      result must include(messages("enterEmail.hint"))
     }
+  }
 
-    "onSubmit" should {
-      s"redirect to next page after a valid email form submit for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.EnterEmailController.onSubmit().url)
-          .withFormUrlEncodedBody("email" -> "s@s.s")
+  "onSubmit" should {
+    s"redirect to /journey-details after successful form submit" in {
+      givenTheUserIsAuthenticatedAndAuthorised
+      val request = buildPost(EnterEmailController.onSubmit().url, aSessionId)
+        .withFormUrlEncodedBody("email" -> "test@email.com")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(routes.JourneyDetailsController.onPageLoad().url)
-      }
+      (mockNavigator
+        .nextPage(_: EnterEmailRequest)(_: ExecutionContext))
+        .expects(*, *)
+        .returning(Future.successful(JourneyDetailsController.onPageLoad()))
+        .once()
 
-      s"redirect to next page if user do not enter any email and submit for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.EnterEmailController.onSubmit().url)
-          .withFormUrlEncodedBody("email" -> "")
-
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(routes.JourneyDetailsController.onPageLoad().url)
-      }
-
-      s"return 400 with any invalid emails for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-        val request = buildGet(routes.EnterEmailController.onSubmit().url)
-          .withFormUrlEncodedBody("email" -> "invalidEmail")
-
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        val result = contentAsString(eventualResult)
-
-        status(eventualResult) mustBe 400
-        result must include(messageApi("enterEmail.title"))
-        result must include(messageApi("enterEmail.heading"))
-        result must include(messageApi("enterEmail.hint"))
-        result must include(messageApi("enterEmail.email"))
-      }
+      controller(journey).onSubmit()(request).futureValue
     }
+  }
+
+  s"return 400 with any form errors" in {
+    givenTheUserIsAuthenticatedAndAuthorised
+    val request = buildPost(EnterEmailController.onSubmit().url, aSessionId)
+      .withFormUrlEncodedBody("email" -> "in valid")
+
+    val eventualResult = controller(journey).onSubmit()(request)
+    val result = contentAsString(eventualResult)
+
+    status(eventualResult) mustBe 400
+    result must include(messages("enterEmail.title"))
+    result must include(messages("enterEmail.heading"))
+    result must include(messages("enterEmail.email"))
+    result must include(messages("enterEmail.hint"))
+    result must include(messages("enterEmail.error.invalid"))
   }
 }

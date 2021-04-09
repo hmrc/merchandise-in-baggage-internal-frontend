@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.forms.VehicleRegistrationNumberForm.form
+import uk.gov.hmrc.merchandiseinbaggage.navigation.VehicleRegistrationNumberRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.views.html.VehicleRegistrationNumberView
 
@@ -30,6 +31,7 @@ class VehicleRegistrationNumberController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
+  navigator: Navigator,
   view: VehicleRegistrationNumberView
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
@@ -48,15 +50,15 @@ class VehicleRegistrationNumberController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, request.declarationType, backButtonUrl))),
-        vehicleReg => {
-          repo
-            .upsert(
-              request.declarationJourney.copy(maybeRegistrationNumber = Some(vehicleReg))
-            )
-            .map { _ =>
-              Redirect(routes.CheckYourAnswersController.onPageLoad())
-            }
-        }
+        vehicleReg =>
+          navigator
+            .nextPage(
+              VehicleRegistrationNumberRequest(
+                request.declarationJourney,
+                vehicleReg,
+                repo.upsert
+              ))
+            .map(Redirect)
       )
   }
 }

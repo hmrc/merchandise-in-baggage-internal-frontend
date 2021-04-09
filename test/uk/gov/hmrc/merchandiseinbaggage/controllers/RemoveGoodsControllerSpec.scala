@@ -16,113 +16,38 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
+import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.mvc.Http.Status
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, RemoveGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.navigation.RemoveGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RemoveGoodsView
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec {
+class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData with MockFactory {
 
-  private val view = app.injector.instanceOf[RemoveGoodsView]
+  val view = app.injector.instanceOf[RemoveGoodsView]
+  val mockNavigator = mock[Navigator]
+  val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, mockNavigator, view)
 
-  forAll(declarationTypesTable) { importOrExport =>
-    val controller: DeclarationJourney => RemoveGoodsController =
-      declarationJourney =>
-        new RemoveGoodsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
-    val journey: DeclarationJourney =
-      DeclarationJourney(SessionId("123"), importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
-    "onPageLoad" should {
-      s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
+  "delegate to navigator for navigation in" in {
+    givenTheUserIsAuthenticatedAndAuthorised
+    givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
+    val postReq = buildPost(RemoveGoodsController.onPageLoad(1).url, completedDeclarationJourney.sessionId)
+      .withFormUrlEncodedBody("value" -> "Yes")
+    val result: Future[Result] = controller.onSubmit(1)(postReq)
 
-        val request = buildGet(routes.RemoveGoodsController.onPageLoad(1).url)
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(1)(request)
-        val result = contentAsString(eventualResult)
+    (mockNavigator
+      .nextPage(_: RemoveGoodsRequest)(_: ExecutionContext))
+      .expects(*, *)
+      .returning(Future.successful(CheckYourAnswersController.onPageLoad()))
 
-        status(eventualResult) mustBe 200
-        result must include(messages("removeGoods.title", "wine"))
-        result must include(messages("removeGoods.heading", "wine"))
-      }
-    }
-
-    forAll(removeGoodsAnswer) { (yesNo, redirectTo) =>
-      "onSubmit" should {
-        s"redirect to $redirectTo after successful form submit with $yesNo and there was only one item for $importOrExport" in {
-          givenTheUserIsAuthenticatedAndAuthorised()
-
-          val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
-            .withFormUrlEncodedBody("value" -> yesNo.toString)
-
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
-
-          status(eventualResult) mustBe 303
-          redirectLocation(eventualResult).get must endWith(redirectTo)
-        }
-      }
-    }
-
-    s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-      givenADeclarationJourneyIsPersistedWithStub(journey)
-
-      val request = buildGet(routes.RemoveGoodsController.onSubmit(1).url)
-        .withFormUrlEncodedBody("value" -> "in valid")
-
-      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(1)(request)
-      val result = contentAsString(eventualResult)
-
-      status(eventualResult) mustBe 400
-      result must include(messageApi("error.summary.title"))
-      result must include(messages("removeGoods.title", "wine"))
-      result must include(messages("removeGoods.heading", "wine"))
-    }
-  }
-  "on submit if answer No" should {
-    val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, view)
-    s"redirect x back to ${routes.CheckYourAnswersController.onPageLoad().url} if journey was completed" in {
-      val result = controller.removeGoodOrRedirect(1, completedDeclarationJourney, No)
-
-      status(result) mustBe Status.SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
-    }
-
-    s"redirect back to ${routes.ReviewGoodsController.onPageLoad().url} if journey was NOT completed" in {
-      val result = controller.removeGoodOrRedirect(1, startedImportJourney, No)
-
-      status(result) mustBe Status.SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.ReviewGoodsController.onPageLoad().url)
-    }
-  }
-
-  "on submit if answer yes" should {
-    val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, view)
-    s"redirect to ${routes.GoodsRemovedController.onPageLoad()} if goods contains an entry" in {
-      val result = controller.removeGoodOrRedirect(1, importJourneyWithStartedGoodsEntry, Yes)
-
-      status(result) mustBe Status.SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.GoodsRemovedController.onPageLoad().url)
-    }
-
-    s"redirect to ${routes.ReviewGoodsController.onPageLoad()} if goods contains more entries" in {
-      val journey = importJourneyWithStartedGoodsEntry.copy(goodsEntries = GoodsEntries(Seq(startedImportGoods, startedImportGoods)))
-      val result = controller.removeGoodOrRedirect(1, journey, Yes)
-
-      status(result) mustBe Status.SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.ReviewGoodsController.onPageLoad().url)
-    }
-
-    s"redirect to ${routes.CheckYourAnswersController.onPageLoad()} if goods contains more entries and is completed" in {
-      val journey = completedDeclarationJourney.copy(goodsEntries = GoodsEntries(Seq(completedImportGoods, completedImportGoods)))
-      val result = controller.removeGoodOrRedirect(1, journey, Yes)
-
-      status(result) mustBe Status.SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.CheckYourAnswersController.onPageLoad().url)
-    }
+    status(result) mustBe Status.SEE_OTHER
   }
 }
