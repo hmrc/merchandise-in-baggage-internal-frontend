@@ -70,7 +70,7 @@ class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {
   "DeclarationGoodsRequest" should {
     "new import journey" in {
       val djr = new DeclarationJourneyRequest(startedImportJourney, fakeAuthRequest)
-      val request = new DeclarationGoodsRequest( djr, startedImportGoods)
+      val request = new DeclarationGoodsRequest(djr, startedImportGoods)
       val result = ViewUtils.googleAnalyticsJourneyType(request)
 
       result mustBe ("new")
@@ -78,7 +78,7 @@ class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {
 
     "new export journey" in {
       val djr = new DeclarationJourneyRequest(startedExportJourney, fakeAuthRequest)
-      val request = new DeclarationGoodsRequest( djr, startedExportGoods)
+      val request = new DeclarationGoodsRequest(djr, startedExportGoods)
       val result = ViewUtils.googleAnalyticsJourneyType(request)
 
       result mustBe ("new")
@@ -86,7 +86,7 @@ class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {
 
     "amend import journey" in {
       val djr = new DeclarationJourneyRequest(startedImportJourney.copy(journeyType = Amend), fakeAuthRequest)
-      val request = new DeclarationGoodsRequest( djr, startedImportGoods)
+      val request = new DeclarationGoodsRequest(djr, startedImportGoods)
       val result = ViewUtils.googleAnalyticsJourneyType(request)
 
       result mustBe ("amend")
@@ -94,7 +94,7 @@ class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {
 
     "amend export journey" in {
       val djr = new DeclarationJourneyRequest(startedExportJourney.copy(journeyType = Amend), fakeAuthRequest)
-      val request = new DeclarationGoodsRequest( djr, startedExportGoods)
+      val request = new DeclarationGoodsRequest(djr, startedExportGoods)
       val result = ViewUtils.googleAnalyticsJourneyType(request)
 
       result mustBe ("amend")
