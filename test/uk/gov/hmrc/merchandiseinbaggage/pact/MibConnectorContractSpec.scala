@@ -48,7 +48,7 @@ class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData
         .description("Persisting a declaration")
         .given("persistDeclarationTest")
         .uponReceiving(POST, s"$declarationsUrl", None, Map("Content-Type" -> "application/json"), Json.toJson(declaration).toString)
-        .willRespondWith(201)
+        .willRespondWith(201, s""""\\"${declaration.declarationId.value}\\""""")
     )
     .addInteraction(
       interaction
@@ -60,7 +60,7 @@ class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData
           None,
           Map("Content-Type" -> "application/json"),
           Json.toJson(declarationWithAmendment).toString)
-        .willRespondWith(200)
+        .willRespondWith(200, s""""\\"${declarationWithAmendment.declarationId.value}\\""""")
     )
     .addInteraction(
       interaction
