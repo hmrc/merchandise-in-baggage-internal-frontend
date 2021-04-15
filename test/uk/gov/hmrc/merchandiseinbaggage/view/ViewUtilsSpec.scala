@@ -18,11 +18,10 @@ package uk.gov.hmrc.merchandiseinbaggage.view
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 import uk.gov.hmrc.merchandiseinbaggage.auth.AuthRequest
 import uk.gov.hmrc.merchandiseinbaggage.controllers.{DeclarationGoodsRequest, DeclarationJourneyRequest}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpecWithApplication
 import uk.gov.hmrc.merchandiseinbaggage.views.ViewUtils
 
 class ViewUtilsSpec extends BaseSpecWithApplication with CoreTestData {

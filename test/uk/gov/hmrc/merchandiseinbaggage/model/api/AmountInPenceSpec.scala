@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.model.api
 
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpec
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpec, CoreTestData}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 
 class AmountInPenceSpec extends BaseSpec with CoreTestData {

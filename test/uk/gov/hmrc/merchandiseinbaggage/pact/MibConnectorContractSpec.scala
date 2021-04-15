@@ -26,9 +26,8 @@ import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId}
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpecWithApplication
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData with MibConfiguration with WireMockSupport {

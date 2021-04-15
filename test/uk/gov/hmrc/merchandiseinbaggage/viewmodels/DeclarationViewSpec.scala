@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.viewmodels
 
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpec, CoreTestData}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, JourneyOnFoot, NotRequired, Paid}
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpec
 import uk.gov.hmrc.merchandiseinbaggage.viewmodels.DeclarationView.proofOfOriginNeeded
 import com.softwaremill.quicklens._
 

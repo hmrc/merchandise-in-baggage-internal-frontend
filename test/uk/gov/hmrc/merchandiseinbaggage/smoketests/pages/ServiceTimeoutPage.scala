@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.smoketests.pages
 
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpecWithApplication
+import uk.gov.hmrc.merchandiseinbaggage.BaseSpecWithApplication
 
 object ServiceTimeoutPage extends BaseSpecWithApplication {
   val path = "/declare-commercial-goods/service-timed-out"

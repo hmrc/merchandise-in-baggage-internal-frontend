@@ -23,6 +23,7 @@ import play.api.test.Helpers.{GET, POST}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
 import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.merchandiseinbaggage.BaseSpecWithApplication
 import uk.gov.hmrc.merchandiseinbaggage.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.{AddressLookupFrontendConnector, MibConnector}

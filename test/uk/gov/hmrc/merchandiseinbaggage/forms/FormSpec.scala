@@ -18,7 +18,7 @@ package uk.gov.hmrc.merchandiseinbaggage.forms
 
 import org.scalatest.{Assertion, OptionValues}
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpec
+import uk.gov.hmrc.merchandiseinbaggage.BaseSpec
 
 trait FormSpec extends BaseSpec with OptionValues {
 

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.merchandiseinbaggage.forms
 
 import play.api.data.FormError
+import uk.gov.hmrc.merchandiseinbaggage.BaseSpec
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm._
-import uk.gov.hmrc.merchandiseinbaggage.support.BaseSpec
 
 class CheckYourAnswersFormProviderSpec extends BaseSpec {
   "bind tax due in pence to the form" in {
