@@ -17,7 +17,6 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import java.time.LocalDateTime
-
 import play.api.mvc.DefaultActionBuilder
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -29,8 +28,9 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, _
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
-import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, WireMockSupport}
+import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 import uk.gov.hmrc.merchandiseinbaggage.views.html.DeclarationConfirmationView
+import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

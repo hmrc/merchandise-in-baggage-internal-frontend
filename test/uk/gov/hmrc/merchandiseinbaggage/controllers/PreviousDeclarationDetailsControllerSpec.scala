@@ -25,8 +25,9 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, Paid, Sessio
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
-import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, WireMockSupport}
+import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PreviousDeclarationDetailsView
+import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

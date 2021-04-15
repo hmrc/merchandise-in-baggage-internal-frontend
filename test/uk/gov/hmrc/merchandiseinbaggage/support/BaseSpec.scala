@@ -34,6 +34,7 @@ import uk.gov.hmrc.merchandiseinbaggage.config.MongoConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import play.api.test.CSRFTokenHelper._
+import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 trait BaseSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach
 

@@ -30,6 +30,7 @@ import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAut
 import uk.gov.hmrc.merchandiseinbaggage.support.TpsPaymentsBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView, CheckYourAnswersExportView, CheckYourAnswersImportView}
+import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
