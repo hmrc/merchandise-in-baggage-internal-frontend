@@ -22,7 +22,6 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{ExciseAndRestrictedG
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.ExciseAndRestrictedGoodsRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ExciseAndRestrictedGoodsView
 
@@ -45,7 +44,6 @@ class ExciseAndRestrictedGoodsControllerSpec extends DeclarationJourneyControlle
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
 
         val request = buildGet(ExciseAndRestrictedGoodsController.onPageLoad.url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)

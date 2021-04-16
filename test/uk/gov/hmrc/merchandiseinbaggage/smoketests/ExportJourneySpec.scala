@@ -22,13 +22,11 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Emai
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeExport
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth._
 
 class ExportJourneySpec extends BaseUiSpec {
 
   "Export journey" should {
     "work as expected" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, MakeExport.toString)

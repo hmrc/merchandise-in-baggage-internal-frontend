@@ -19,22 +19,17 @@ package uk.gov.hmrc.merchandiseinbaggage.smoketests
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.AddToExisting
 import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
-import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenFindByDeclarationReturnSuccess
 import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth
 
 class AmendJourneySpec extends BaseUiSpec {
 
   "AddToExisting journey - happy path" should {
     "work as expected" in {
-      MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised()
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, AddToExisting.toString)
 
-      givenFindByDeclarationReturnSuccess(mibReference, eori)
       submitPage(RetrieveDeclarationPage, RetrieveDeclaration(mibReference, eori))
-
-      //webDriver.getCurrentUrl mustBe fullUrl(RetrieveDeclarationPage.path)
     }
   }
 }

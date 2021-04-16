@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.CustomsAgentView
 
@@ -36,8 +35,6 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with radio buttons on $importOrExport answer" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
         val request = buildGet(routes.CustomsAgentController.onPageLoad.url)
         val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -49,7 +46,6 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
       }
 
       s"show required error on form submit without answering for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.CustomsAgentController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "")
 
@@ -59,7 +55,6 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
       }
 
       s"return 400 with any form errors $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.CustomsAgentController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> "in valid")
 
@@ -77,7 +72,6 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
   forAll(customAgentYesOrNoAnswer) { (yesOrNo, redirectTo) =>
     "onSubmit" should {
       s"redirect to $redirectTo on submit if answer is $yesOrNo" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(routes.CustomsAgentController.onSubmit().url)
           .withFormUrlEncodedBody("value" -> yesOrNo.toString)
 

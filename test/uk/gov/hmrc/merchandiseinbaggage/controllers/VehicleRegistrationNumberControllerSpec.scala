@@ -19,7 +19,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.VehicleRegistrationNumberView
 
@@ -43,7 +42,6 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
 
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildGet(routes.VehicleRegistrationNumberController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad()(request)
 
@@ -56,7 +54,6 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
 
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildPost(routes.VehicleRegistrationNumberController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "KM04 123")
 
@@ -67,7 +64,6 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
       }
 
       s"return 400 with required form error for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildGet(routes.VehicleRegistrationNumberController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value123" -> "")
 

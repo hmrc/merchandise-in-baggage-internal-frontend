@@ -26,7 +26,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.RetrieveDeclarationRequest
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenFindByDeclarationReturnStatus
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, PropertyBaseTables}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RetrieveDeclarationView
 import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
@@ -59,7 +58,6 @@ class RetrieveDeclarationControllerSpec
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with expected content for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(RetrieveDeclarationController.onPageLoad.url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -88,7 +86,6 @@ class RetrieveDeclarationControllerSpec
 
   "onSubmit" should {
     s"redirect by delegating to Navigator" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       givenFindByDeclarationReturnStatus(mibReference, eori, 404)
       val request = buildPost(RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
@@ -102,7 +99,6 @@ class RetrieveDeclarationControllerSpec
     }
 
     s"redirect to /internal-server-error after successful form submit but some unexpected error is thrown from the BE" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       givenFindByDeclarationReturnStatus(mibReference, eori, 500)
       val request = buildPost(RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> mibReference.value, "eori" -> eori.value)
@@ -112,7 +108,6 @@ class RetrieveDeclarationControllerSpec
     }
 
     "return 400 for invalid form data" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(RetrieveDeclarationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("mibReference" -> "XAMB0000010", "eori" -> "GB12345")
       val eventualResult = controller(journey).onSubmit(request)

@@ -24,7 +24,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
 
@@ -50,8 +49,6 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
 
   "onPageLoad" should {
     "return 200 with expected content" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
       val journey = DeclarationJourney(
         SessionId("123"),
         DeclarationType.Import,
@@ -78,8 +75,6 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
     forAll(declarationTypesTable) { importOrExport =>
       forAll(paymentCalculationThreshold) { (thresholdValue, redirectTo) =>
         s"redirect to $redirectTo for $importOrExport if threshold is $thresholdValue" in {
-          givenTheUserIsAuthenticatedAndAuthorised()
-
           val journey = DeclarationJourney(
             SessionId("123"),
             DeclarationType.Export,

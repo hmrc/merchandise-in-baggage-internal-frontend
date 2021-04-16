@@ -20,7 +20,6 @@ import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.{AddToExisting, MakeExport}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.ImportExportChoiceRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ImportExportChoice
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
@@ -36,7 +35,6 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
 
   "onPageLoad" should {
     "return 200 with radio button" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(ImportExportChoiceController.onPageLoad.url)
 
       val eventualResult = controller.onPageLoad(request)
@@ -52,7 +50,6 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
 
   "onSubmit" should {
     "redirect with navigator adding 'new' to header" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> MakeExport.toString)
 
@@ -67,7 +64,6 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     "redirect with navigator adding 'amend' to header" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(routes.ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> AddToExisting.toString)
 
@@ -82,7 +78,6 @@ class ImportExportChoiceControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     "return 400 with required form error" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(ImportExportChoiceController.onSubmit().url)
         .withFormUrlEncodedBody("value" -> "")
 

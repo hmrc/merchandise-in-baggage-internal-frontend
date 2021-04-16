@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +29,6 @@ class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with expected content for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         repo.insert(startedImportToGreatBritainJourney.copy(declarationType = importOrExport)).futureValue
 
         val request = buildGet(routes.ResetServiceController.onPageLoad().url, aSessionId)
@@ -47,5 +45,8 @@ class ResetServiceControllerSpec extends DeclarationJourneyControllerSpec {
     }
   }
 
-  override def beforeEach(): Unit = repo.deleteAll().futureValue
+  override def beforeEach(): Unit = {
+    repo.deleteAll().futureValue
+    super.beforeEach()
+  }
 }

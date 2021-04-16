@@ -23,7 +23,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsTypeQuantityRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsTypeQuantityView
 
@@ -46,8 +45,6 @@ class GoodsTypeQuantityControllerSpec extends DeclarationJourneyControllerSpec w
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
         val request = buildGet(GoodsTypeQuantityController.onPageLoad(1).url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(1)(request)
         val result = contentAsString(eventualResult)

@@ -20,7 +20,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ValueWeightOfGoodsView
 
@@ -38,7 +37,6 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
       DeclarationJourney(aSessionId, importOrExport).copy(maybeGoodsDestination = Some(GreatBritain))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -51,7 +49,6 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
 
     "onSubmit" should {
       s"redirect to /goods-type-quantity after successful form submit with Yes for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildPost(routes.ValueWeightOfGoodsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "Yes")
 
@@ -63,7 +60,6 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised
       val request = buildPost(routes.ValueWeightOfGoodsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 

@@ -23,7 +23,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.AgentDetailsRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.AgentDetailsView
 
@@ -43,8 +42,6 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec with M
 
   "onPageLoad" should {
     s"return 200 with correct content" in {
-      givenTheUserIsAuthenticatedAndAuthorised
-
       val request = buildGet(routes.AgentDetailsController.onPageLoad().url, aSessionId)
       val eventualResult = controller(journey).onPageLoad(request)
       val result = contentAsString(eventualResult)
@@ -57,7 +54,6 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec with M
 
   "onSubmit" should {
     s"redirect to /enter-agent-address after successful form" in {
-      givenTheUserIsAuthenticatedAndAuthorised
       val request = buildPost(routes.AgentDetailsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "business name")
 
@@ -72,7 +68,6 @@ class AgentDetailsControllerSpec extends DeclarationJourneyControllerSpec with M
   }
 
   s"return 400 with any form errors" in {
-    givenTheUserIsAuthenticatedAndAuthorised
     val request = buildPost(routes.AgentDetailsController.onSubmit().url, aSessionId)
       .withFormUrlEncodedBody("value1" -> "in valid")
 

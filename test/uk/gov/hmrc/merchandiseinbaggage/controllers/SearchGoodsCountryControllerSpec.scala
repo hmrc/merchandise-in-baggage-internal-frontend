@@ -22,7 +22,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.SearchGoodsCountryView
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -45,7 +44,6 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
 
   "onPageLoad" should {
     s"return 200 with correct content Export" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(routes.SearchGoodsCountryController.onPageLoad(1).url, aSessionId)
       val eventualResult = controller(journey).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
@@ -60,7 +58,6 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
 
   "onSubmit" should {
     s"redirect to next page after successful form submit for Export" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(routes.SearchGoodsCountryController.onSubmit(1).url, aSessionId)
         .withFormUrlEncodedBody("country" -> "AF")
 
@@ -71,7 +68,6 @@ class SearchGoodsCountryControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     s"return 400 with any form errors for Export" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(routes.SearchGoodsCountryController.onSubmit(1).url, aSessionId)
         .withFormUrlEncodedBody("country" -> "in valid")
 

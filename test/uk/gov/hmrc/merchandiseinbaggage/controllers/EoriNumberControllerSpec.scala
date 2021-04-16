@@ -21,7 +21,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EoriNumberView
 
@@ -41,7 +40,6 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Moc
     new EoriNumberController(controllerComponents, actionProvider, declarationJourneyRepository, view, connector, mockNavigator)
 
   "return an error if API EROI validation fails" in {
-    givenTheUserIsAuthenticatedAndAuthorised
     givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
 
     val result = controller.onSubmit()(
@@ -55,7 +53,6 @@ class EoriNumberControllerSpec extends DeclarationJourneyControllerSpec with Moc
   }
 
   "return an error if API return 404" in {
-    givenTheUserIsAuthenticatedAndAuthorised
     givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
     val connector = new MibConnector(client, "some url") {
       override def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier): Future[CheckResponse] =

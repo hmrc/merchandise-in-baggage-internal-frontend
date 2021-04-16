@@ -23,7 +23,6 @@ import play.mvc.Http.Status
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, RemoveGoodsController}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.RemoveGoodsRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.RemoveGoodsView
 
@@ -37,7 +36,6 @@ class RemoveGoodsControllerSpec extends DeclarationJourneyControllerSpec with Co
   val controller = new RemoveGoodsController(controllerComponents, actionProvider, repo, mockNavigator, view)
 
   "delegate to navigator for navigation in" in {
-    givenTheUserIsAuthenticatedAndAuthorised
     givenADeclarationJourneyIsPersisted(completedDeclarationJourney)
     val postReq = buildPost(RemoveGoodsController.onPageLoad(1).url, completedDeclarationJourney.sessionId)
       .withFormUrlEncodedBody("value" -> "Yes")

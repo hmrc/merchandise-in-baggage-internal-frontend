@@ -22,7 +22,6 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{EnterEmailController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.EnterEmailRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.EnterEmailView
 
@@ -42,7 +41,6 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec with Moc
   //TODO move content test in UI
   "onPageLoad" should {
     s"return 200 with correct content" in {
-      givenTheUserIsAuthenticatedAndAuthorised
       val request = buildGet(EnterEmailController.onPageLoad().url, aSessionId)
       val eventualResult = controller(journey).onPageLoad()(request)
       val result = contentAsString(eventualResult)
@@ -57,7 +55,6 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec with Moc
 
   "onSubmit" should {
     s"redirect to /journey-details after successful form submit" in {
-      givenTheUserIsAuthenticatedAndAuthorised
       val request = buildPost(EnterEmailController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("email" -> "test@email.com")
 
@@ -72,7 +69,6 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec with Moc
   }
 
   s"return 400 with any form errors" in {
-    givenTheUserIsAuthenticatedAndAuthorised
     val request = buildPost(EnterEmailController.onSubmit().url, aSessionId)
       .withFormUrlEncodedBody("email" -> "in valid")
 

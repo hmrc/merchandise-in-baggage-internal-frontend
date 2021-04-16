@@ -20,7 +20,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.addresslookup.{Address, AddressLookupCountry}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.support.AddressLookupFrontendStub._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,7 +37,6 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         givenInitJourney()
         val journey = startedImportJourney
 
@@ -59,7 +57,6 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
 
         s"store address and redirect to ${routes.EoriNumberController.onPageLoad()} for $importOrExport" when {
           s"a declaration journey has been started for $importOrExport" in {
-            givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
             val result =
@@ -72,7 +69,6 @@ class EnterAgentAddressControllerSpec extends DeclarationJourneyControllerSpec {
 
         s"store address and redirect to ${routes.CheckYourAnswersController.onPageLoad()} for $importOrExport" when {
           s"a declaration journey is complete for $importOrExport" in {
-            givenTheUserIsAuthenticatedAndAuthorised()
             givenConfirmJourney("id", address)
 
             val result =

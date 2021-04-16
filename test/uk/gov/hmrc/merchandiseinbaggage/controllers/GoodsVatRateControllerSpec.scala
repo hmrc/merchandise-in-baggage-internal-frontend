@@ -24,7 +24,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEnt
 import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsVatRateRequest
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsVatRateView
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +43,6 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
 
   "onPageLoad" should {
     "return 200 with radio buttons" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(GoodsVatRateController.onPageLoad(1).url, aSessionId)
       val eventualResult = controller(journey).onPageLoad(1)(request)
       val result = contentAsString(eventualResult)
@@ -61,7 +59,6 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
 
   "onSubmit" should {
     "redirect to next page after successful form submit" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(GoodsVatRateController.onSubmit(1).url, aSessionId)
         .withFormUrlEncodedBody("value" -> "Zero")
 
@@ -75,7 +72,6 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
     }
 
     "return 400 with any form errors" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildGet(GoodsVatRateController.onSubmit(1).url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 

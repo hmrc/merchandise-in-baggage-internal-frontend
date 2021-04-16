@@ -21,7 +21,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsInVehicleController, VehicleSizeController}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsInVehicleRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsInVehicleView
 
@@ -42,7 +41,6 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec with
 
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildGet(GoodsInVehicleController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad()(request)
         val result = contentAsString(eventualResult)
@@ -55,7 +53,6 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec with
 
     "onSubmit" should {
       s"redirect by delegating to navigator for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildPost(GoodsInVehicleController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "Yes")
 
@@ -70,7 +67,6 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec with
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised
       val request = buildGet(GoodsInVehicleController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 

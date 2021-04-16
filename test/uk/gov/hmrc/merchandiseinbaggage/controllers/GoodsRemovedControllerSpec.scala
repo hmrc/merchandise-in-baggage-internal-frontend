@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsRemovedView
 
@@ -31,7 +30,6 @@ class GoodsRemovedControllerSpec extends DeclarationJourneyControllerSpec {
   forAll(declarationTypesTable) { importOrExport =>
     "onPageLoad" should {
       s"return 200 for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val journey = startedImportJourney.copy(declarationType = importOrExport, goodsEntries = GoodsEntries(Seq(completedImportGoods)))
 
         val request = buildGet(routes.GoodsRemovedController.onPageLoad().url)

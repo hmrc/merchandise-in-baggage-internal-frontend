@@ -21,14 +21,11 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Paid
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{PurchaseDetailsInput, RetrieveDeclaration}
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 class AdditionalDeclarationImportSpec extends BaseUiSpec {
 
   "Additional Declaration Import journey - happy path" should {
     "work as expected" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, "AddToExisting")

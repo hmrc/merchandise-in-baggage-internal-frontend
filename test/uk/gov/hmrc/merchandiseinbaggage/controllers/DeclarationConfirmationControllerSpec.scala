@@ -27,7 +27,6 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 import uk.gov.hmrc.merchandiseinbaggage.views.html.DeclarationConfirmationView
 import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
@@ -53,8 +52,6 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
     val exportJourney: DeclarationJourney = completedDeclarationJourney
       .copy(sessionId = sessionId, declarationType = DeclarationType.Export, createdAt = created, declarationId = id)
 
-    givenTheUserIsAuthenticatedAndAuthorised()
-
     val repo = stubRepo(givenADeclarationJourneyIsPersistedWithStub(exportJourney))
 
     lazy val defaultBuilder = injector.instanceOf[DefaultActionBuilder]
@@ -72,8 +69,6 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
   }
 
   "on page load return an invalid request if journey is invalidated by resetting" in {
-    givenTheUserIsAuthenticatedAndAuthorised()
-
     val connector = new MibConnector(client, "") {
       override def findDeclaration(declarationId: DeclarationId)(implicit hc: HeaderCarrier): Future[Option[Declaration]] =
         Future.failed(new Exception("not found"))

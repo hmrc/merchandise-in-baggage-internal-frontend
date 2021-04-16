@@ -29,7 +29,6 @@ import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,8 +54,6 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
 
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
         val request = buildGet(ReviewGoodsController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad()(request)
         val result = contentAsString(eventualResult)
@@ -72,8 +69,6 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
 
     "onSubmit" should {
       s"redirect to next page after successful form submit with Yes for $importOrExport by delegating to Navigator" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
-
         val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "Yes")
 
@@ -88,8 +83,6 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
-
       val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 

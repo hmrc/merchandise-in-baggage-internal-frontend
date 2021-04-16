@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.views.html.DeclarationNotFoundView
 
 class DeclarationNotFoundControllerSpec extends DeclarationJourneyControllerSpec {
@@ -29,7 +28,6 @@ class DeclarationNotFoundControllerSpec extends DeclarationJourneyControllerSpec
   "return 200 on pageLoad" in {
     val request = buildGet(routes.DeclarationNotFoundController.onPageLoad().url, aSessionId)
 
-    givenTheUserIsAuthenticatedAndAuthorised()
     val eventualResult = controller.onPageLoad(request)
 
     status(eventualResult) mustBe 200

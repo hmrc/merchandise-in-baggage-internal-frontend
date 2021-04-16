@@ -24,7 +24,6 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsInVehicleContro
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.JourneyDetailsRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.JourneyDetailsPage
 
@@ -50,7 +49,6 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec with
 
     "onPageLoad" should {
       s"return 200 with correct content for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildGet(JourneyDetailsController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -66,7 +64,6 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec with
 
     "onSubmit" should {
       s"redirect to next page after successful form submit for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val today = LocalDate.now()
         val request = buildPost(JourneyDetailsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody(
@@ -85,7 +82,6 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec with
       }
 
       s"return 400 with any form errors for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised
         val request = buildPost(JourneyDetailsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("port111" -> "ABZ")
 

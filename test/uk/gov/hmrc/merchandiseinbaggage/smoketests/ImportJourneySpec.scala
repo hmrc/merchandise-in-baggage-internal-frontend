@@ -22,13 +22,11 @@ import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeImpor
 import uk.gov.hmrc.merchandiseinbaggage.model.core.PurchaseDetailsInput
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth
 
 class ImportJourneySpec extends BaseUiSpec {
 
   "Import journey - happy path" should {
     "work as expected" in {
-      MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised()
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, MakeImport.toString)

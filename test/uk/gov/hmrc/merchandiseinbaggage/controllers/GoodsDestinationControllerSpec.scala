@@ -22,7 +22,6 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{ExciseAndRestrictedG
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsDestinationRequest
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsDestinationView
 
@@ -46,7 +45,6 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec wi
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildGet(GoodsDestinationController.onPageLoad.url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -61,7 +59,6 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec wi
 
     "onSubmit" should {
       s"redirect for $importOrExport using Navigator" in {
-        givenTheUserIsAuthenticatedAndAuthorised()
         val request = buildPost(GoodsDestinationController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "GreatBritain")
 
@@ -76,7 +73,6 @@ class GoodsDestinationControllerSpec extends DeclarationJourneyControllerSpec wi
     }
 
     s"return 400 with any form errors for $importOrExport" in {
-      givenTheUserIsAuthenticatedAndAuthorised()
       val request = buildPost(GoodsDestinationController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 
