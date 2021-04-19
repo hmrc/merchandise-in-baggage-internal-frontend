@@ -40,7 +40,7 @@ class AdditionalDeclarationImportSpec extends BaseUiSpec {
 
       givenPersistedDeclarationIsFound(paidDeclaration, paidDeclaration.declarationId)
 
-      givenAPaymentCalculation(List(aCalculationResult))
+      givenAPaymentCalculation(aCalculationResult)
       givenEoriIsChecked(eori.toString)
 
       submitPage(RetrieveDeclarationPage, RetrieveDeclaration(mibReference, eori))

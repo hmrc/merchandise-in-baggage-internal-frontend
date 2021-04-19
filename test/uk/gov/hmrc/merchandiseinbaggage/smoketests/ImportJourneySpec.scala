@@ -45,7 +45,7 @@ class ImportJourneySpec extends BaseUiSpec {
 
       submitPage(PurchaseDetailsPage, PurchaseDetailsInput("100", "EUR"))
 
-      givenAPaymentCalculation(List(aCalculationResult))
+      givenAPaymentCalculation(aCalculationResult)
       submitPage(ReviewGoodsPage, No)
 
       submitPage(PaymentCalculationPage, "")

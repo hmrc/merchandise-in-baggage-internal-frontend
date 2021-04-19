@@ -17,6 +17,8 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import java.time.LocalDateTime
+
+import cats.data.OptionT
 import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
@@ -27,12 +29,11 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationId, _}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, PropertyBaseTables}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView}
-import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -66,22 +67,20 @@ class CheckYourAnswersAmendHandlerSpec
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
-        (mockCalculationService
-          .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
-          .expects(id, *)
-          .returning(Future.successful(Some(declaration.copy(maybeTotalCalculationResult = Some(aTotalCalculationResult)))))
+        if (importOrExport == Import)(mockCalculationService
+          .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
+          .expects(*, *)
+          .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = false, aCalculationResults)))
           .once()
-
-        if (importOrExport == Import) {
+        else
           (mockCalculationService
-            .paymentCalculations(_: Seq[ImportGoods])(_: HeaderCarrier))
+            .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
-            .returning(Future.successful(aCalculationResults))
+            .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = false, aCalculationResults)))
             .once()
-        }
 
         val amendment = completedAmendment(importOrExport)
-        val eventualResult = handler.onPageLoad(importOrExport, amendment, journey.declarationId)
+        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment)
 
         status(eventualResult) mustBe OK
         contentAsString(eventualResult) must include(messageApi("checkYourAnswers.amend.title"))
@@ -107,21 +106,19 @@ class CheckYourAnswersAmendHandlerSpec
           .modify(_.calculationResults.each)
           .setTo(aCalculationResult.modify(_.gbpAmount).setTo(AmountInPence(150000001)))
 
-        (mockCalculationService
-          .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
-          .expects(id, *)
-          .returning(Future.successful(Some(exportOverThresholdDeclaration)))
+        if (importOrExport == Import)(mockCalculationService
+          .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
+          .expects(*, *)
+          .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = true, aCalculationResults)))
           .once()
-
-        if (importOrExport == Import) {
+        else
           (mockCalculationService
-            .paymentCalculations(_: Seq[ImportGoods])(_: HeaderCarrier))
+            .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
-            .returning(Future.successful(importOverThresholdGoods))
+            .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = true, aCalculationResults)))
             .once()
-        }
 
-        val eventualResult = handler.onPageLoad(importOrExport, amendment, journey.declarationId)
+        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment)
 
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.GoodsOverThresholdController.onPageLoad().url)
@@ -143,8 +140,8 @@ class CheckYourAnswersAmendHandlerSpec
         .once()
 
       (mockCalculationService
-        .paymentCalculations(_: Seq[ImportGoods])(_: HeaderCarrier))
-        .expects(*, *)
+        .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
+        .expects(*, *, *)
         .returning(Future.successful(aCalculationResults))
         .once()
 

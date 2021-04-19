@@ -21,6 +21,8 @@ import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.CheckYourAnswersPage
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenAPaymentCalculation
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
+import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth.givenTheUserIsAuthenticatedAndAuthorised
 
 import scala.collection.JavaConverters._
 
@@ -52,8 +54,8 @@ class CheckYourAnswerImportContentSpec extends CheckYourAnswersPage with CoreTes
   }
 
   private def setUp(calculationResult: CalculationResult)(fn: List[WebElement] => Any): Any = fn {
+    givenAPaymentCalculation(calculationResult)
     givenAJourneyWithSession()
-    givenAPaymentCalculation(List(calculationResult))
     goToCYAPage()
 
     findByXPath("//ul[@name='declarationAcknowledgement']")
@@ -64,6 +66,7 @@ class CheckYourAnswerImportContentSpec extends CheckYourAnswersPage with CoreTes
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    givenTheUserIsAuthenticatedAndAuthorised()
     declarationJourneyRepository.deleteAll()
   }
 }

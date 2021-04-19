@@ -19,8 +19,9 @@ package uk.gov.hmrc.merchandiseinbaggage.content
 import org.openqa.selenium.{By, WebElement}
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, OverThreshold, ThresholdCheck, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.CheckYourAnswersPage
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.{givenAPaymentCalculation, givenPersistedDeclarationIsFound}
 
@@ -29,7 +30,7 @@ import scala.collection.JavaConverters._
 class CheckYourAnswerAmendImportContentSpec extends CheckYourAnswersPage with CoreTestData {
 
   "render proof of origin needed if good EU origin goods amount is > 1000" in {
-    setUp(aCalculationResultOverThousand) { bulletPoints =>
+    setUp(aCalculationResultOverThousand, OverThreshold) { bulletPoints =>
       bulletPoints.size mustBe 4
       elementText(bulletPoints(0)) mustBe s"${messages("checkYourAnswers.amend.sendDeclaration.acknowledgement.1")}"
       elementText(bulletPoints(1)) mustBe s"${messages("checkYourAnswers.sendDeclaration.acknowledgement.EU.over.thousand")}"
@@ -55,10 +56,17 @@ class CheckYourAnswerAmendImportContentSpec extends CheckYourAnswersPage with Co
     }
   }
 
-  private def setUp(calculationResult: CalculationResult)(fn: List[WebElement] => Any): Any = fn {
-    givenAPaymentCalculation(calculationResult)
-    givenAJourneyWithSession(Amend, declarationJourney = completedAmendedJourney(Import).copy(declarationId = aDeclarationId))
-    givenPersistedDeclarationIsFound(declaration.copy(maybeTotalCalculationResult = Some(aTotalCalculationResult)), aDeclarationId)
+  private def setUp(calculationResult: CalculationResult, thresholdCheck: ThresholdCheck = WithinThreshold)(
+    fn: List[WebElement] => Any): Any = fn {
+    givenAPaymentCalculation(calculationResult, thresholdCheck)
+    givenAJourneyWithSession(
+      Amend,
+      declarationJourney = completedAmendedJourney(Import)
+        .copy(declarationId = aDeclarationId, maybeGoodsDestination = Some(GreatBritain)))
+    givenPersistedDeclarationIsFound(
+      declaration
+        .copy(maybeTotalCalculationResult = Some(aTotalCalculationResult), goodsDestination = GreatBritain),
+      aDeclarationId)
     goToCYAPage(Amend)
 
     findByXPath("//ul[@name='declarationAcknowledgement']")

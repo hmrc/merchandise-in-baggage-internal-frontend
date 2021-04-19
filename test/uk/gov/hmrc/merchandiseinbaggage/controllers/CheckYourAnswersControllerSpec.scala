@@ -21,7 +21,7 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, ImportGoods}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, GoodsDestination, ImportGoods}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
@@ -46,7 +46,8 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
   //TODO replace with a mock for consistency
   private lazy val stubbedCalculation: CalculationResults => CalculationService = aPaymentCalculations =>
     new CalculationService(mibConnector) {
-      override def paymentCalculations(importGoods: Seq[ImportGoods])(implicit hc: HeaderCarrier): Future[CalculationResults] =
+      override def paymentCalculations(importGoods: Seq[ImportGoods], destination: GoodsDestination)(
+        implicit hc: HeaderCarrier): Future[CalculationResults] =
         Future.successful(aPaymentCalculations)
   }
 

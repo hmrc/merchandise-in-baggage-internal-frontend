@@ -17,14 +17,12 @@
 package uk.gov.hmrc.merchandiseinbaggage.connectors
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
+import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResult
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
-import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with WireMockSupport {
 
@@ -39,20 +37,23 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with Wi
   }
 
   "send a calculation request to backend for payment" in {
-    val calculationRequest = List(aImportGoods).map(_.calculationRequest)
-    val stubbedResult = List(CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None))
+    val calculationRequests = List(aImportGoods).map(_.calculationRequest(GreatBritain))
+    val stubbedResult = CalculationResults(
+      List(CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)),
+      WithinThreshold)
 
-    givenAPaymentCalculations(calculationRequest, stubbedResult)
+    givenAPaymentCalculations(calculationRequests, stubbedResult.calculationResults)
 
-    client.calculatePayments(calculationRequest).futureValue mustBe stubbedResult
+    client.calculatePayments(calculationRequests).futureValue mustBe stubbedResult
   }
 
   "send a calculation requests to backend for payment" in {
-    val calculationRequests = aDeclarationGood.importGoods.map(_.calculationRequest)
-    val stubbedResults =
-      CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil
+    val calculationRequests = aDeclarationGood.importGoods.map(_.calculationRequest(GreatBritain))
+    val stubbedResults = CalculationResults(
+      CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil,
+      WithinThreshold)
 
-    givenAPaymentCalculations(calculationRequests, stubbedResults)
+    givenAPaymentCalculations(calculationRequests, stubbedResults.calculationResults)
 
     client.calculatePayments(calculationRequests).futureValue mustBe stubbedResults
   }

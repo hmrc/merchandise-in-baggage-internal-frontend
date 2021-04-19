@@ -22,8 +22,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
+import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResult, CalculationResults}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, DeclarationId, TotalCalculationResult}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
@@ -40,20 +41,20 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
   "retrieve payment calculations from mib backend" in {
     val stubbedResult =
       CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), Some(aConversionRatePeriod))
-    val expected = CalculationResults(List(stubbedResult))
+    val expected = CalculationResults(List(stubbedResult), WithinThreshold)
 
     (mockConnector
       .calculatePayments(_: Seq[CalculationRequest])(_: HeaderCarrier))
-      .expects(expected.calculationResults.map(_.goods.calculationRequest), *)
-      .returning(Future.successful(Seq(stubbedResult)))
+      .expects(expected.calculationResults.map(_.goods.calculationRequest(GreatBritain)), *)
+      .returning(Future.successful(CalculationResults(Seq(stubbedResult), WithinThreshold)))
 
-    service.paymentCalculations(Seq(aGoods)).futureValue mustBe expected
+    service.paymentCalculations(Seq(aGoods), GreatBritain).futureValue mustBe expected
   }
 
   "check if over threshold for amend journey" in {
     val stubbedResult =
       CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), Some(aConversionRatePeriod))
-    val expected = CalculationResults(List(stubbedResult))
+    val expected = CalculationResults(List(stubbedResult), WithinThreshold)
     val amended = completedImportJourneyWithGoodsOverThreshold
       .copy(journeyType = Amend)
 
@@ -64,8 +65,8 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
 
     (mockConnector
       .calculatePayments(_: Seq[CalculationRequest])(_: HeaderCarrier))
-      .expects(declaration.declarationGoods.importGoods.map(_.calculationRequest), *)
-      .returning(Future.successful(Seq(stubbedResult)))
+      .expects(declaration.declarationGoods.importGoods.map(_.calculationRequest(GreatBritain)), *)
+      .returning(Future.successful(CalculationResults(Seq(stubbedResult), WithinThreshold)))
 
     (mockConnector
       .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
@@ -78,7 +79,7 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
   "returns true if over threshold for amend journey" in {
     val stubbedResult =
       CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), Some(aConversionRatePeriod))
-    val expected = CalculationResults(List(stubbedResult))
+    val expected = CalculationResults(List(stubbedResult), WithinThreshold)
     val amended = completedImportJourneyWithGoodsOverThreshold
       .copy(journeyType = Amend)
 
@@ -91,8 +92,8 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
 
     (mockConnector
       .calculatePayments(_: Seq[CalculationRequest])(_: HeaderCarrier))
-      .expects(declaration.declarationGoods.importGoods.map(_.calculationRequest), *)
-      .returning(Future.successful(Seq(expectedResult)))
+      .expects(declaration.declarationGoods.importGoods.map(_.calculationRequest(GreatBritain)), *)
+      .returning(Future.successful(CalculationResults(Seq(expectedResult), WithinThreshold)))
 
     (mockConnector
       .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
@@ -124,7 +125,7 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
       .returning(Future.successful(Some(declaration)))
 
     service.isAmendPlusOriginalOverThresholdExport(amended).value.futureValue mustBe Some(
-      AmendCalculationResult(isOverThreshold = true, CalculationResults(Seq.empty)))
+      AmendCalculationResult(isOverThreshold = true, CalculationResults(Seq.empty, WithinThreshold)))
   }
 
   "return None for any journey that are NOT amendmentRequiredAndComplete" in {
