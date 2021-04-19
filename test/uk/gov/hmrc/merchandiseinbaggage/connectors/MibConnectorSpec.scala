@@ -17,14 +17,16 @@
 package uk.gov.hmrc.merchandiseinbaggage.connectors
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 
-class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData with WireMockSupport {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData {
 
   private val client = app.injector.instanceOf[MibConnector]
   implicit val hc: HeaderCarrier = HeaderCarrier()

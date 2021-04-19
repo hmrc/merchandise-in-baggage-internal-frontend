@@ -24,17 +24,16 @@ import com.itv.scalapact.circe13._
 import com.itv.scalapact.model.{ScalaPactDescription, ScalaPactOptions}
 import org.json4s.DefaultFormats
 import play.api.libs.json.Json
-import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, ConversionRatePeriod, Declaration, DeclarationId}
-import uk.gov.hmrc.merchandiseinbaggage.support.{BaseSpecWithApplication, WireMockSupport}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
+import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 
-class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData with MibConfiguration with WireMockSupport {
+class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData with MibConfiguration {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 

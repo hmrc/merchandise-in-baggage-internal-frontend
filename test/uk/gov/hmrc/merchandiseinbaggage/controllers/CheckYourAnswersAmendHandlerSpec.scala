@@ -19,7 +19,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import java.time.LocalDateTime
 
 import cats.data.OptionT
-import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import play.api.test.Helpers._
@@ -39,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CheckYourAnswersAmendHandlerSpec
-    extends DeclarationJourneyControllerSpec with MibConfiguration with WireMockSupport with MockFactory with PropertyBaseTables {
+    extends DeclarationJourneyControllerSpec with MibConfiguration with MockFactory with PropertyBaseTables {
 
   lazy val actionBuilder: DeclarationJourneyActionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
 
@@ -97,14 +96,7 @@ class CheckYourAnswersAmendHandlerSpec
             declarationId = id,
             goodsEntries = overThresholdGoods(importOrExport))
 
-        val declaration = journey.declarationIfRequiredAndComplete.get
-        val exportOverThresholdDeclaration = declaration.copy(
-          maybeTotalCalculationResult = Some(aTotalCalculationResult.modify(_.totalGbpValue).setTo(AmountInPence(150000001))))
-
         val amendment = completedAmendment(importOrExport)
-        val importOverThresholdGoods = aCalculationResults
-          .modify(_.calculationResults.each)
-          .setTo(aCalculationResult.modify(_.gbpAmount).setTo(AmountInPence(150000001)))
 
         if (importOrExport == Import)(mockCalculationService
           .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
