@@ -23,7 +23,7 @@ import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResults}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRequest, CalculationResponse}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Eori, MibReference}
 
@@ -49,9 +49,7 @@ class MibConnector @Inject()(httpClient: HttpClient, @Named("mibBackendBaseUrl")
       }
     }
 
-  def findBy(mibReference: MibReference, eori: Eori)(
-    implicit ec: ExecutionContext,
-    hc: HeaderCarrier): EitherT[Future, String, Option[Declaration]] =
+  def findBy(mibReference: MibReference, eori: Eori)(implicit hc: HeaderCarrier): EitherT[Future, String, Option[Declaration]] =
     EitherT(
       httpClient.GET[HttpResponse](s"$base$declarationsUrl?mibReference=${mibReference.value}&eori=${eori.value}").map { response =>
         response.status match {
@@ -64,8 +62,8 @@ class MibConnector @Inject()(httpClient: HttpClient, @Named("mibBackendBaseUrl")
       }
     )
 
-  def calculatePayments(calculationRequests: Seq[CalculationRequest])(implicit hc: HeaderCarrier): Future[CalculationResults] =
-    httpClient.POST[Seq[CalculationRequest], CalculationResults](s"$base$calculationsUrl", calculationRequests)
+  def calculatePayments(calculationRequests: Seq[CalculationRequest])(implicit hc: HeaderCarrier): Future[CalculationResponse] =
+    httpClient.POST[Seq[CalculationRequest], CalculationResponse](s"$base$calculationsUrl", calculationRequests)
 
   def checkEoriNumber(eori: String)(implicit hc: HeaderCarrier): Future[CheckResponse] =
     httpClient.GET[CheckResponse](s"$base$checkEoriUrl$eori")

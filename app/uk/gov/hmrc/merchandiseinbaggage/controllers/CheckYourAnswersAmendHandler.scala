@@ -26,7 +26,7 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{DeclarationConfirmationController, _}
 import uk.gov.hmrc.merchandiseinbaggage.forms.CheckYourAnswersForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResults, OverThreshold, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Amendment, Declaration, DeclarationId}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
@@ -43,6 +43,7 @@ class CheckYourAnswersAmendHandler @Inject()(
   amendImportView: CheckYourAnswersAmendImportView,
   amendExportView: CheckYourAnswersAmendExportView)(implicit val ec: ExecutionContext, val appConfig: AppConfig) {
 
+  //TODO make BE do ThresholdCheck for amend too so we will need one pattern match
   def onPageLoad(
     declarationJourney: DeclarationJourney,
     amendment: Amendment)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Future[Result] =
@@ -57,9 +58,10 @@ class CheckYourAnswersAmendHandler @Inject()(
     calculationService
       .isAmendPlusOriginalOverThresholdImport(declarationJourney)
       .fold(actionProvider.invalidRequest(declarationNotFoundMessage)) { res =>
-        if (res.isOverThreshold) {
-          Redirect(GoodsOverThresholdController.onPageLoad())
-        } else Ok(amendImportView(form, amendment, res.calculationResult))
+        res.thresholdCheck match {
+          case OverThreshold   => Redirect(GoodsOverThresholdController.onPageLoad())
+          case WithinThreshold => Ok(amendImportView(form, amendment, res.results))
+        }
       }
 
   private def onPageLoadExport(
@@ -68,8 +70,10 @@ class CheckYourAnswersAmendHandler @Inject()(
     calculationService
       .isAmendPlusOriginalOverThresholdExport(declarationJourney)
       .fold(actionProvider.invalidRequest(declarationNotFoundMessage)) { amendCalculationResult =>
-        if (amendCalculationResult.isOverThreshold) Redirect(GoodsOverThresholdController.onPageLoad())
-        else Ok(amendExportView(form, amendment))
+        amendCalculationResult.thresholdCheck match {
+          case OverThreshold   => Redirect(GoodsOverThresholdController.onPageLoad())
+          case WithinThreshold => Ok(amendExportView(form, amendment))
+        }
       }
 
   def onSubmit(declarationId: DeclarationId, pid: String, newAmendment: Amendment)(
@@ -94,18 +98,17 @@ class CheckYourAnswersAmendHandler @Inject()(
   private def persistAndRedirectToPayments(amendment: Amendment, pid: String, originalDeclaration: Declaration)(
     implicit request: Request[_],
     hc: HeaderCarrier): Future[Result] =
-    calculationService.paymentCalculations(amendment.goods.importGoods, originalDeclaration.goodsDestination).flatMap {
-      calculationResults =>
-        val amendmentRef = originalDeclaration.amendments.size + 1
-        val updatedAmendment =
-          amendment.copy(reference = amendmentRef, maybeTotalCalculationResult = Some(calculationResults.totalCalculationResult))
+    calculationService.paymentCalculations(amendment.goods.goods, originalDeclaration.goodsDestination).flatMap { calculationResponse =>
+      val amendmentRef = originalDeclaration.amendments.size + 1
+      val updatedAmendment =
+        amendment.copy(reference = amendmentRef, maybeTotalCalculationResult = Some(calculationResponse.results.totalCalculationResult))
 
-        val updatedDeclaration = originalDeclaration.copy(amendments = originalDeclaration.amendments :+ updatedAmendment)
+      val updatedDeclaration = originalDeclaration.copy(amendments = originalDeclaration.amendments :+ updatedAmendment)
 
-        for {
-          _        <- calculationService.amendDeclaration(updatedDeclaration)
-          redirect <- redirectToPaymentsIfNecessary(calculationResults, originalDeclaration, pid, amendmentRef)
-        } yield redirect
+      for {
+        _        <- calculationService.amendDeclaration(updatedDeclaration)
+        redirect <- redirectToPaymentsIfNecessary(calculationResponse.results, originalDeclaration, pid, amendmentRef)
+      } yield redirect
     }
 
   def redirectToPaymentsIfNecessary(calculations: CalculationResults, declaration: Declaration, pid: String, amendmentRef: Int)(

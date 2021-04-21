@@ -18,9 +18,10 @@ package uk.gov.hmrc.merchandiseinbaggage.smoketests
 
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.WithinThreshold
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Paid}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
-import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.{CheckYourAnswersPage, ExciseAndRestrictedGoodsPage, GoodsTypeQuantityPage, ImportExportChoicePage, PreviousDeclarationDetailsPage, PurchaseDetailsExportPage, RetrieveDeclarationPage, ReviewGoodsPage, SearchGoodsCountryPage, ValueWeightOfGoodsPage}
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 
 class AdditionalDeclarationExportSpec extends BaseUiSpec {
@@ -65,6 +66,7 @@ class AdditionalDeclarationExportSpec extends BaseUiSpec {
       webDriver.getPageSource must include("France")
       webDriver.getPageSource must include("£100.50")
 
+      givenAPaymentCalculation(aCalculationResult, WithinThreshold)
       submitPage(ReviewGoodsPage, "No")
 
       webDriver.getPageSource must include("sock")

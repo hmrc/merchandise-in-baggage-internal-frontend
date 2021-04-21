@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
-import com.softwaremill.quicklens._
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsOverThresholdController, PaymentCalculationController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, OverThreshold, ThresholdCheck, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -33,20 +33,19 @@ import scala.concurrent.Future
 class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
 
   private val view = app.injector.instanceOf[PaymentCalculationView]
-  private lazy val stubbedCalculation: CalculationResults => CalculationService = calculationResults =>
+  private lazy val stubbedCalculation: CalculationResponse => CalculationService = response =>
     new CalculationService(mibConnector) {
-      override def paymentCalculations(importGoods: Seq[ImportGoods], destination: GoodsDestination)(
-        implicit hc: HeaderCarrier): Future[CalculationResults] =
-        Future.successful(calculationResults)
+      override def paymentCalculations(goods: Seq[Goods], destination: GoodsDestination)(
+        implicit hc: HeaderCarrier): Future[CalculationResponse] =
+        Future.successful(response)
   }
 
-  val controller: DeclarationJourney => PaymentCalculationController =
-    declarationJourney =>
-      new PaymentCalculationController(
-        controllerComponents,
-        stubProvider(declarationJourney),
-        stubbedCalculation(aCalculationResults),
-        view)
+  def controller(journey: DeclarationJourney, check: ThresholdCheck = WithinThreshold): PaymentCalculationController =
+    new PaymentCalculationController(
+      controllerComponents,
+      stubProvider(journey),
+      stubbedCalculation(aCalculationResponse.copy(thresholdCheck = check)),
+      view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
@@ -74,21 +73,20 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     forAll(declarationTypesTable) { importOrExport =>
-      forAll(paymentCalculationThreshold) { (thresholdValue, redirectTo) =>
-        s"redirect to $redirectTo for $importOrExport if threshold is $thresholdValue" in {
-          val journey = DeclarationJourney(
+      s"redirect to /goods-over-threshold for $importOrExport if its over threshold" in {
+        val journey =
+          DeclarationJourney(
             SessionId("123"),
-            DeclarationType.Export,
+            importOrExport,
             maybeGoodsDestination = Some(GoodsDestinations.GreatBritain),
-            goodsEntries = GoodsEntries(Seq(completedImportGoods.modify(_.maybePurchaseDetails.each.amount).setTo(thresholdValue)))
+            goodsEntries = overThresholdGoods(importOrExport)
           )
 
-          val request = buildGet(routes.PaymentCalculationController.onPageLoad().url)
-          val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onPageLoad()(request)
+        val request = buildGet(PaymentCalculationController.onPageLoad().url, aSessionId)
+        val eventualResult = controller(givenADeclarationJourneyIsPersisted(journey), OverThreshold).onPageLoad()(request)
 
-          status(eventualResult) mustBe 303
-          redirectLocation(eventualResult).get must endWith(redirectTo)
-        }
+        status(eventualResult) mustBe 303
+        redirectLocation(eventualResult) mustBe Some(GoodsOverThresholdController.onPageLoad().url)
       }
     }
   }

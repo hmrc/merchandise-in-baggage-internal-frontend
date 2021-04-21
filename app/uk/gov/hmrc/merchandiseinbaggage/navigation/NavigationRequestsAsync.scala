@@ -17,6 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.navigation
 
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.ThresholdCheck
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntry, ImportExportChoice, PurchaseDetailsInput}
 
 import scala.concurrent.Future
@@ -26,7 +27,7 @@ sealed trait NavigationRequestsAsync
 final case class ReviewGoodsRequest(
   value: YesNo,
   declarationJourney: DeclarationJourney,
-  overThresholdCheck: Boolean,
+  overThresholdCheck: ThresholdCheck,
   callBack: DeclarationJourney => Future[DeclarationJourney])
     extends NavigationRequestsAsync
 

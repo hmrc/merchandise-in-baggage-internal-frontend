@@ -26,9 +26,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, OverThreshold, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationId, _}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{AmendCalculationResult, DeclarationJourney}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, PropertyBaseTables}
@@ -69,13 +69,13 @@ class CheckYourAnswersAmendHandlerSpec
         if (importOrExport == Import)(mockCalculationService
           .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
-          .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = false, aCalculationResults)))
+          .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
           .once()
         else
           (mockCalculationService
             .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
-            .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = false, aCalculationResults)))
+            .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
             .once()
 
         val amendment = completedAmendment(importOrExport)
@@ -101,13 +101,13 @@ class CheckYourAnswersAmendHandlerSpec
         if (importOrExport == Import)(mockCalculationService
           .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
-          .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = true, aCalculationResults)))
+          .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
           .once()
         else
           (mockCalculationService
             .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
-            .returning(OptionT.pure[Future](AmendCalculationResult(isOverThreshold = true, aCalculationResults)))
+            .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
             .once()
 
         val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment)
@@ -134,7 +134,7 @@ class CheckYourAnswersAmendHandlerSpec
       (mockCalculationService
         .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
         .expects(*, *, *)
-        .returning(Future.successful(aCalculationResults))
+        .returning(Future.successful(CalculationResponse(aCalculationResults, WithinThreshold)))
         .once()
 
       (mockCalculationService

@@ -19,12 +19,10 @@ package uk.gov.hmrc.merchandiseinbaggage.connectors
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults, WithinThreshold}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData {
 
@@ -39,25 +37,24 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData {
   }
 
   "send a calculation request to backend for payment" in {
-    val calculationRequests = List(aImportGoods).map(_.calculationRequest(GreatBritain))
-    val stubbedResult = CalculationResults(
-      List(CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None)),
-      WithinThreshold)
+    val calculationRequest = List(aGoods).map(_.calculationRequest(GreatBritain))
+    val stubbedResult = List(CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None))
 
-    givenAPaymentCalculations(calculationRequests, stubbedResult.calculationResults)
+    givenAPaymentCalculations(calculationRequest, stubbedResult)
 
-    client.calculatePayments(calculationRequests).futureValue mustBe stubbedResult
+    client.calculatePayments(calculationRequest).futureValue mustBe CalculationResponse(CalculationResults(stubbedResult), WithinThreshold)
   }
 
   "send a calculation requests to backend for payment" in {
-    val calculationRequests = aDeclarationGood.importGoods.map(_.calculationRequest(GreatBritain))
-    val stubbedResults = CalculationResults(
-      CalculationResult(aImportGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil,
+    val calculationRequests = aDeclarationGood.goods.map(_.calculationRequest(GreatBritain))
+    val stubbedResults =
+      CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil
+
+    givenAPaymentCalculations(calculationRequests, stubbedResults)
+
+    client.calculatePayments(calculationRequests).futureValue mustBe CalculationResponse(
+      CalculationResults(stubbedResults),
       WithinThreshold)
-
-    givenAPaymentCalculations(calculationRequests, stubbedResults.calculationResults)
-
-    client.calculatePayments(calculationRequests).futureValue mustBe stubbedResults
   }
 
   "find a persisted declaration from backend by declarationId" in {
@@ -73,7 +70,7 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData {
   }
 
   "findBy query" should {
-    "return declaration as expected" in {
+    "return declarationId as expected" in {
       givenFindByDeclarationReturnSuccess(mibReference, eori, declaration)
       client.findBy(mibReference, eori).value.futureValue mustBe Right(Some(declaration))
     }

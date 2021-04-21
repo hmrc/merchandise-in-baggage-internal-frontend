@@ -20,8 +20,8 @@ import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, GoodsDestination, ImportGoods}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, Goods, GoodsDestination}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
 import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
@@ -44,37 +44,37 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
   private lazy val amendExportView = injector.instanceOf[CheckYourAnswersAmendExportView]
 
   //TODO replace with a mock for consistency
-  private lazy val stubbedCalculation: CalculationResults => CalculationService = aPaymentCalculations =>
+  private lazy val stubbedCalculation: CalculationResponse => CalculationService = calculationResponse =>
     new CalculationService(mibConnector) {
-      override def paymentCalculations(importGoods: Seq[ImportGoods], destination: GoodsDestination)(
-        implicit hc: HeaderCarrier): Future[CalculationResults] =
-        Future.successful(aPaymentCalculations)
+      override def paymentCalculations(goods: Seq[Goods], destination: GoodsDestination)(
+        implicit hc: HeaderCarrier): Future[CalculationResponse] =
+        Future.successful(calculationResponse)
   }
 
-  private def newHandler(paymentCalcs: CalculationResults) =
+  private def newHandler(calculationResponse: CalculationResponse) =
     new CheckYourAnswersNewHandler(
-      stubbedCalculation(paymentCalcs),
+      stubbedCalculation(calculationResponse),
       mockTpsPaymentsService,
       mibConnector,
       importView,
       exportView,
     )
 
-  private def amendHandler(paymentCalcs: CalculationResults) =
+  private def amendHandler(calculationResponse: CalculationResponse) =
     new CheckYourAnswersAmendHandler(
       actionBuilder,
-      stubbedCalculation(paymentCalcs),
+      stubbedCalculation(calculationResponse),
       mockTpsPaymentsService,
       amendImportView,
       amendExportView,
     )
 
-  private def controller(paymentCalcs: CalculationResults = aCalculationResults, declarationJourney: DeclarationJourney) =
+  private def controller(response: CalculationResponse = aCalculationResponse, declarationJourney: DeclarationJourney) =
     new CheckYourAnswersController(
       controllerComponents,
       actionBuilder,
-      newHandler(paymentCalcs),
-      amendHandler(paymentCalcs),
+      newHandler(response),
+      amendHandler(response),
       stubRepo(declarationJourney)
     )
 
@@ -83,7 +83,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       s"return 200 for type $importOrExport" in {
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
 
-        val eventualResult = controller(aCalculationResults, givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(importOrExport)))
+        val eventualResult = controller(aCalculationResponse, givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(importOrExport)))
           .onPageLoad()(request)
         val result = contentAsString(eventualResult)
 
@@ -124,7 +124,7 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
       s"return 200 for type $importOrExport when email is None" in {
         val request = buildGet(routes.CheckYourAnswersController.onPageLoad().url, aSessionId)
         val eventualResult = controller(
-          aCalculationResults,
+          aCalculationResponse,
           givenADeclarationJourneyIsPersisted(dynamicCompletedJourney(importOrExport).copy(maybeEmailAddress = None))).onPageLoad()(request)
 
         status(eventualResult) mustBe 200
