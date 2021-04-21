@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggage.model.core
+package uk.gov.hmrc.merchandiseinbaggage.model.api.calculation
 
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
+import play.api.libs.json.{Json, OFormat}
 
-case class AmendCalculationResult(isOverThreshold: Boolean, calculationResult: CalculationResults)
+case class CalculationResponse(results: CalculationResults, thresholdCheck: ThresholdCheck)
+
+object CalculationResponse {
+  implicit val format: OFormat[CalculationResponse] = Json.format[CalculationResponse]
+}

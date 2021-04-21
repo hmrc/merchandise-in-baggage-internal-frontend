@@ -19,7 +19,6 @@ package uk.gov.hmrc.merchandiseinbaggage.smoketests
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.AddToExisting
 import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
-import uk.gov.hmrc.merchandiseinbaggage.support.MockStrideAuth
 
 class AmendJourneySpec extends BaseUiSpec {
 
