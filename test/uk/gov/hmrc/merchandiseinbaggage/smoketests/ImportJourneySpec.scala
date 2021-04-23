@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.smoketests
 
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Email, Name}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Email, Name}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.ImportExportChoices.MakeImport
 import uk.gov.hmrc.merchandiseinbaggage.model.core.PurchaseDetailsInput
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
@@ -37,7 +37,7 @@ class ImportJourneySpec extends BaseUiSpec {
 
       submitPage(ValueWeightOfGoodsPage, Yes)
 
-      submitPage(GoodsTypeQuantityPage, CategoryQuantityOfGoods("shoes", "one pair"))
+      submitPage(GoodsTypePage, "shoes")
 
       submitPage(GoodsVatRatePage, "Five")
 

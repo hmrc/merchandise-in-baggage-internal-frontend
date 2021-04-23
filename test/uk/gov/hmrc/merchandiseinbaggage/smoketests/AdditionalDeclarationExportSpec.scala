@@ -17,9 +17,9 @@
 package uk.gov.hmrc.merchandiseinbaggage.smoketests
 
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
+import uk.gov.hmrc.merchandiseinbaggage.model.api.Paid
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo.{No, Yes}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.WithinThreshold
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, Paid}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.RetrieveDeclaration
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages._
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
@@ -55,7 +55,7 @@ class AdditionalDeclarationExportSpec extends BaseUiSpec {
 
       submitPage(ValueWeightOfGoodsPage, Yes)
 
-      submitPage(GoodsTypeQuantityPage, CategoryQuantityOfGoods("sock", "one"))
+      submitPage(GoodsTypePage, "sock")
 
       submitPage(SearchGoodsCountryPage, "FR")
 

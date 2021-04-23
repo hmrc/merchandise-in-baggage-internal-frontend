@@ -92,7 +92,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
         result must include(messages("checkYourAnswers.change"))
         result must include(messages("checkYourAnswers.detailsOfTheGoods"))
         result must include(messages("checkYourAnswers.detailsOfTheGoods.category"))
-        result must include(messages("checkYourAnswers.detailsOfTheGoods.quantity"))
         result must include(messages("checkYourAnswers.addMoreGoods"))
         result must include(messages("checkYourAnswers.personalDetails"))
         result must include(messages("checkYourAnswers.journeyDetails.travellingByVehicle"))

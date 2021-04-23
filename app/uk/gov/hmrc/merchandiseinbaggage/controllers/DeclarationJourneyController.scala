@@ -63,8 +63,8 @@ trait IndexedDeclarationJourneyController extends FrontendBaseController {
 
   def withGoodsCategory(goodsEntry: GoodsEntry)(f: String => Future[Result])(
     implicit request: DeclarationGoodsRequest[AnyContent]): Future[Result] =
-    goodsEntry.maybeCategoryQuantityOfGoods match {
-      case Some(c) => f(c.category)
+    goodsEntry.maybeCategoryOfGoods match {
+      case Some(c) => f(c)
       case None =>
         DeclarationJourneyLogger.warn(s"Goods category not found so redirecting to ${routes.CannotAccessPageController.onPageLoad()}")
         Future successful Redirect(routes.CannotAccessPageController.onPageLoad())
