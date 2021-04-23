@@ -19,7 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsVatRateController, SearchGoodsCountryController}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{CategoryQuantityOfGoods, DeclarationType}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsVatRateRequest
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -38,7 +38,7 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
   private val journey: DeclarationJourney = DeclarationJourney(
     aSessionId,
     DeclarationType.Import,
-    goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryQuantityOfGoods = Some(CategoryQuantityOfGoods("clothes", "1")))))
+    goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryOfGoods = Some("clothes"))))
   )
 
   "onPageLoad" should {

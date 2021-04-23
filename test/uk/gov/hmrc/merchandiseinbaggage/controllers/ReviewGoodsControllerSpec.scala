@@ -20,7 +20,7 @@ import cats.data.OptionT
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeQuantityController, ReviewGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeController, ReviewGoodsController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
@@ -75,7 +75,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
         (mockNavigator
           .nextPage(_: ReviewGoodsRequest)(_: ExecutionContext))
           .expects(*, *)
-          .returning(Future.successful(GoodsTypeQuantityController.onPageLoad(2)))
+          .returning(Future.successful(GoodsTypeController.onPageLoad(2)))
           .once()
 
         controller(journey).onSubmit(request).futureValue

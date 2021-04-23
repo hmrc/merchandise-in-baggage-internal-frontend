@@ -19,20 +19,20 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
-import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsTypeQuantityForm.form
+import uk.gov.hmrc.merchandiseinbaggage.forms.GoodsTypeForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
-import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsTypeQuantityRequest
+import uk.gov.hmrc.merchandiseinbaggage.navigation.GoodsTypeRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsTypeQuantityView
+import uk.gov.hmrc.merchandiseinbaggage.views.html.GoodsTypeView
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GoodsTypeQuantityController @Inject()(
+class GoodsTypeController @Inject()(
   override val controllerComponents: MessagesControllerComponents,
   actionProvider: DeclarationJourneyActionProvider,
   repo: DeclarationJourneyRepository,
-  view: GoodsTypeQuantityView,
+  view: GoodsTypeView,
   navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends IndexedDeclarationJourneyUpdateController {
 
@@ -46,7 +46,7 @@ class GoodsTypeQuantityController @Inject()(
   }
 
   def onPageLoad(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx) { implicit request =>
-    val preparedForm = request.goodsEntry.maybeCategoryQuantityOfGoods.fold(form)(form.fill)
+    val preparedForm = request.goodsEntry.maybeCategoryOfGoods.fold(form)(form.fill)
 
     Ok(view(preparedForm, idx, request.declarationJourney.declarationType, backButtonUrl))
   }
@@ -57,9 +57,9 @@ class GoodsTypeQuantityController @Inject()(
       .fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, idx, request.declarationJourney.declarationType, backButtonUrl))),
-        categoryQuantityOfGoods =>
+        categoryOfGoods =>
           navigator
-            .nextPage(GoodsTypeQuantityRequest(request.declarationJourney, request.goodsEntry, idx, categoryQuantityOfGoods, repo.upsert))
+            .nextPage(GoodsTypeRequest(request.declarationJourney, request.goodsEntry, idx, categoryOfGoods, repo.upsert))
             .map(Redirect)
       )
   }

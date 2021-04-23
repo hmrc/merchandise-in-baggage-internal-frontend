@@ -47,7 +47,7 @@ trait PropertyBaseTables extends ScalaCheckPropertyChecks {
   val valueOfWeighOfGoodsAnswer: TableFor2[YesNo, String] = Table(
     ("radio button yes/no", "redirectTo"),
     (No, CannotUseServiceController.onPageLoad().url),
-    (Yes, GoodsTypeQuantityController.onPageLoad(1).url)
+    (Yes, GoodsTypeController.onPageLoad(1).url)
   )
 
   val customAgentYesOrNoAnswer: TableFor2[YesNo, String] = yesOrNoTable(
@@ -62,7 +62,7 @@ trait PropertyBaseTables extends ScalaCheckPropertyChecks {
 
   val reviewGoodsAnswer: TableFor2[YesNo, String] = Table(
     ("radio button yes/no", "redirectTo"),
-    (Yes, GoodsTypeQuantityController.onPageLoad(2).url),
+    (Yes, GoodsTypeController.onPageLoad(2).url),
     (No, PaymentCalculationController.onPageLoad().url)
   )
 
