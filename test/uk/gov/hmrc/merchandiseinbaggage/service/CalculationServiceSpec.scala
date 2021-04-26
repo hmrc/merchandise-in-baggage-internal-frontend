@@ -19,10 +19,10 @@ package uk.gov.hmrc.merchandiseinbaggage.service
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
+import uk.gov.hmrc.merchandiseinbaggage.model.api.AmountInPence
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, DeclarationId, Goods, TotalCalculationResult}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 
@@ -51,35 +51,14 @@ class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData w
   "check if over threshold for amend journey" in {
     val stubbedResult =
       CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), Some(aConversionRatePeriod))
-    val expected = CalculationResponse(CalculationResults(List(stubbedResult)), WithinThreshold)
     val amended = completedImportJourneyWithGoodsOverThreshold
       .copy(journeyType = Amend)
 
-    import expected._
-    val declaration = amended.toDeclaration
-      .copy(
-        maybeTotalCalculationResult =
-          Some(TotalCalculationResult(results, results.totalGbpValue, results.totalTaxDue, results.totalDutyDue, results.totalVatDue)))
-
     (mockConnector
-      .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
-      .expects(amended.declarationId, *)
-      .returning(Future.successful(Some(declaration)))
-
-    val originalAndAmendGoods: Seq[Goods] = declaration.declarationGoods.goods ++ amended.goodsEntries.declarationGoodsIfComplete.get.goods
-
-    (mockConnector
-      .calculatePayments(_: Seq[CalculationRequest])(_: HeaderCarrier))
-      .expects(originalAndAmendGoods.map(_.calculationRequest(GreatBritain)), *)
+      .calculatePaymentsAmendPlusExisting(_: CalculationAmendRequest)(_: HeaderCarrier))
+      .expects(*, *)
       .returning(Future.successful(CalculationResponse(CalculationResults(Seq(stubbedResult)), WithinThreshold)))
 
-    service.isAmendPlusOriginalOverThresholdImport(amended).value.futureValue.get.thresholdCheck mustBe WithinThreshold
-  }
-
-  "return None for any journey that are NOT amendmentRequiredAndComplete" in {
-    service
-      .isAmendPlusOriginalOverThresholdImport(startedImportToGreatBritainJourney.copy(journeyType = Amend))
-      .value
-      .futureValue mustBe None
+    service.amendPlusOriginalCalculations(amended).value.futureValue.get.thresholdCheck mustBe WithinThreshold
   }
 }

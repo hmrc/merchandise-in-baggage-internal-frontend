@@ -80,6 +80,23 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
         post(urlPathEqualTo(s"$calculationsUrl"))
           .willReturn(okJson(Json.toJson(CalculationResponse(CalculationResults(List(result)), thresholdCheck)).toString)))
 
+  def givenAnAmendPaymentCalculationsRequest(
+    request: CalculationAmendRequest,
+    results: Seq[CalculationResult],
+    thresholdCheck: ThresholdCheck = WithinThreshold)(implicit server: WireMockServer): StubMapping =
+    server
+      .stubFor(
+        post(urlPathEqualTo(s"$amendsPlusExistingCalculationsUrl"))
+          .withRequestBody(equalToJson(toJson(request).toString, true, false))
+          .willReturn(okJson(Json.toJson(CalculationResponse(CalculationResults(results), thresholdCheck)).toString)))
+
+  def givenAnAmendPaymentCalculations(results: Seq[CalculationResult], thresholdCheck: ThresholdCheck = WithinThreshold)(
+    implicit server: WireMockServer): StubMapping =
+    server
+      .stubFor(
+        post(urlPathEqualTo(s"$amendsPlusExistingCalculationsUrl"))
+          .willReturn(okJson(Json.toJson(CalculationResponse(CalculationResults(results), thresholdCheck)).toString)))
+
   def givenEoriIsChecked(eoriNumber: String)(implicit server: WireMockServer): StubMapping =
     server
       .stubFor(

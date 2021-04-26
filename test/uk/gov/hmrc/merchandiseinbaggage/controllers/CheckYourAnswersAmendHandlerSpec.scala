@@ -67,13 +67,13 @@ class CheckYourAnswersAmendHandlerSpec
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
         if (importOrExport == Import)(mockCalculationService
-          .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
+          .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
           .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
           .once()
         else
           (mockCalculationService
-            .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
+            .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
             .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
             .once()
@@ -99,13 +99,13 @@ class CheckYourAnswersAmendHandlerSpec
         val amendment = completedAmendment(importOrExport)
 
         if (importOrExport == Import)(mockCalculationService
-          .isAmendPlusOriginalOverThresholdImport(_: DeclarationJourney)(_: HeaderCarrier))
+          .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
           .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
           .once()
         else
           (mockCalculationService
-            .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
+            .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
             .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
             .once()

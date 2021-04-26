@@ -66,7 +66,7 @@ class AdditionalDeclarationExportSpec extends BaseUiSpec {
       webDriver.getPageSource must include("France")
       webDriver.getPageSource must include("£100.50")
 
-      givenAPaymentCalculation(aCalculationResult, WithinThreshold)
+      givenAnAmendPaymentCalculations(Seq.empty, WithinThreshold)
       submitPage(ReviewGoodsPage, "No")
 
       webDriver.getPageSource must include("sock")

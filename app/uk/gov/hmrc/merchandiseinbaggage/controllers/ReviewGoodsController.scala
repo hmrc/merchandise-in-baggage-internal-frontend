@@ -23,7 +23,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{declarationNotFoundMessage, goodsDeclarationIncompleteMessage}
 import uk.gov.hmrc.merchandiseinbaggage.forms.ReviewGoodsForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
@@ -86,12 +85,6 @@ class ReviewGoodsController @Inject()(
     implicit hc: HeaderCarrier): OptionT[Future, CalculationResponse] =
     declarationJourney.amendmentIfRequiredAndComplete
       .fold(OptionT.pure[Future](CalculationResponse(CalculationResults(Seq.empty), WithinThreshold))) { _ =>
-        overThresholdCheck(declarationJourney)
+        calculationService.amendPlusOriginalCalculations(declarationJourney)
       }
-
-  private def overThresholdCheck(declarationJourney: DeclarationJourney)(implicit hc: HeaderCarrier): OptionT[Future, CalculationResponse] =
-    declarationJourney.declarationType match {
-      case Import => calculationService.isAmendPlusOriginalOverThresholdImport(declarationJourney)
-      case Export => calculationService.isAmendPlusOriginalOverThresholdExport(declarationJourney)
-    }
 }

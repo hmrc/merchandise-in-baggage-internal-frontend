@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.connectors
 
+import java.time.LocalDateTime
+
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
-import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationAmendRequest, CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.{givenAnAmendPaymentCalculationsRequest, _}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 
@@ -45,14 +47,15 @@ class MibConnectorSpec extends BaseSpecWithApplication with CoreTestData {
     client.calculatePayments(calculationRequest).futureValue mustBe CalculationResponse(CalculationResults(stubbedResult), WithinThreshold)
   }
 
-  "send a calculation requests to backend for payment" in {
-    val calculationRequests = aDeclarationGood.goods.map(_.calculationRequest(GreatBritain))
+  "send a calculation requests to backend for amend payment" in {
+    val amend = Amendment(111, LocalDateTime.now, DeclarationGoods(Seq(aImportGoods)))
+    val amendRequest = CalculationAmendRequest(Some(amend), Some(GreatBritain), aDeclarationId)
     val stubbedResults =
       CalculationResult(aGoods, AmountInPence(7835), AmountInPence(0), AmountInPence(1567), None) :: Nil
 
-    givenAPaymentCalculations(calculationRequests, stubbedResults)
+    givenAnAmendPaymentCalculationsRequest(amendRequest, stubbedResults)
 
-    client.calculatePayments(calculationRequests).futureValue mustBe CalculationResponse(
+    client.calculatePaymentsAmendPlusExisting(amendRequest).futureValue mustBe CalculationResponse(
       CalculationResults(stubbedResults),
       WithinThreshold)
   }
