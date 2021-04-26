@@ -47,32 +47,13 @@ class CheckYourAnswersAmendHandler @Inject()(
   def onPageLoad(
     declarationJourney: DeclarationJourney,
     amendment: Amendment)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Future[Result] =
-    declarationJourney.declarationType match {
-      case Import => onPageLoadImport(amendment, declarationJourney)
-      case Export => onPageLoadExport(amendment, declarationJourney)
-    }
-
-  private def onPageLoadImport(
-    amendment: Amendment,
-    declarationJourney: DeclarationJourney)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Future[Result] =
     calculationService
-      .isAmendPlusOriginalOverThresholdImport(declarationJourney)
-      .fold(actionProvider.invalidRequest(declarationNotFoundMessage)) { res =>
-        res.thresholdCheck match {
-          case OverThreshold   => Redirect(GoodsOverThresholdController.onPageLoad())
-          case WithinThreshold => Ok(amendImportView(form, amendment, res.results))
-        }
-      }
-
-  private def onPageLoadExport(
-    amendment: Amendment,
-    declarationJourney: DeclarationJourney)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Future[Result] =
-    calculationService
-      .isAmendPlusOriginalOverThresholdExport(declarationJourney)
-      .fold(actionProvider.invalidRequest(declarationNotFoundMessage)) { amendCalculationResult =>
-        amendCalculationResult.thresholdCheck match {
-          case OverThreshold   => Redirect(GoodsOverThresholdController.onPageLoad())
-          case WithinThreshold => Ok(amendExportView(form, amendment))
+      .amendPlusOriginalCalculations(declarationJourney)
+      .fold(actionProvider.invalidRequest(declarationNotFoundMessage)) { calculations =>
+        (declarationJourney.declarationType, calculations.thresholdCheck) match {
+          case (_, OverThreshold) => Redirect(GoodsOverThresholdController.onPageLoad())
+          case (Import, _)        => Ok(amendImportView(form, amendment, calculations.results))
+          case (Export, _)        => Ok(amendExportView(form, amendment))
         }
       }
 

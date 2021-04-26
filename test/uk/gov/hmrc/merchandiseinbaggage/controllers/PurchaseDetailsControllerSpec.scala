@@ -20,7 +20,6 @@ import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{PurchaseDetailsController, ReviewGoodsController, SearchGoodsCountryController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
-import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.PurchaseDetailsRequest
 import uk.gov.hmrc.merchandiseinbaggage.support._

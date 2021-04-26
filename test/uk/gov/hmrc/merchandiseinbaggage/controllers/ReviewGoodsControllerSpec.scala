@@ -20,7 +20,7 @@ import cats.data.OptionT
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeController, ReviewGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeController, PaymentCalculationController, ReviewGoodsController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
@@ -83,6 +83,7 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
     }
 
     s"return 400 with any form errors for $importOrExport" in {
+
       val request = buildPost(ReviewGoodsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 
@@ -96,32 +97,36 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
     }
   }
 
-  s"redirect to next page after successful form submit with No for $Export" in {
-    val id = aSessionId
-    val journey: DeclarationJourney =
-      DeclarationJourney(id, Export, goodsEntries = completedGoodsEntries(Export))
-        .copy(journeyType = Amend)
+  forAll(declarationTypesTable) { importOrExport =>
+    s"redirect to next page after successful form submit with No for $importOrExport" in {
+      val id = aSessionId
+      val journey: DeclarationJourney =
+        DeclarationJourney(id, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
+          .copy(journeyType = Amend)
 
-    val controller =
-      new ReviewGoodsController(
-        controllerComponents,
-        stubProvider(journey),
-        stubRepo(journey),
-        view,
-        mockCalculationService,
-        injector.instanceOf[Navigator])
+      val controller =
+        new ReviewGoodsController(
+          controllerComponents,
+          stubProvider(journey),
+          stubRepo(journey),
+          view,
+          mockCalculationService,
+          injector.instanceOf[Navigator])
 
-    (mockCalculationService
-      .isAmendPlusOriginalOverThresholdExport(_: DeclarationJourney)(_: HeaderCarrier))
-      .expects(*, *)
-      .returning(OptionT.pure[Future](CalculationResponse(CalculationResults(Seq.empty), WithinThreshold)))
+      (mockCalculationService
+        .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
+        .expects(*, *)
+        .returning(OptionT.pure[Future](CalculationResponse(CalculationResults(Seq.empty), WithinThreshold)))
 
-    val request = buildPost(ReviewGoodsController.onSubmit().url, id)
-      .withFormUrlEncodedBody("value" -> "No")
+      val request = buildPost(ReviewGoodsController.onSubmit().url, id)
+        .withFormUrlEncodedBody("value" -> "No")
 
-    val eventualResult = controller.onSubmit()(request)
-
-    status(eventualResult) mustBe 303
-    redirectLocation(eventualResult) mustBe Some(CheckYourAnswersController.onPageLoad().url)
+      val eventualResult = controller.onSubmit()(request)
+      val expectedRedirect =
+        if (importOrExport == Export) Some(CheckYourAnswersController.onPageLoad().url)
+        else Some(PaymentCalculationController.onPageLoad().url)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe expectedRedirect
+    }
   }
 }
