@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.pact
 
 import java.io.File
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.circe13._
@@ -27,9 +27,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationAmendRequest, CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, ConversionRatePeriod, Declaration, DeclarationId}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Amendment, AmountInPence, ConversionRatePeriod, Declaration, DeclarationGoods, DeclarationId, ImportGoods}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 
@@ -73,6 +73,41 @@ class MibConnectorContractSpec extends BaseSpecWithApplication with CoreTestData
         .given(s"id1234XXX${Json.toJson(declaration.copy(declarationId = DeclarationId("56789"))).toString}")
         .uponReceiving(GET, s"$declarationsUrl/56789")
         .willRespondWith(200, Json.toJson(declaration.copy(declarationId = DeclarationId("56789"))).toString)
+    )
+    .addInteraction(
+      interaction
+        .description("calculates total payments for amendment")
+        .given(s"id789")
+        .uponReceiving(
+          POST,
+          s"$amendsPlusExistingCalculationsUrl",
+          None,
+          Map("Content-Type" -> "application/json"),
+          Json
+            .toJson(
+              CalculationAmendRequest(
+                Some(declarationWithAmendment.amendments.head),
+                Some(declarationWithAmendment.goodsDestination),
+                DeclarationId("id789")
+              ))
+            .toString
+        )
+        .willRespondWith(
+          200,
+          Json
+            .toJson(CalculationResponse(
+              CalculationResults(
+                Seq(
+                  CalculationResult(
+                    declarationWithAmendment.declarationGoods.goods.head.asInstanceOf[ImportGoods],
+                    AmountInPence(9090),
+                    AmountInPence(0),
+                    AmountInPence(1818),
+                    Some(period)))),
+              WithinThreshold
+            ))
+            .toString
+        )
     )
     .addInteraction(
       interaction
