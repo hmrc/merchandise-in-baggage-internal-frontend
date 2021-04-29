@@ -28,6 +28,8 @@ class AdditionalDeclarationExportSpec extends BaseUiSpec {
 
   "Additional Declaration Export journey - happy path" should {
     "work as expected" in {
+      givenExchangeRateURL("http://something.com")
+
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, "AddToExisting")

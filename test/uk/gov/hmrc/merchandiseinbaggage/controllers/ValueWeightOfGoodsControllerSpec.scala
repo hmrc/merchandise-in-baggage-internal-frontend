@@ -17,9 +17,11 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenExchangeRateURL
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ValueWeightOfGoodsView
 
@@ -30,13 +32,20 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
   private val view = injector.instanceOf[ValueWeightOfGoodsView]
   private val navigator = injector.instanceOf[Navigator]
   def controller(declarationJourney: DeclarationJourney) =
-    new ValueWeightOfGoodsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), navigator, view)
+    new ValueWeightOfGoodsController(
+      controllerComponents,
+      stubProvider(declarationJourney),
+      stubRepo(declarationJourney),
+      navigator,
+      mibConnector,
+      view)
 
   declarationTypes.foreach { importOrExport: DeclarationType =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport).copy(maybeGoodsDestination = Some(GreatBritain))
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
+        givenExchangeRateURL("http://something.com")
         val request = buildGet(routes.ValueWeightOfGoodsController.onPageLoad().url, aSessionId)
         val eventualResult = controller(journey).onPageLoad(request)
         val result = contentAsString(eventualResult)
@@ -49,6 +58,7 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
 
     "onSubmit" should {
       s"redirect to /goods-type after successful form submit with Yes for $importOrExport" in {
+        givenExchangeRateURL("http://something.com")
         val request = buildPost(routes.ValueWeightOfGoodsController.onSubmit().url, aSessionId)
           .withFormUrlEncodedBody("value" -> "Yes")
 
@@ -60,6 +70,7 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
     }
 
     s"return 400 with any form errors for $importOrExport" in {
+      givenExchangeRateURL("http://something.com")
       val request = buildPost(routes.ValueWeightOfGoodsController.onSubmit().url, aSessionId)
         .withFormUrlEncodedBody("value" -> "in valid")
 

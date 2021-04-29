@@ -28,6 +28,8 @@ class ExportJourneySpec extends BaseUiSpec {
 
   "Export journey" should {
     "work as expected" in {
+      givenExchangeRateURL("http://something.com")
+
       goto(ImportExportChoicePage.path)
 
       submitPage(ImportExportChoicePage, MakeExport.toString)
