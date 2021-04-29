@@ -47,7 +47,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec wit
     val journey: DeclarationJourney = DeclarationJourney(
       aSessionId,
       importOrExport,
-      goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryOfGoods = Some("clothes"))))
+      goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategory = Some("clothes"))))
     )
 
     "onPageLoad" should {

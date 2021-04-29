@@ -170,43 +170,43 @@ class NavigatorSpec extends DeclarationJourneyControllerSpec with PropertyBaseTa
         }
       }
 
-      s"from ${GoodsOriginController.onPageLoad(1).url} navigates to ${PurchaseDetailsController
+      s"from ${GoodsOriginController.onPageLoad(1).url} navigates to ${GoodsVatRateController
         .onPageLoad(1)} for $newOrAmend & $importOrExport" in new Navigator {
         val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
         val entries = if (importOrExport == Import) startedImportGoods else startedExportGoods
         val result: Future[Call] = nextPage(GoodsOriginRequest(journey, entries, 1, _ => Future(journey)))
 
-        result.futureValue mustBe PurchaseDetailsController.onPageLoad(1)
+        result.futureValue mustBe GoodsVatRateController.onPageLoad(1)
       }
 
       if (importOrExport == Import) {
-        s"from ${GoodsTypeController.onPageLoad(1).url} navigates to ${GoodsVatRateController
+        s"from ${GoodsTypeController.onPageLoad(1).url} navigates to ${PurchaseDetailsController
           .onPageLoad(1)} for $newOrAmend & $importOrExport" in new Navigator {
           val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
           val result: Future[Call] =
             nextPage(GoodsTypeRequest(journey, startedImportGoods, 1, aCategory, _ => Future(journey)))
 
-          result.futureValue mustBe GoodsVatRateController.onPageLoad(1)
+          result.futureValue mustBe PurchaseDetailsController.onPageLoad(1)
         }
       }
 
       if (importOrExport == Export) {
-        s"from ${GoodsTypeController.onPageLoad(1).url} navigates to ${SearchGoodsCountryController
+        s"from ${GoodsTypeController.onPageLoad(1).url} navigates to ${PurchaseDetailsController
           .onPageLoad(1)} for $newOrAmend & $importOrExport" in new Navigator {
           val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
           val result: Future[Call] =
             nextPage(GoodsTypeRequest(journey, startedExportGoods, 1, aCategory, _ => Future(journey)))
 
-          result.futureValue mustBe SearchGoodsCountryController.onPageLoad(1)
+          result.futureValue mustBe PurchaseDetailsController.onPageLoad(1)
         }
       }
 
-      s"from ${GoodsVatRateController.onPageLoad(1).url} navigates to ${SearchGoodsCountryController
-        .onPageLoad(1)} for $newOrAmend & $importOrExport" in new Navigator {
+      s"from ${GoodsVatRateController.onPageLoad(1).url} navigates to ${ReviewGoodsController
+        .onPageLoad()} for $newOrAmend & $importOrExport" in new Navigator {
         val journey: DeclarationJourney = completedDeclarationJourney.copy(declarationType = importOrExport, journeyType = newOrAmend)
         val result: Future[Call] = nextPage(GoodsVatRateRequest(journey, startedImportGoods, 1, _ => Future(journey)))
 
-        result.futureValue mustBe SearchGoodsCountryController.onPageLoad(1)
+        result.futureValue mustBe ReviewGoodsController.onPageLoad()
       }
 
       s"from ${SearchGoodsCountryController.onPageLoad(2).url} navigates to ${PurchaseDetailsController
@@ -234,7 +234,7 @@ class NavigatorSpec extends DeclarationJourneyControllerSpec with PropertyBaseTa
         result.futureValue mustBe ExciseAndRestrictedGoodsController.onPageLoad()
       }
 
-      s"from ${PurchaseDetailsController.onPageLoad(1).url} navigates to ${ReviewGoodsController
+      s"from ${PurchaseDetailsController.onPageLoad(1).url} navigates to ${CheckYourAnswersController
         .onPageLoad()} for $newOrAmend & $importOrExport updating goods entries" in new Navigator {
         val detailsInput: PurchaseDetailsInput = PurchaseDetailsInput("123", "EUR")
         val stubUpsert: DeclarationJourney => Future[DeclarationJourney] =
@@ -248,7 +248,7 @@ class NavigatorSpec extends DeclarationJourneyControllerSpec with PropertyBaseTa
             completedDeclarationJourney,
             stubUpsert))
 
-        result.futureValue mustBe ReviewGoodsController.onPageLoad()
+        result.futureValue mustBe CheckYourAnswersController.onPageLoad()
       }
 
       s"from ${ImportExportChoiceController.onPageLoad()}" must {

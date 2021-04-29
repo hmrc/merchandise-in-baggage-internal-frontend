@@ -38,7 +38,7 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
   private val journey: DeclarationJourney = DeclarationJourney(
     aSessionId,
     DeclarationType.Import,
-    goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategoryOfGoods = Some("clothes"))))
+    goodsEntries = GoodsEntries(Seq(ImportGoodsEntry(maybeCategory = Some("clothes"))))
   )
 
   "onPageLoad" should {

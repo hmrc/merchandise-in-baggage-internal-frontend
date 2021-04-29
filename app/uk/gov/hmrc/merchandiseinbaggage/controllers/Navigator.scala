@@ -55,9 +55,9 @@ class Navigator {
     case PreviousDeclarationDetailsRequest(journey, declaration, upsert)   => previousDeclarationDetails(journey, declaration, upsert)
     case GoodsTypeRequest(journey, entries, idx, category, upsert)         => goodsType(journey, entries, idx, category, upsert)
     case GoodsOriginRequest(journey, entries, idx, upsert) =>
-      persistAndRedirect(journey, entries, idx, PurchaseDetailsController.onPageLoad(idx), upsert)
+      persistAndRedirect(journey, entries, idx, GoodsVatRateController.onPageLoad(idx), upsert)
     case GoodsVatRateRequest(journey, entries, idx, upsert) =>
-      persistAndRedirect(journey, entries, idx, SearchGoodsCountryController.onPageLoad(idx), upsert)
+      goodsVatRate(journey, entries, idx, upsert)
     case SearchGoodsCountryRequest(journey, entries, idx, upsert) =>
       persistAndRedirect(journey, entries, idx, PurchaseDetailsController.onPageLoad(idx), upsert)
   }
@@ -202,18 +202,26 @@ object NavigatorMapping {
     journey: DeclarationJourney,
     currentEntries: GoodsEntry,
     idx: Int,
-    categoryOfGoods: String,
+    category: String,
     upsert: DeclarationJourney => Future[DeclarationJourney])(implicit ec: ExecutionContext): Future[Call] = {
     val updatedGoodsEntry = currentEntries match {
-      case entry: ImportGoodsEntry => entry.copy(maybeCategoryOfGoods = Some(categoryOfGoods))
-      case entry: ExportGoodsEntry => entry.copy(maybeCategoryOfGoods = Some(categoryOfGoods))
+      case entry: ImportGoodsEntry => entry.copy(maybeCategory = Some(category))
+      case entry: ExportGoodsEntry => entry.copy(maybeCategory = Some(category))
     }
 
-    val redirectTo = journey.declarationType match {
-      case Import => GoodsVatRateController.onPageLoad(idx)
-      case Export => SearchGoodsCountryController.onPageLoad(idx)
+    persistAndRedirect(journey, updatedGoodsEntry, idx, PurchaseDetailsController.onPageLoad(idx), upsert)
+  }
+
+  def goodsVatRate(
+    declarationJourney: DeclarationJourney,
+    currentEntries: GoodsEntry,
+    index: Int,
+    upsert: DeclarationJourney => Future[DeclarationJourney])(implicit ec: ExecutionContext): Future[Call] = {
+    val updatedDeclarationJourney =
+      declarationJourney.copy(goodsEntries = declarationJourney.goodsEntries.patch(index, currentEntries))
+    upsert(updatedDeclarationJourney).map { _ =>
+      ReviewGoodsController.onPageLoad()
     }
-    persistAndRedirect(journey, updatedGoodsEntry, idx, redirectTo, upsert)
   }
 
   def reviewGoods(
@@ -253,12 +261,7 @@ object NavigatorMapping {
       .getCurrencyByCode(purchaseDetailsInput.currency)
       .fold(Future(CannotAccessPageController.onPageLoad())) { currency =>
         val updatedGoodsEntry: GoodsEntry = updateGoodsEntry(purchaseDetailsInput.price, currency, goodsEntry)
-        val updatedDeclarationJourney =
-          declarationJourney.copy(goodsEntries = declarationJourney.goodsEntries.patch(idx, updatedGoodsEntry))
-
-        upsert(updatedDeclarationJourney).map { _ =>
-          ReviewGoodsController.onPageLoad()
-        }
+        persistAndRedirect(declarationJourney, updatedGoodsEntry, idx, GoodsOriginController.onPageLoad(idx), upsert)
       }
 
   def updateGoodsEntry(amount: String, currency: Currency, goodsEntry: GoodsEntry): GoodsEntry =
