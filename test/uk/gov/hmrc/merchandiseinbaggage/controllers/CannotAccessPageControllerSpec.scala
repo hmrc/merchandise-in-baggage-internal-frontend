@@ -29,7 +29,7 @@ class CannotAccessPageControllerSpec extends DeclarationJourneyControllerSpec {
 
   def controller = new CannotAccessPageController(controllerComponents, view)
 
-  declarationTypes.foreach { importOrExport: DeclarationType =>
+  forAll(declarationTypes) { importOrExport: DeclarationType =>
     "onPageLoad" should {
       s"return 200 with radio buttons for $importOrExport" in {
 

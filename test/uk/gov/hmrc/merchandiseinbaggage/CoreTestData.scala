@@ -20,6 +20,8 @@ import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.softwaremill.quicklens._
+import org.scalatest.prop.TableFor1
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
@@ -39,7 +41,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.{ConversionRatePeriod, Country
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, ExportGoodsEntry, GoodsEntries, ImportGoodsEntry}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{DeclarationConfirmationView, Layout}
 
-trait CoreTestData {
+trait CoreTestData extends ScalaCheckPropertyChecks {
   val payApiRequest: PayApiRequest = payapi.PayApiRequest(
     MibReference("MIBI1234567890"),
     AmountInPence(1),
@@ -49,7 +51,9 @@ trait CoreTestData {
     "http://localhost:8281/declare-commercial-goods/check-your-answers"
   )
 
-  val declarationTypes = List(Import, Export)
+  val declarationTypes: TableFor1[DeclarationType] = Table("declarationType", Import, Export)
+
+  val journeyTypes: TableFor1[JourneyType] = Table("journeyType", New, Amend)
 
   val aSessionId: SessionId = SessionId()
 

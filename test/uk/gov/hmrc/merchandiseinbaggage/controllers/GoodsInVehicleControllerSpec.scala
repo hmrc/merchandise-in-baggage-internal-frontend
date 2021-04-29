@@ -35,7 +35,7 @@ class GoodsInVehicleControllerSpec extends DeclarationJourneyControllerSpec with
   def controller(declarationJourney: DeclarationJourney) =
     new GoodsInVehicleController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), mockNavigator, view)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
 

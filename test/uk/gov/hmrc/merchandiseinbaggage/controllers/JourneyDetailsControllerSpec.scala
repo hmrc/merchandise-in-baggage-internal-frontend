@@ -43,7 +43,7 @@ class JourneyDetailsControllerSpec extends DeclarationJourneyControllerSpec with
         mockNavigator,
         view)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport).copy(maybeIsACustomsAgent = Some(YesNo.No))
 

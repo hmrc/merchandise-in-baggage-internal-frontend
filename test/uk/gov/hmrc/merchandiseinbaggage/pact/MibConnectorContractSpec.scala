@@ -17,7 +17,7 @@
 package uk.gov.hmrc.merchandiseinbaggage.pact
 
 import java.io.File
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 import com.itv.scalapact.ScalaPactForger._
 import com.itv.scalapact.circe13._
@@ -27,9 +27,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationAmendRequest, CalculationResponse, CalculationResult, CalculationResults, WithinThreshold}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.checkeori.CheckResponse
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Amendment, AmountInPence, ConversionRatePeriod, Declaration, DeclarationGoods, DeclarationId, ImportGoods}
+import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
 import uk.gov.hmrc.merchandiseinbaggage.{BaseSpecWithApplication, CoreTestData}
 

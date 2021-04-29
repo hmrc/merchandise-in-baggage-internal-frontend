@@ -32,7 +32,7 @@ class ValueWeightOfGoodsControllerSpec extends DeclarationJourneyControllerSpec 
   def controller(declarationJourney: DeclarationJourney) =
     new ValueWeightOfGoodsController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), navigator, view)
 
-  declarationTypes.foreach { importOrExport: DeclarationType =>
+  forAll(declarationTypes) { importOrExport: DeclarationType =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport).copy(maybeGoodsDestination = Some(GreatBritain))
     "onPageLoad" should {

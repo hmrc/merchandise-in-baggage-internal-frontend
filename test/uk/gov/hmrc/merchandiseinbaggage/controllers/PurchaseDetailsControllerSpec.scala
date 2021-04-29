@@ -43,7 +43,7 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec wit
       importView,
       exportView)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney = DeclarationJourney(
       aSessionId,
       importOrExport,
