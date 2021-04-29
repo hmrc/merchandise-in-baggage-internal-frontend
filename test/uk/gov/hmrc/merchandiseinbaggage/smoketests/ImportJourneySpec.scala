@@ -39,11 +39,11 @@ class ImportJourneySpec extends BaseUiSpec {
 
       submitPage(GoodsTypePage, "shoes")
 
-      submitPage(GoodsVatRatePage, "Five")
+      submitPage(PurchaseDetailsPage, PurchaseDetailsInput("100", "EUR"))
 
       submitPage(GoodsOriginPage, Yes)
 
-      submitPage(PurchaseDetailsPage, PurchaseDetailsInput("100", "EUR"))
+      submitPage(GoodsVatRatePage, "Five")
 
       givenAPaymentCalculation(aCalculationResult)
       submitPage(ReviewGoodsPage, No)

@@ -94,7 +94,7 @@ trait CoreTestData {
 
   val aImportGoods: ImportGoods =
     ImportGoods(
-      completedImportGoods.maybeCategoryOfGoods.get,
+      completedImportGoods.maybeCategory.get,
       completedImportGoods.maybeGoodsVatRate.get,
       completedImportGoods.maybeProducedInEu.get,
       completedImportGoods.maybePurchaseDetails.get
@@ -102,7 +102,7 @@ trait CoreTestData {
 
   val aExportGoods =
     ExportGoods(
-      completedExportGoods.maybeCategoryOfGoods.get,
+      completedExportGoods.maybeCategory.get,
       completedExportGoods.maybeDestination.get,
       completedExportGoods.maybePurchaseDetails.get
     )

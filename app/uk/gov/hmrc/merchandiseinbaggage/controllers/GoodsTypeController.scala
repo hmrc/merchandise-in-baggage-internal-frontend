@@ -46,7 +46,7 @@ class GoodsTypeController @Inject()(
   }
 
   def onPageLoad(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx) { implicit request =>
-    val preparedForm = request.goodsEntry.maybeCategoryOfGoods.fold(form)(form.fill)
+    val preparedForm = request.goodsEntry.maybeCategory.fold(form)(form.fill)
 
     Ok(view(preparedForm, idx, request.declarationJourney.declarationType, backButtonUrl))
   }

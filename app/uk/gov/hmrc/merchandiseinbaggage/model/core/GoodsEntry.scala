@@ -20,7 +20,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 
 sealed trait GoodsEntry {
-  val maybeCategoryOfGoods: Option[String]
+  val maybeCategory: Option[String]
   val maybePurchaseDetails: Option[PurchaseDetails]
 
   def goodsIfComplete: Option[Goods]
@@ -29,14 +29,14 @@ sealed trait GoodsEntry {
 }
 
 final case class ImportGoodsEntry(
-  override val maybeCategoryOfGoods: Option[String] = None,
+  override val maybeCategory: Option[String] = None,
   maybeGoodsVatRate: Option[GoodsVatRate] = None,
   maybeProducedInEu: Option[YesNoDontKnow] = None,
   override val maybePurchaseDetails: Option[PurchaseDetails] = None
 ) extends GoodsEntry {
   override def goodsIfComplete: Option[ImportGoods] =
     for {
-      category        <- maybeCategoryOfGoods
+      category        <- maybeCategory
       goodsVatRate    <- maybeGoodsVatRate
       producedInEu    <- maybeProducedInEu
       purchaseDetails <- maybePurchaseDetails
@@ -52,13 +52,13 @@ object ImportGoodsEntry {
 }
 
 final case class ExportGoodsEntry(
-  override val maybeCategoryOfGoods: Option[String] = None,
+  override val maybeCategory: Option[String] = None,
   maybeDestination: Option[Country] = None,
   override val maybePurchaseDetails: Option[PurchaseDetails] = None
 ) extends GoodsEntry {
   override def goodsIfComplete: Option[ExportGoods] =
     for {
-      category        <- maybeCategoryOfGoods
+      category        <- maybeCategory
       destination     <- maybeDestination
       purchaseDetails <- maybePurchaseDetails
     } yield ExportGoods(category, destination, purchaseDetails)
