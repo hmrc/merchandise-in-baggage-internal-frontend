@@ -17,14 +17,30 @@
 package uk.gov.hmrc.merchandiseinbaggage.smoketests.pages
 
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import org.scalatest.{Assertion, Suite}
 import org.scalatestplus.selenium.WebBrowser._
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyType
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.New
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.BaseUiSpec
+import GoodsTypePage._
 
 object GoodsTypePage extends Page {
   def path(idx: Int): String = s"/declare-commercial-goods/goods-type/$idx"
-  def title(idx: Int) = s"Enter the ${if (idx == 1) "first" else "next"} type of goods"
 
-  def submitPage[T](formData: T)(implicit webDriver: HtmlUnitDriver): Unit = {
-    find(NameQuery("category")).get.underlying.sendKeys(formData.toString)
+  def submitPage[T](category: T)(implicit webDriver: HtmlUnitDriver): Unit = {
+    find(NameQuery("category")).get.underlying.sendKeys(category.toString)
     click.on(NameQuery("continue"))
+  }
+}
+
+trait GoodsTypePage extends BaseUiSpec {
+  this: Suite =>
+
+  def title(idx: Int, journeyType: JourneyType): String =
+    messages(s"goodsType.$journeyType.${if (idx == 1 && journeyType == New) "" else "next."}title")
+
+  def goToGoodsTypePage(idx: Int, journeyType: JourneyType): Assertion = {
+    goto(path(idx))
+    pageTitle must startWith(title(idx, journeyType))
   }
 }
