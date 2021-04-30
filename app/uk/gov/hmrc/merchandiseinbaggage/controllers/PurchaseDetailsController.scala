@@ -19,6 +19,7 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
+import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.forms.PurchaseDetailsForm.form
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, ImportGoodsEntry, PurchaseDetailsInput}
@@ -35,6 +36,7 @@ class PurchaseDetailsController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   repo: DeclarationJourneyRepository,
   navigator: Navigator,
+  mibConnector: MibConnector,
   importView: PurchaseDetailsImportView,
   exportView: PurchaseDetailsExportView,
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
@@ -54,7 +56,9 @@ class PurchaseDetailsController @Inject()(
         case Import =>
           val preparedForm = request.goodsEntry.maybePurchaseDetails.fold(form)(p => form.fill(p.purchaseDetailsInput))
 
-          Future successful Ok(importView(preparedForm, idx, category, backButtonUrl(idx)))
+          mibConnector.findExchangeRateURL().map { exchangeUrl =>
+            Ok(importView(preparedForm, idx, category, exchangeUrl.url, backButtonUrl(idx)))
+          }
         case Export =>
           val preparedForm = request.goodsEntry.maybePurchaseDetails.fold(form)(p => form.fill(p.purchaseDetailsInput))
 
@@ -76,7 +80,10 @@ class PurchaseDetailsController @Inject()(
             form
               .bindFromRequest()
               .fold(
-                formWithErrors => Future successful BadRequest(importView(formWithErrors, idx, category, backButtonUrl(idx))),
+                formWithErrors =>
+                  mibConnector.findExchangeRateURL().map { exchangeUrl =>
+                    BadRequest(importView(formWithErrors, idx, category, exchangeUrl.url, backButtonUrl(idx)))
+                },
                 purchaseDetailsInput => requestWithIndexAndCallBack(purchaseDetailsInput)
               )
           case Export =>
