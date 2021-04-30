@@ -31,7 +31,7 @@ class VehicleSizeControllerSpec extends DeclarationJourneyControllerSpec {
   def controller(declarationJourney: DeclarationJourney) =
     new VehicleSizeController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), navigator, view)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney =
       DeclarationJourney(aSessionId, importOrExport, goodsEntries = completedGoodsEntries(importOrExport))
 

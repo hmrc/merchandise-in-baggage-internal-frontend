@@ -48,7 +48,7 @@ class GoodsTypeController @Inject()(
   def onPageLoad(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx) { implicit request =>
     val preparedForm = request.goodsEntry.maybeCategory.fold(form)(form.fill)
 
-    Ok(view(preparedForm, idx, request.declarationJourney.declarationType, backButtonUrl))
+    Ok(view(preparedForm, idx, request.declarationJourney.declarationType, request.declarationJourney.journeyType, backButtonUrl))
   }
 
   def onSubmit(idx: Int): Action[AnyContent] = actionProvider.goodsAction(idx).async { implicit request =>
@@ -56,11 +56,13 @@ class GoodsTypeController @Inject()(
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, idx, request.declarationJourney.declarationType, backButtonUrl))),
-        categoryOfGoods =>
+          Future.successful(BadRequest(
+            view(formWithErrors, idx, request.declarationJourney.declarationType, request.declarationJourney.journeyType, backButtonUrl))),
+        category => {
           navigator
-            .nextPage(GoodsTypeRequest(request.declarationJourney, request.goodsEntry, idx, categoryOfGoods, repo.upsert))
+            .nextPage(GoodsTypeRequest(request.declarationJourney, request.goodsEntry, idx, category, repo.upsert))
             .map(Redirect)
+        }
       )
   }
 }

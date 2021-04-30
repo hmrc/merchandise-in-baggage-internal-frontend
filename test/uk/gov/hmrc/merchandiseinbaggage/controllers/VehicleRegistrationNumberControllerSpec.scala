@@ -37,7 +37,7 @@ class VehicleRegistrationNumberControllerSpec extends DeclarationJourneyControll
       navigator,
       view)
 
-  declarationTypes.foreach { importOrExport =>
+  forAll(declarationTypes) { importOrExport =>
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
 
     "onPageLoad" should {
