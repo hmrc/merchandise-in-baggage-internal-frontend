@@ -25,7 +25,7 @@ import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation._
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Eori, MibReference}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Eori, ExchangeRateURL, MibReference}
 
 object MibBackendStub extends MibConfiguration with CoreTestData {
 
@@ -116,5 +116,11 @@ object MibBackendStub extends MibConfiguration with CoreTestData {
       .stubFor(
         get(urlEqualTo(s"$declarationsUrl?mibReference=${mibReference.value}&eori=${eori.value}"))
           .willReturn(status(aStatus)))
+
+  def givenExchangeRateURL(url: String)(implicit server: WireMockServer): StubMapping =
+    server
+      .stubFor(
+        get(urlPathEqualTo(s"$exchangeRateUrl"))
+          .willReturn(ok().withBody(Json.toJson(ExchangeRateURL(url)).toString)))
 
 }
