@@ -48,8 +48,8 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
       val result = contentAsString(eventualResult)
 
       status(eventualResult) mustBe 200
-      result must include(messages("goodsVatRate.title", "clothes"))
-      result must include(messages("goodsVatRate.heading", "clothes"))
+      result must include(messages("goodsVatRate.title"))
+      result must include(messages("goodsVatRate.heading"))
       result must include(messages("goodsVatRate.p"))
       result must include(messages("goodsVatRate.Zero"))
       result must include(messages("goodsVatRate.Five"))
@@ -80,8 +80,8 @@ class GoodsVatRateControllerSpec extends DeclarationJourneyControllerSpec with M
 
       status(eventualResult) mustBe 400
       result must include(messageApi("error.summary.title"))
-      result must include(messages("goodsVatRate.title", "clothes"))
-      result must include(messages("goodsVatRate.heading", "clothes"))
+      result must include(messages("goodsVatRate.title"))
+      result must include(messages("goodsVatRate.heading"))
     }
   }
 }
