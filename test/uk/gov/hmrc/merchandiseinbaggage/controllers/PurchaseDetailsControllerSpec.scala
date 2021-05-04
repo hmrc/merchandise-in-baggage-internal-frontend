@@ -60,8 +60,8 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec wit
         val result = contentAsString(eventualResult)
 
         status(eventualResult) mustBe 200
-        result must include(messages("purchaseDetails.title", "clothes"))
-        result must include(messages("purchaseDetails.heading", "clothes"))
+        result must include(messages("purchaseDetails.title"))
+        result must include(messages("purchaseDetails.heading"))
 
         if (importOrExport == Import) {
           result must include(messages("purchaseDetails.price.hint"))
@@ -98,8 +98,8 @@ class PurchaseDetailsControllerSpec extends DeclarationJourneyControllerSpec wit
 
         status(eventualResult) mustBe 400
         result must include(messageApi("error.summary.title"))
-        result must include(messages("purchaseDetails.title", "clothes"))
-        result must include(messages("purchaseDetails.heading", "clothes"))
+        result must include(messages("purchaseDetails.title"))
+        result must include(messages("purchaseDetails.heading"))
       }
     }
   }

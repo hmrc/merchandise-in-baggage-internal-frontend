@@ -47,7 +47,7 @@ trait PurchaseDetailsPage extends BaseUiSpec { this: Suite =>
 
   def goToPurchaseDetailsPage(idx: Int): Assertion = {
     goto(path(idx))
-    pageTitle must startWith(messages(s"purchaseDetails.title", "wine"))
-    elementText(findByTagName("h1")) must startWith(messages(s"purchaseDetails.heading", "wine"))
+    pageTitle must startWith(messages(s"purchaseDetails.title"))
+    elementText(findByTagName("h1")) must startWith(messages(s"purchaseDetails.heading"))
   }
 }
