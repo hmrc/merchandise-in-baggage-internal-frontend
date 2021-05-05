@@ -35,7 +35,8 @@ object GoodsSummaryList {
       }
     }
 
-  private def rowWithChange(key: String, value: String, changeUrl: String, changeId: String)(implicit messages: Messages): SummaryListRow =
+  private def rowWithChange(key: String, value: String, changeUrl: String, changeId: String, hiddenTxt: String)(
+    implicit messages: Messages): SummaryListRow =
     SummaryListRow(
       key = Key(Text(messages(key))),
       value = Value(Text(value)),
@@ -45,7 +46,7 @@ object GoodsSummaryList {
             ActionItem(
               href = changeUrl,
               content = Text(messages("site.change")),
-              visuallyHiddenText = Some(messages(key)),
+              visuallyHiddenText = Some(messages(hiddenTxt)),
               attributes = Map("id" -> s"$changeId")
             )
           )
@@ -59,25 +60,29 @@ object GoodsSummaryList {
           "reviewGoods.list.item",
           goods.category,
           routes.GoodsTypeController.onPageLoad(idx).url,
-          s"categoryChangeLink_$idx"
-        ),
-        rowWithChange(
-          "reviewGoods.list.vatRate",
-          s"${goods.goodsVatRate.value}%",
-          routes.GoodsVatRateController.onPageLoad(idx).url,
-          s"vatRateChangeLink_$idx"
-        ),
-        rowWithChange(
-          "reviewGoods.list.producedInEu",
-          messages(goods.producedInEu.messageKey),
-          routes.GoodsOriginController.onPageLoad(idx).url,
-          s"goodsOriginChangeLink_$idx"
+          s"categoryChangeLink_$idx",
+          "reviewGoods.goodsType.changeText"
         ),
         rowWithChange(
           "reviewGoods.list.price",
           goods.purchaseDetails.formatted,
           routes.PurchaseDetailsController.onPageLoad(idx).url,
-          s"priceChangeLink_$idx"
+          s"priceChangeLink_$idx",
+          "reviewGoods.price.changeText"
+        ),
+        rowWithChange(
+          "reviewGoods.list.producedInEu",
+          messages(goods.producedInEu.messageKey),
+          routes.GoodsOriginController.onPageLoad(idx).url,
+          s"goodsOriginChangeLink_$idx",
+          "reviewGoods.country.changeText"
+        ),
+        rowWithChange(
+          "reviewGoods.list.vatRate",
+          s"${goods.goodsVatRate.value}%",
+          routes.GoodsVatRateController.onPageLoad(idx).url,
+          s"vatRateChangeLink_$idx",
+          "reviewGoods.list.vatRate"
         )
       ),
       classes = "govuk-!-margin-bottom-1",
@@ -91,23 +96,25 @@ object GoodsSummaryList {
           "reviewGoods.list.item",
           goods.category,
           routes.GoodsTypeController.onPageLoad(idx).url,
-          s"categoryChangeLink_$idx"
-        ),
-        rowWithChange(
-          "reviewGoods.list.destination",
-          messages(goods.destination.countryName),
-          routes.SearchGoodsCountryController.onPageLoad(idx).url,
-          s"destinationChangeLink_$idx"
+          s"categoryChangeLink_$idx",
+          "reviewGoods.goodsType.changeText"
         ),
         rowWithChange(
           "reviewGoods.list.price",
           goods.purchaseDetails.formatted,
           routes.PurchaseDetailsController.onPageLoad(idx).url,
-          s"priceChangeLink_$idx"
+          s"priceChangeLink_$idx",
+          "reviewGoods.price.changeText"
+        ),
+        rowWithChange(
+          "reviewGoods.list.destination",
+          messages(goods.destination.countryName),
+          routes.SearchGoodsCountryController.onPageLoad(idx).url,
+          s"destinationChangeLink_$idx",
+          "reviewGoods.destination.changeText"
         )
       ),
-      classes = "govuk-!-margin-bottom-1",
-      attributes = Map("id" -> "summaryListId")
+      classes = "govuk-!-margin-bottom-1"
     )
 
 }
