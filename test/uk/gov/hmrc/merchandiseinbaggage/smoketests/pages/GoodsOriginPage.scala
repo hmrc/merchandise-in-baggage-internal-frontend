@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.smoketests.pages
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import org.scalatest.{Assertion, Suite}
 import org.scalatestplus.selenium.WebBrowser._
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.BaseUiSpec
+import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.GoodsOriginPage.{path, title}
 
 object GoodsOriginPage extends Page {
   def path(idx: Int) = s"/declare-commercial-goods/goods-origin/$idx"
@@ -25,5 +28,13 @@ object GoodsOriginPage extends Page {
   def submitPage[T](formData: T)(implicit webDriver: HtmlUnitDriver): Unit = {
     click.on(IdQuery(formData.toString))
     click.on(NameQuery("continue"))
+  }
+}
+
+trait GoodsOriginPage extends BaseUiSpec { this: Suite =>
+
+  def goToGoodsOriginPage(idx: Int): Assertion = {
+    goto(path(idx))
+    pageTitle must startWith(title)
   }
 }
