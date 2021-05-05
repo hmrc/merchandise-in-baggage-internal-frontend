@@ -22,11 +22,13 @@ import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.ReviewGoodsPage
 import uk.gov.hmrc.merchandiseinbaggage.support.PropertyBaseTables
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 
 class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with PropertyBaseTables {
 
   s"render contents" in {
     givenAJourneyWithSession()
+    givenAPaymentCalculation(aCalculationResult)
     goToReviewGoodsPagePage(New)
 
     elementText(findByTagName("h2")) must include(messages("reviewGoods.h2"))
@@ -36,6 +38,7 @@ class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with Prop
     rowTest(2, "reviewGoods.list.producedInEu", "Yes", "/goods-origin/1")
     rowTest(3, "reviewGoods.list.vatRate", "20%", "/goods-vat-rate/1")
 
+    findByClassName("govuk-inset-text").getText mustBe messages("reviewGoods.allowance", s"${aCalculationResult.taxDue.value}")
     findByTagName("a").getAttribute("href") must include("review-goods#main-content")
     radioButtonTest
     elementText(findByTagName("button")) mustBe "Continue"
@@ -43,6 +46,7 @@ class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with Prop
 
   s"render different title&header for amending an existing declaration" in {
     givenAJourneyWithSession(Amend)
+    givenAPaymentCalculation(aCalculationResult)
     goToReviewGoodsPagePage(Amend)
   }
 

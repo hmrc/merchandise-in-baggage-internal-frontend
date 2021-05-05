@@ -17,15 +17,16 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import cats.data.OptionT
+import cats.instances.future._
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{declarationNotFoundMessage, goodsDeclarationIncompleteMessage}
 import uk.gov.hmrc.merchandiseinbaggage.forms.ReviewGoodsForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, GoodsDestination, YesNo}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
 import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
@@ -46,26 +47,35 @@ class ReviewGoodsController @Inject()(
   private def backButtonUrl(implicit request: DeclarationJourneyRequest[_]) =
     routes.PurchaseDetailsController.onPageLoad(request.declarationJourney.goodsEntries.entries.size)
 
-  val onPageLoad: Action[AnyContent] = actionProvider.journeyAction { implicit request =>
+  val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    goodsEntries.declarationGoodsIfComplete
-      .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { goods =>
-        Ok(view(form, goods, backButtonUrl, declarationType, journeyType))
+    validateRequest(maybeGoodsDestination, goodsEntries)
+      .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { r =>
+        Ok(view(form, r._1, backButtonUrl, declarationType, journeyType, r._2))
       }
   }
 
   val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    goodsEntries.declarationGoodsIfComplete
-      .fold(actionProvider.invalidRequestF(goodsDeclarationIncompleteMessage)) { goods =>
+    validateRequest(maybeGoodsDestination, goodsEntries)
+      .foldF(actionProvider.invalidRequestF(goodsDeclarationIncompleteMessage)) { goods =>
         form
           .bindFromRequest()
           .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, goods, backButtonUrl, declarationType, journeyType))),
+            formWithErrors =>
+              Future.successful(BadRequest(view(formWithErrors, goods._1, backButtonUrl, declarationType, journeyType, goods._2))),
             redirectTo
           )
       }
   }
+
+  private def validateRequest(maybeGoodsDestination: Option[GoodsDestination], goodsEntries: GoodsEntries)(
+    implicit request: DeclarationJourneyRequest[_]): OptionT[Future, (DeclarationGoods, CalculationResponse)] =
+    (for {
+      entries     <- OptionT.fromOption(goodsEntries.declarationGoodsIfComplete)
+      destination <- OptionT.fromOption(maybeGoodsDestination)
+      calculation <- OptionT.liftF(calculationService.paymentCalculations(entries.goods, destination))
+    } yield (entries, calculation))
 
   private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] =
     (for {
