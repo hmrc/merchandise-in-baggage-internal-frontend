@@ -71,11 +71,11 @@ class ReviewGoodsController @Inject()(
 
   private def validateRequest(maybeGoodsDestination: Option[GoodsDestination], goodsEntries: GoodsEntries)(
     implicit request: DeclarationJourneyRequest[_]): OptionT[Future, (DeclarationGoods, CalculationResponse)] =
-    (for {
+    for {
       entries     <- OptionT.fromOption(goodsEntries.declarationGoodsIfComplete)
       destination <- OptionT.fromOption(maybeGoodsDestination)
       calculation <- OptionT.liftF(calculationService.paymentCalculations(entries.goods, destination))
-    } yield (entries, calculation))
+    } yield (entries, calculation)
 
   private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] =
     (for {

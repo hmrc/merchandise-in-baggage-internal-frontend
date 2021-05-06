@@ -216,7 +216,8 @@ reviewGoods.price.changeText = amount paid
 reviewGoods.list.invoice = Invoice number
 reviewGoods.list.paymentMade = Payment made
 reviewGoods.h2 = Do you need to declare more types of commercial goods?
-reviewGoods.allowance = You cannot add more than £{0} of goods to this declaration. Remove or change the goods to continue.
+reviewGoods.allowance.within = You have £{0} left of your £1,500 allowance.
+reviewGoods.allowance.over = You cannot add more than £1,500 of goods to this declaration. Remove or change the goods to continue.
 reviewGoods.error.required = Select yes if you want to declare more goods
 
 # RemoveGoods

@@ -43,9 +43,15 @@ button: components.button
 
         @summaryList(goods)
 
-        @h2(messages("reviewGoods.h2"), classes = Some("govuk-heading-m"))
-
-        <div class="govuk-inset-text">@messages("reviewGoods.allowance", calculationResponse.results.calculationResults.map(_.taxDue.value).sum)</div>
+        @calculationResponse.thresholdCheck match {
+            case WithinThreshold => {
+                @h2(messages("reviewGoods.h2"), classes = Some("govuk-heading-m"))
+                <div class="govuk-inset-text">@messages("reviewGoods.allowance.within", calculationResponse.results.calculationResults.map(_.taxDue.value).sum)</div>
+            }
+            case OverThreshold   => {
+                <div class="govuk-inset-text">@messages("reviewGoods.allowance.over")</div>
+            }
+        }
 
         @inputYesNo(
             form = form,
