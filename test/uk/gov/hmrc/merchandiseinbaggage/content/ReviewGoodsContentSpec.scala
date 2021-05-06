@@ -22,8 +22,8 @@ import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.OverThreshold
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.ReviewGoodsPage
-import uk.gov.hmrc.merchandiseinbaggage.support.PropertyBaseTables
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
+import uk.gov.hmrc.merchandiseinbaggage.support.PropertyBaseTables
 
 class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with PropertyBaseTables {
 
@@ -39,7 +39,7 @@ class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with Prop
     rowTest(2, "reviewGoods.list.producedInEu", "Yes", "/goods-origin/1")
     rowTest(3, "reviewGoods.list.vatRate", "20%", "/goods-vat-rate/1")
 
-    findByClassName("govuk-inset-text").getText mustBe messages("reviewGoods.allowance.within", s"${aCalculationResult.taxDue.value}")
+    findByClassName("govuk-inset-text").getText mustBe messages("reviewGoods.allowance.within", s"1,488")
     findByTagName("a").getAttribute("href") must include("review-goods#main-content")
     radioButtonTest
     elementText(findByTagName("button")) mustBe "Continue"
