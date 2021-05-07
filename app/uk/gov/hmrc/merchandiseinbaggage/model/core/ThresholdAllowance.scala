@@ -23,6 +23,8 @@ case class ThresholdAllowance(goods: DeclarationGoods, calculationResponse: Calc
 
 object ThresholdAllowance {
 
+  val formatter = java.text.NumberFormat.getInstance
+
   implicit class ThresholdAllowanceLeft(allowance: ThresholdAllowance) {
     import allowance._
     def allowanceLeft =
