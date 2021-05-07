@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggage.model.api.calculation
+package uk.gov.hmrc.merchandiseinbaggage.model.core
 
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResponse
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, GoodsDestination}
 
 case class ThresholdAllowance(goods: DeclarationGoods, calculationResponse: CalculationResponse, destination: GoodsDestination)

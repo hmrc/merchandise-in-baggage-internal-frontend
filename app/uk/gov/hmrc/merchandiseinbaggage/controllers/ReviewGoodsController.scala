@@ -24,9 +24,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.{declarationNotFoundMessage, goodsDeclarationIncompleteMessage}
 import uk.gov.hmrc.merchandiseinbaggage.forms.ReviewGoodsForm.form
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, ThresholdAllowance, WithinThreshold}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{GoodsDestination, YesNo}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.YesNo
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
@@ -49,7 +49,8 @@ class ReviewGoodsController @Inject()(
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    validateRequest(maybeGoodsDestination, goodsEntries)
+    calculationService
+      .thresholdAllowance(maybeGoodsDestination, goodsEntries)
       .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { allowance =>
         Ok(view(form, allowance, backButtonUrl, declarationType, journeyType))
       }
@@ -57,7 +58,8 @@ class ReviewGoodsController @Inject()(
 
   val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    validateRequest(maybeGoodsDestination, goodsEntries)
+    calculationService
+      .thresholdAllowance(maybeGoodsDestination, goodsEntries)
       .foldF(actionProvider.invalidRequestF(goodsDeclarationIncompleteMessage)) { thresholdAllowance =>
         form
           .bindFromRequest()
@@ -68,14 +70,6 @@ class ReviewGoodsController @Inject()(
           )
       }
   }
-
-  private def validateRequest(maybeGoodsDestination: Option[GoodsDestination], goodsEntries: GoodsEntries)(
-    implicit request: DeclarationJourneyRequest[_]): OptionT[Future, ThresholdAllowance] =
-    for {
-      entries     <- OptionT.fromOption(goodsEntries.declarationGoodsIfComplete)
-      destination <- OptionT.fromOption(maybeGoodsDestination)
-      calculation <- OptionT.liftF(calculationService.paymentCalculations(entries.goods, destination))
-    } yield ThresholdAllowance(entries, calculation, destination)
 
   private def redirectTo(declareMoreGoods: YesNo)(implicit request: DeclarationJourneyRequest[_]): Future[Result] =
     (for {

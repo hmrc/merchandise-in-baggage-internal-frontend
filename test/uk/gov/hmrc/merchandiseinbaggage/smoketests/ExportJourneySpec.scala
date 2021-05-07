@@ -44,6 +44,7 @@ class ExportJourneySpec extends BaseUiSpec {
 
       submitPage(PurchaseDetailsExportPage, "100.50")
 
+      givenAPaymentCalculation(aCalculationResult)
       submitPage(SearchGoodsCountryPage, "FR")
 
       submitPage(ReviewGoodsPage, Yes)
