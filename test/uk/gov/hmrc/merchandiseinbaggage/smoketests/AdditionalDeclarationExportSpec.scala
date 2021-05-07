@@ -59,6 +59,7 @@ class AdditionalDeclarationExportSpec extends BaseUiSpec {
 
       submitPage(GoodsTypePage, "sock")
 
+      givenAPaymentCalculation(aCalculationResult)
       submitPage(PurchaseDetailsExportPage, "100.50")
 
       submitPage(SearchGoodsCountryPage, "FR")
