@@ -21,6 +21,6 @@ import uk.gov.hmrc.merchandiseinbaggage.{BaseSpec, CoreTestData}
 class ThresholdAllowanceSpec extends BaseSpec with CoreTestData {
 
   "return threshold allowance left" in {
-    aThresholdAllowance.allowanceLeft mustBe 1488L
+    aThresholdAllowance.allowanceLeft mustBe 1499L
   }
 }
