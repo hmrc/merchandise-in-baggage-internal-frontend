@@ -63,7 +63,7 @@ class PreviousDeclarationDetailsController @Inject()(
           .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { allowance =>
             decl.fold(actionProvider.invalidRequest(s"declaration not found for id:${request.declarationJourney.declarationId.value}")) {
               declaration =>
-                val remainder = allowance.allowanceLeft
+                val remainder = allowance.allowanceLeft.toInt
                 Ok(view(declaration, f" £$remainder%,d"))
             }
           }
