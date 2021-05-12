@@ -21,7 +21,7 @@ import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyOnFoot
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.PreviousDeclarationDetailsPage
-import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.{givenAPaymentCalculation, givenPersistedDeclarationIsFound}
 
 import java.time.LocalDate
 
@@ -29,6 +29,7 @@ class PreviousDeclarationDetailsContentSpec extends PreviousDeclarationDetailsPa
 
   "it should show all paid goods" in {
     val journey = givenAJourneyWithSession(Amend)
+    givenAPaymentCalculation(aCalculationResult)
     givenPersistedDeclarationIsFound(declarationWithPaidAmendment, journey.declarationId)
     goToPreviousDeclarationDetailsPage
 
@@ -37,6 +38,7 @@ class PreviousDeclarationDetailsContentSpec extends PreviousDeclarationDetailsPa
 
   "it should not show unpaid goods" in {
     val journey = givenAJourneyWithSession(Amend)
+    givenAPaymentCalculation(aCalculationResult)
     givenPersistedDeclarationIsFound(declarationWithAmendment, journey.declarationId)
     goToPreviousDeclarationDetailsPage
 
@@ -45,6 +47,7 @@ class PreviousDeclarationDetailsContentSpec extends PreviousDeclarationDetailsPa
 
   "it should not show the 'Add more goods' button if the travel date was out side of allowed range" in {
     val journey = givenAJourneyWithSession(Amend)
+    givenAPaymentCalculation(aCalculationResult)
     givenPersistedDeclarationIsFound(
       declarationWithAmendment.copy(journeyDetails = JourneyOnFoot(journeyPort, LocalDate.now().minusDays(35))),
       journey.declarationId)

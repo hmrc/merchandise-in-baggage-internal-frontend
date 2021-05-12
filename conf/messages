@@ -75,6 +75,8 @@ previousDeclarationDetails.add = Add more goods to this declaration
 previousDeclarationDetails.expired = You cannot add to an old declaration.
 previousDeclarationDetails.add_goods = You can only add more goods to this declaration, you cannot change any other details. Make sure the total value of all the goods is less than £1,500 and the weight is less than 1,000kg.
 previousDeclarationDetails.add.button.text = Add more goods
+previousDeclarationDetails.allowance.p1 = You have
+previousDeclarationDetails.allowance.p2 = left of your £1,500 allowance.
 
 # ExciseAndRestrictedGoods
 exciseAndRestrictedGoods.Import.title = Are you bringing excise, controlled or restricted goods to Great Britain?
