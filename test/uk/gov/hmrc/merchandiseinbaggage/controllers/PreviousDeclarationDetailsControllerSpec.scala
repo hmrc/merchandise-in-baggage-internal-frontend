@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
-import cats.data.OptionT
+//import cats.data.OptionT
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.PreviousDeclarationDetailsController
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, GoodsDestination, Paid, SessionId}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationType, Paid, SessionId}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
@@ -47,18 +47,16 @@ class PreviousDeclarationDetailsControllerSpec
       actionProvider,
       declarationJourneyRepository,
       mibConnector,
-      mockCalculationService,
       mockNavigator,
+      mockCalculationService,
       view)
 
   "creating a page" should {
     "return 200 if declaration exists" in {
-      val allowance = aThresholdAllowance
       (mockCalculationService
-        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-        .expects(*, *, *)
-        .returning(OptionT.pure[Future](allowance))
-        .once()
+        .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
+        .expects(*, *)
+        .returning(Future.successful(aThresholdAllowance))
 
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
@@ -103,12 +101,10 @@ class PreviousDeclarationDetailsControllerSpec
     }
 
     "return 200 if import declaration with amendment exists " in {
-      val allowance = aThresholdAllowance
       (mockCalculationService
-        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-        .expects(*, *, *)
-        .returning(OptionT.pure[Future](allowance))
-        .once()
+        .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
+        .expects(*, *)
+        .returning(Future.successful(aThresholdAllowance))
 
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
@@ -133,16 +129,14 @@ class PreviousDeclarationDetailsControllerSpec
       contentAsString(eventualResult) must include("cheese")
       contentAsString(eventualResult) must include("more cheese")
       contentAsString(eventualResult) must include("Payment made")
-      contentAsString(eventualResult) must include("£1,499 </span>left of your £1,500 allowance")
+      contentAsString(eventualResult) must include("£1,499.90 </span>left of your £1,500 allowance.")
     }
 
     "return 200 if export declaration with amendment exists " in {
-      val allowance = aThresholdAllowance
       (mockCalculationService
-        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-        .expects(*, *, *)
-        .returning(OptionT.pure[Future](allowance))
-        .once()
+        .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
+        .expects(*, *)
+        .returning(Future.successful(aThresholdAllowance))
 
       val exportJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
@@ -167,7 +161,7 @@ class PreviousDeclarationDetailsControllerSpec
       contentAsString(eventualResult) must include("cheese")
       contentAsString(eventualResult) must include("more cheese")
       contentAsString(eventualResult) mustNot include("Payment made")
-      contentAsString(eventualResult) must include("£1,499 </span>left of your £1,500 allowance")
+      contentAsString(eventualResult) must include("£1,499.90 </span>left of your £1,500 allowance.")
     }
   }
 
