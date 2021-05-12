@@ -29,6 +29,7 @@ object ThresholdAllowance {
 
   implicit class ThresholdAllowanceLeft(allowance: ThresholdAllowance) {
     import allowance._
+
     def allowanceLeft: Double =
       Try {
         val sum = calculationResponse.results.calculationResults.map(_.gbpAmount.value).sum

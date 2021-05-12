@@ -16,36 +16,50 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import cats.data.OptionT
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.PreviousDeclarationDetailsController
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, Paid, SessionId}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationType, GoodsDestination, Paid, SessionId}
+import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
+import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PreviousDeclarationDetailsView
 import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class PreviousDeclarationDetailsControllerSpec
     extends DeclarationJourneyControllerSpec with CoreTestData with WireMockSupport with MibConfiguration with MockFactory {
 
   val mockNavigator: Navigator = mock[Navigator]
   val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
+  private val mockCalculationService = mock[CalculationService]
+
   val controller =
     new PreviousDeclarationDetailsController(
       controllerComponents,
       actionProvider,
       declarationJourneyRepository,
       mibConnector,
+      mockCalculationService,
       mockNavigator,
       view)
 
   "creating a page" should {
     "return 200 if declaration exists" in {
+      val allowance = aThresholdAllowance
+      (mockCalculationService
+        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
+        .expects(*, *, *)
+        .returning(OptionT.pure[Future](allowance))
+        .once()
+
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
           sessionId = aSessionId,
@@ -89,6 +103,13 @@ class PreviousDeclarationDetailsControllerSpec
     }
 
     "return 200 if import declaration with amendment exists " in {
+      val allowance = aThresholdAllowance
+      (mockCalculationService
+        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
+        .expects(*, *, *)
+        .returning(OptionT.pure[Future](allowance))
+        .once()
+
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
           sessionId = aSessionId,
@@ -112,10 +133,17 @@ class PreviousDeclarationDetailsControllerSpec
       contentAsString(eventualResult) must include("cheese")
       contentAsString(eventualResult) must include("more cheese")
       contentAsString(eventualResult) must include("Payment made")
-
+      contentAsString(eventualResult) must include("£1,499 </span>left of your £1,500 allowance")
     }
 
     "return 200 if export declaration with amendment exists " in {
+      val allowance = aThresholdAllowance
+      (mockCalculationService
+        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
+        .expects(*, *, *)
+        .returning(OptionT.pure[Future](allowance))
+        .once()
+
       val exportJourney: DeclarationJourney = completedDeclarationJourney
         .copy(
           sessionId = aSessionId,
@@ -139,6 +167,7 @@ class PreviousDeclarationDetailsControllerSpec
       contentAsString(eventualResult) must include("cheese")
       contentAsString(eventualResult) must include("more cheese")
       contentAsString(eventualResult) mustNot include("Payment made")
+      contentAsString(eventualResult) must include("£1,499 </span>left of your £1,500 allowance")
     }
   }
 
