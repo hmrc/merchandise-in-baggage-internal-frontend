@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import cats.data.OptionT
+import cats.instances.future._
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
-import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyController.goodsDeclarationIncompleteMessage
-import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationGoods, ExportGoods, Goods, ImportGoods, NotRequired, Paid}
-import uk.gov.hmrc.merchandiseinbaggage.model.core.{ExportGoodsEntry, GoodsEntries, GoodsEntry, ImportGoodsEntry}
-import uk.gov.hmrc.merchandiseinbaggage.navigation.PreviousDeclarationDetailsRequest
+import uk.gov.hmrc.merchandiseinbaggage.navigation._
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PreviousDeclarationDetailsView
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class PreviousDeclarationDetailsController @Inject()(
@@ -37,38 +35,18 @@ class PreviousDeclarationDetailsController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
   mibConnector: MibConnector,
-  calculationService: CalculationService,
   navigator: Navigator,
+  calculationService: CalculationService,
   view: PreviousDeclarationDetailsView)(implicit ec: ExecutionContext, appConf: AppConfig)
     extends DeclarationJourneyUpdateController {
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
-    def declarationGoods2GoodsEntryList(goods: DeclarationGoods): Seq[GoodsEntry] = goods.goods.map {
-      case g: ImportGoods => ImportGoodsEntry(Some(g.category), Some(g.goodsVatRate), Some(g.producedInEu), Some(g.purchaseDetails))
-      case g: ExportGoods => ExportGoodsEntry(Some(g.category), None, Some(g.purchaseDetails))
-    }
-
-    mibConnector.findDeclaration(request.declarationJourney.declarationId).flatMap { decl =>
-      decl.fold(Future.successful(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage))) { declaration =>
-        calculationService
-          .thresholdAllowance(
-            Some(declaration.goodsDestination),
-            GoodsEntries(
-              declarationGoods2GoodsEntryList(declaration.declarationGoods)
-                ++ declaration.amendments
-                  .filter(a =>
-                    a.paymentStatus.contains(Paid) || a.paymentStatus.contains(NotRequired) || declaration.declarationType == Export)
-                  .flatMap(b => declarationGoods2GoodsEntryList(b.goods)))
-          )
-          .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { allowance =>
-            decl.fold(actionProvider.invalidRequest(s"declaration not found for id:${request.declarationJourney.declarationId.value}")) {
-              declaration =>
-                val remainder = allowance.allowanceLeft.toInt
-                Ok(view(declaration, f" £$remainder%,d"))
-            }
-          }
-      }
-    }
+    import request.declarationJourney._
+    (for {
+      declaration <- OptionT(mibConnector.findDeclaration(declarationId))
+      allowance   <- OptionT.liftF(calculationService.thresholdAllowance(declaration))
+    } yield Ok(view(declaration, allowance)))
+      .fold(actionProvider.invalidRequest(s"declaration not found for id:${request.declarationJourney.declarationId.value}"))(view => view)
   }
 
   val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
@@ -79,7 +57,6 @@ class PreviousDeclarationDetailsController @Inject()(
             navigator
               .nextPage(PreviousDeclarationDetailsRequest(request.declarationJourney, originalDeclaration, repo.upsert))
               .map(Redirect)
-
         }
     }
   }
