@@ -44,6 +44,11 @@ object DateUtils {
       val dateFormatted = dateTime.format(dateTimeFormatter)
       translatedDate(dateFormatted)
     }
+
+    def formattedDateNoTime(implicit messages: Messages): String = {
+      val dateFormatted = dateTime.format(dateFormatter)
+      translatedDate(dateFormatted)
+    }
   }
 
   implicit class LocalDateOps(date: LocalDate) {
