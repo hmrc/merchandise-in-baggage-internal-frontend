@@ -23,7 +23,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.merchandiseinbaggage.auth.StrideAuthAction
 import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
-import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
@@ -43,7 +42,16 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
   private val client = app.injector.instanceOf[HttpClient]
   private val connector = new MibConnector(client, s"$protocol://$host:${WireMockSupport.port}")
 
-  "on page load return 200 if declaration exists and resets the journey" in {
+  private def controller(journey: DeclarationJourney) = {
+    val repo = stubRepo(givenADeclarationJourneyIsPersistedWithStub(journey))
+    lazy val defaultBuilder = injector.instanceOf[DefaultActionBuilder]
+    lazy val stride = injector.instanceOf[StrideAuthAction]
+    val ab = new DeclarationJourneyActionProvider(defaultBuilder, repo, stride)
+
+    new DeclarationConfirmationController(controllerComponents, ab, view, connector, repo)
+  }
+
+  "on page load return 200 if declaration exists and resets the journey for Exports" in {
     val sessionId = aSessionId //SessionId()
     val id = aDeclarationId //DeclarationId("456")
     val created = LocalDateTime.now.withSecond(0).withNano(0)
@@ -52,20 +60,44 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
     val exportJourney: DeclarationJourney = completedDeclarationJourney
       .copy(sessionId = sessionId, declarationType = DeclarationType.Export, createdAt = created, declarationId = id)
 
-    val repo = stubRepo(givenADeclarationJourneyIsPersistedWithStub(exportJourney))
-
-    lazy val defaultBuilder = injector.instanceOf[DefaultActionBuilder]
-    lazy val stride = injector.instanceOf[StrideAuthAction]
-    val ab = new DeclarationJourneyActionProvider(defaultBuilder, repo, stride)
-
-    val controller =
-      new DeclarationConfirmationController(controllerComponents, ab, view, connector, repo)
-
     givenPersistedDeclarationIsFound(exportJourney.declarationIfRequiredAndComplete.get, id)
 
-    val eventualResult = controller.onPageLoad()(request)
+    val eventualResult = controller(exportJourney).onPageLoad()(request)
     status(eventualResult) mustBe 200
+  }
 
+  "on page load return 200 if declaration exists and resets the journey for Import with no payment required" in {
+    val sessionId = SessionId()
+    val id = DeclarationId("456")
+    val created = LocalDateTime.now.withSecond(0).withNano(0)
+    val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, sessionId)
+
+    val importJourney: DeclarationJourney = completedDeclarationJourney.copy(sessionId = sessionId, createdAt = created, declarationId = id)
+    val declarationWithNoPaymentRequired = importJourney.declarationIfRequiredAndComplete.get.copy(paymentStatus = Some(NotRequired))
+
+    givenADeclarationJourneyIsPersisted(importJourney)
+
+    givenPersistedDeclarationIsFound(declarationWithNoPaymentRequired, id)
+
+    val eventualResult = controller(importJourney).onPageLoad()(request)
+    status(eventualResult) mustBe 200
+  }
+
+  "on page load return an invalid request for Import with payment required but not paid yet" in {
+    val sessionId = SessionId()
+    val id = DeclarationId("456")
+    val created = LocalDateTime.now.withSecond(0).withNano(0)
+    val request = buildGet(routes.DeclarationConfirmationController.onPageLoad().url, sessionId)
+
+    val importJourney: DeclarationJourney = completedDeclarationJourney.copy(sessionId = sessionId, createdAt = created, declarationId = id)
+
+    givenADeclarationJourneyIsPersisted(importJourney)
+
+    givenPersistedDeclarationIsFound(declaration, id)
+
+    val eventualResult = controller(importJourney).onPageLoad()(request)
+    status(eventualResult) mustBe 303
+    redirectLocation(eventualResult) mustBe Some("/declare-commercial-goods/cannot-access-page")
   }
 
   "on page load return an invalid request if journey is invalidated by resetting" in {
@@ -82,42 +114,4 @@ class DeclarationConfirmationControllerSpec extends DeclarationJourneyController
     status(eventualResult) mustBe 303
     redirectLocation(eventualResult) mustBe Some("/declare-commercial-goods/cannot-access-page")
   }
-
-  "Import with value over 1000gbp, add an 'take proof' line" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111)
-
-    result must include(messageApi("declarationConfirmation.ul.3"))
-  }
-
-  "Import with value under 1000gbp, DONOT add an 'take proof' line" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 100)
-
-    result mustNot include(messageApi("declarationConfirmation.ul.3"))
-  }
-
-  "Export with value over 1000gbp, DONOT add an 'take proof' line" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Export, 111111)
-
-    result mustNot include(messageApi("declarationConfirmation.ul.3"))
-  }
-
-  "New declaration displays 'take this declaration with you'" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111, New)
-
-    result must include(messageApi("declarationConfirmation.ul.2.New"))
-  }
-
-  "Amended declaration displays 'take this UPDATED declaration with you'" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Import, 111111, Amend)
-
-    result must include(messageApi("declarationConfirmation.ul.2.Amend"))
-  }
-
-  "Import should display the destination country" in {
-    val result = generateDeclarationConfirmationPage(DeclarationType.Export, 100)
-
-    result must include("Destination")
-    result must include("France")
-  }
-
 }

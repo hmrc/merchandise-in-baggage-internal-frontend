@@ -21,7 +21,8 @@ import play.api.i18n.Messages
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.merchandiseinbaggage.controllers.{DeclarationGoodsRequest, DeclarationJourneyRequest}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.Country
+import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Country, Declaration, NotRequired, Paid, TotalCalculationResult, YesNoDontKnow}
 import uk.gov.hmrc.merchandiseinbaggage.service.CountryService
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched.CountryEnriched
 
@@ -48,6 +49,23 @@ object ViewUtils {
     case r: DeclarationJourneyRequest[_] => r.declarationJourney.journeyType.entryName.toLowerCase
     case r: DeclarationGoodsRequest[_]   => r.declarationJourney.journeyType.entryName.toLowerCase
     case _                               => ""
+  }
+
+  def proofOfOriginNeeded(declaration: Declaration): Boolean = {
+    def calcAmount(maybeTotalCalculationResult: Option[TotalCalculationResult]): Long =
+      maybeTotalCalculationResult.fold(0L) {
+        _.calculationResults.calculationResults
+          .filter(_.goods.producedInEu == YesNoDontKnow.Yes)
+          .map(_.gbpAmount.value)
+          .sum
+      }
+
+    if (declaration.declarationType == Import) {
+      (calcAmount(declaration.maybeTotalCalculationResult) + declaration.amendments
+        .filter(amendment => List(Some(Paid), Some(NotRequired)).contains(amendment.paymentStatus))
+        .map(x => calcAmount(x.maybeTotalCalculationResult))
+        .sum) > 100000L //amount in pence so 100000L == £1000
+    } else false
   }
 
 }
