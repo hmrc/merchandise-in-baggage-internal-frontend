@@ -220,7 +220,7 @@ reviewGoods.list.paymentMade = Payment made
 reviewGoods.h2 = Do you need to declare more types of commercial goods?
 reviewGoods.allowance.declared = You have £
 reviewGoods.allowance.left = left of your £1,500 allowance.
-reviewGoods.allowance.over = You cannot add more than £1,500 of goods to this declaration. Remove or change the goods to continue.
+reviewGoods.allowance.over = You cannot add more than £1,500 of goods to this declaration.
 reviewGoods.error.required = Select yes if you want to declare more goods
 
 # RemoveGoods
@@ -303,7 +303,7 @@ agentDetails.error.required = Enter your registered business name
 # TraderDetails
 travellerDetails.title = What is the name of the person carrying the goods?
 travellerDetails.heading = What is the name of the person carrying the goods?
-travellerDetails.hint = Enter their full legal name as it appears on their passport or birth certificate.
+travellerDetails.hint = Enter their first and last name as it appears on their passport or birth certificate.
 travellerDetails.firstName = First name
 travellerDetails.lastName = Last name
 travellerDetails.firstName.error.required = Enter the first name of the person carrying the goods
