@@ -74,7 +74,7 @@
         </div>
     </dl>
 
-    <div class="govuk-inset-text">@messages("previousDeclarationDetails.allowance.p1")<span class="govuk-!-font-weight-bold"> £@formatter.format(allowance.allowanceLeft) </span>@messages("previousDeclarationDetails.allowance.p2")</div>
+    <div class="govuk-inset-text">@messages("previousDeclarationDetails.allowance.p1")<span class="govuk-!-font-weight-bold"> @{allowance.toUIString} </span>@messages("previousDeclarationDetails.allowance.p2")</div>
 
     @h2(("previousDeclarationDetails.add"), Some("govuk-heading-m"))
 
