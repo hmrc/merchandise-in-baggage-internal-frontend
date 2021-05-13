@@ -34,7 +34,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     goToConfirmationPage
 
     findById("serviceLabel").getText mustBe "Declaration"
-    findById("service").getText mustBe "Commercial goods"
+    findById("service").getText mustBe "Commercial goods carried in accompanied baggage or small vehicles"
 
     findById("dateOfDeclarationLabel").getText mustBe "Date"
     findById("dateOfDeclaration").getText mustBe declarationWithPaidAmendment.dateOfDeclaration.formattedDateNoTime
@@ -50,7 +50,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     elementText(bulletPoints.head) mustBe s"${messages("declarationConfirmation.ul.2")}"
     elementText(bulletPoints(1)) mustBe s"${messages("declarationConfirmation.ul.3")}"
 
-    findById("makeAnotherDeclarationId").getText mustBe "Make another declaration"
+    findById("makeAnotherDeclarationId").getText mustBe "Make a new declaration"
     findById("makeAnotherDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/make-another-declaration")
     findById("changeDeclarationId").getText mustBe "Add goods to an existing declaration"
     findById("changeDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/add-goods-to-an-existing-declaration")
@@ -71,7 +71,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     goToConfirmationPage
 
     findById("serviceLabel").getText mustBe "Declaration"
-    findById("service").getText mustBe "Commercial goods"
+    findById("service").getText mustBe "Commercial goods carried in accompanied baggage or small vehicles"
 
     findById("dateOfDeclarationLabel").getText mustBe "Date"
     findById("dateOfDeclaration").getText mustBe declarationWithPaidAmendment.dateOfDeclaration.formattedDateNoTime
@@ -91,7 +91,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
 
     findById("bringingEUGoodsId").getText mustBe "Bringing EU goods"
 
-    findById("makeAnotherDeclarationId").getText mustBe "Make another declaration"
+    findById("makeAnotherDeclarationId").getText mustBe "Make a new declaration"
     findById("makeAnotherDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/make-another-declaration")
     findById("changeDeclarationId").getText mustBe "Add goods to an existing declaration"
     findById("changeDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/add-goods-to-an-existing-declaration")
