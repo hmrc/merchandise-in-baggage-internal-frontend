@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.merchandiseinbaggage.controllers
+package uk.gov.hmrc.merchandiseinbaggage.content
 
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.controllers.{GoodsOverThresholdController, routes}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Import
 import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestinations.GreatBritain
@@ -29,7 +30,7 @@ import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoodsOverThresholdControllerSpec extends DeclarationJourneyControllerSpec with WireMockSupport {
+class GoodsOverThresholdContentSpec extends DeclarationJourneyControllerSpec with WireMockSupport {
 
   private val view = app.injector.instanceOf[GoodsOverThresholdView]
   private val calculatorService = app.injector.instanceOf[CalculationService]
