@@ -76,4 +76,9 @@ object DeclarationView {
         .sum) > 100000L
     } else false
   }
+
+  def currentPaymentAmount(declaration: Declaration): Option[AmountInPence] =
+    declaration.amendments.lastOption
+      .flatMap(_.maybeTotalCalculationResult.map(_.totalTaxDue))
+      .orElse(declaration.maybeTotalCalculationResult.map(_.totalTaxDue))
 }

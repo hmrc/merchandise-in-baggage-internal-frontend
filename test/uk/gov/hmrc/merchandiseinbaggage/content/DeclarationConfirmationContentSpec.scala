@@ -19,11 +19,13 @@ package uk.gov.hmrc.merchandiseinbaggage.content
 import org.openqa.selenium.By
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.Export
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, NotRequired}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResult, CalculationResults}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{AmountInPence, NotRequired}
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.DeclarationConfirmationPage
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.utils.DateUtils.LocalDateTimeOps
+
+import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage with CoreTestData {
@@ -40,7 +42,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     findById("dateOfDeclaration").getText mustBe declarationWithPaidAmendment.dateOfDeclaration.formattedDateNoTime
 
     findById("amountLabel").getText mustBe "Amount"
-    findById("amount").getText mustBe "Nothing to pay"
+    findById("nothingtopay").getText mustBe "Nothing to pay"
 
     findById("whatToDoNextId").getText mustBe "What you need to do next"
 
@@ -77,7 +79,7 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     findById("dateOfDeclaration").getText mustBe declarationWithPaidAmendment.dateOfDeclaration.formattedDateNoTime
 
     findById("amountLabel").getText mustBe "Amount"
-    findById("amount").getText mustBe "Nothing to pay"
+    findById("amount").getText mustBe "£1"
 
     findById("whatToDoNextId").getText mustBe "What you need to do next"
 
@@ -88,6 +90,40 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
     elementText(bulletPoints(1)) mustBe "take the declaration sent to the email provided"
     elementText(bulletPoints(2)) mustBe "take the receipts or invoices for all the declared goods"
     elementText(bulletPoints(3)) mustBe "take proof which shows where the EU goods were produced"
+
+    findById("bringingEUGoodsId").getText mustBe "Bringing EU goods"
+
+    findById("makeAnotherDeclarationId").getText mustBe "Make a new declaration"
+    findById("makeAnotherDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/make-another-declaration")
+    findById("changeDeclarationId").getText mustBe "Add goods to an existing declaration"
+    findById("changeDeclarationId").getAttribute("href") mustBe fullUrl("/declare-commercial-goods/add-goods-to-an-existing-declaration")
+  }
+
+  "it should show the amendment amount and date in case of amend journey - not the original declaration amount/date" in {
+    val journey = givenAJourneyWithSession()
+    givenPersistedDeclarationIsFound(
+      declarationWithPaidAmendment.copy(maybeTotalCalculationResult = None, dateOfDeclaration = LocalDateTime.now().minusDays(10)),
+      journey.declarationId)
+
+    goToConfirmationPage
+
+    findById("serviceLabel").getText mustBe "Declaration"
+    findById("service").getText mustBe "Commercial goods carried in accompanied baggage or small vehicles"
+
+    findById("dateOfDeclarationLabel").getText mustBe "Date"
+    findById("dateOfDeclaration").getText mustBe LocalDateTime.now().formattedDateNoTime
+
+    findById("amountLabel").getText mustBe "Amount"
+    findById("amount").getText mustBe "£1"
+
+    findById("whatToDoNextId").getText mustBe "What you need to do next"
+
+    val bulletPoints = findBullets()
+
+    bulletPoints.size mustBe 3
+    elementText(bulletPoints.head) mustBe "go through the green channel (nothing to declare) at customs"
+    elementText(bulletPoints(1)) mustBe "take the declaration sent to the email provided"
+    elementText(bulletPoints(2)) mustBe "take the receipts or invoices for all the declared goods"
 
     findById("bringingEUGoodsId").getText mustBe "Bringing EU goods"
 
