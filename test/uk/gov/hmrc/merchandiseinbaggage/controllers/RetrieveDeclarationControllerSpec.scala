@@ -18,7 +18,6 @@ package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers.{status, _}
-import uk.gov.hmrc.merchandiseinbaggage.config.AmendFlagConf
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{DeclarationNotFoundController, RetrieveDeclarationController}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType
@@ -47,9 +46,7 @@ class RetrieveDeclarationControllerSpec
       stubRepo(declarationJourney),
       connector,
       mockNavigator,
-      view) {
-      override lazy val amendFlagConf: AmendFlagConf = AmendFlagConf(amendFlag)
-    }
+      view)
 
   val journey: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
@@ -72,14 +69,6 @@ class RetrieveDeclarationControllerSpec
 
         result must include(messageApi(s"retrieveDeclaration.eori.label"))
         result must include(messageApi(s"retrieveDeclaration.eori.hint"))
-      }
-
-      s"redirect to ${routes.CannotUseServiceController.onPageLoad().url} if flag is false for $importOrExport" in {
-        val request = buildGet(routes.ImportExportChoiceController.onPageLoad.url, aSessionId)
-        val eventualResult = controller(journey, false).onPageLoad(request)
-
-        status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(routes.CannotUseServiceController.onPageLoad().url)
       }
     }
   }

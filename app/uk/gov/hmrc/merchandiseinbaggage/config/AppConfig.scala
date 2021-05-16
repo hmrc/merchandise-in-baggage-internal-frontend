@@ -75,9 +75,3 @@ trait MibConfiguration {
 }
 
 final case class MIBConf(protocol: String, host: String, port: Int)
-
-trait AmendDeclarationConfiguration {
-  lazy val amendFlagConf: AmendFlagConf = configSource("features.declaration-amend").loadOrThrow[AmendFlagConf]
-}
-
-final case class AmendFlagConf(canBeAmended: Boolean)
