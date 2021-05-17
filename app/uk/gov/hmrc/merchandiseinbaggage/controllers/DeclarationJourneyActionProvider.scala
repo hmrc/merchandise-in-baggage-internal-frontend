@@ -57,9 +57,7 @@ class DeclarationJourneyActionProvider @Inject()(
           case Some(sessionId) =>
             repo.findBySessionId(SessionId(sessionId)).map {
               case Some(declarationJourney) =>
-                val declarationJourneyRequest = new DeclarationJourneyRequest(declarationJourney, request)
-                DeclarationJourneyLogger.info("journeyActionRefiner success")(declarationJourneyRequest)
-                Right(declarationJourneyRequest)
+                Right(new DeclarationJourneyRequest(declarationJourney, request))
               case _ => Left(invalidRequest(s"Persisted declaration journey not found for session: $sessionId")(request))
             }
         }
@@ -75,9 +73,7 @@ class DeclarationJourneyActionProvider @Inject()(
           case None =>
             Left(invalidRequest(s"Goods entry not found for index $idx")(request))
           case Some(goodsEntry) =>
-            val declarationJourneyRequest = new DeclarationGoodsRequest(request, goodsEntry)
-            DeclarationJourneyLogger.info("goodsActionRefiner success")(declarationJourneyRequest)
-            Right(declarationJourneyRequest)
+            Right(new DeclarationGoodsRequest(request, goodsEntry))
         })
 
       override protected def executionContext: ExecutionContext = ec
