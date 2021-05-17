@@ -85,11 +85,10 @@ class DeclarationConfirmationContentSpec extends DeclarationConfirmationPage wit
 
     val bulletPoints = findBullets()
 
-    bulletPoints.size mustBe 4
+    bulletPoints.size mustBe 3
     elementText(bulletPoints.head) mustBe "go through the green channel (nothing to declare) at customs"
     elementText(bulletPoints(1)) mustBe "take the declaration sent to the email provided"
     elementText(bulletPoints(2)) mustBe "take the receipts or invoices for all the declared goods"
-    elementText(bulletPoints(3)) mustBe "take proof which shows where the EU goods were produced"
 
     findById("bringingEUGoodsId").getText mustBe "Bringing EU goods"
 
