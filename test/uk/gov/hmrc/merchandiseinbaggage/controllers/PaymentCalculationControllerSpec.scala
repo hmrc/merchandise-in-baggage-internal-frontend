@@ -26,11 +26,13 @@ import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEnt
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
+import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
+import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenExchangeRateURL
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData {
+class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData with WireMockSupport {
 
   private val view = app.injector.instanceOf[PaymentCalculationView]
   private lazy val stubbedCalculation: CalculationResponse => CalculationService = response =>
@@ -45,10 +47,13 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
       controllerComponents,
       stubProvider(journey),
       stubbedCalculation(aCalculationResponse.copy(thresholdCheck = check)),
+      mibConnector,
       view)
 
   "onPageLoad" should {
     "return 200 with expected content" in {
+      givenExchangeRateURL("http://something")
+
       val journey = DeclarationJourney(
         SessionId("123"),
         DeclarationType.Import,
@@ -77,6 +82,8 @@ class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec 
 
     forAll(declarationTypesTable) { importOrExport =>
       s"redirect to /goods-over-threshold for $importOrExport if its over threshold" in {
+        givenExchangeRateURL("http://something")
+
         val journey =
           DeclarationJourney(
             SessionId("123"),
