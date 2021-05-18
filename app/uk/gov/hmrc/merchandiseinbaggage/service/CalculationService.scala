@@ -18,15 +18,16 @@ package uk.gov.hmrc.merchandiseinbaggage.service
 
 import cats.data.OptionT
 import cats.instances.future._
-
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.connectors.MibConnector
+import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationAmendRequest, CalculationResponse}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationId, Goods, GoodsDestination}
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationGoods, DeclarationId, Goods, GoodsDestination, JourneyType}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries, ThresholdAllowance}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
+import uk.gov.hmrc.merchandiseinbaggage.viewmodels.DeclarationView._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,19 +56,33 @@ class CalculationService @Inject()(mibConnector: MibConnector)(implicit ec: Exec
         )))
   }
 
-  def thresholdAllowance(maybeGoodsDestination: Option[GoodsDestination], goodsEntries: GoodsEntries)(
-    implicit hc: HeaderCarrier): OptionT[Future, ThresholdAllowance] =
+  def thresholdAllowance(
+    maybeGoodsDestination: Option[GoodsDestination],
+    goodsEntries: GoodsEntries,
+    journeyType: JourneyType,
+    declarationId: DeclarationId)(implicit hc: HeaderCarrier): OptionT[Future, ThresholdAllowance] =
     for {
       declarationGoods <- OptionT.fromOption(goodsEntries.declarationGoodsIfComplete)
       destination      <- OptionT.fromOption(maybeGoodsDestination)
-      calculation      <- OptionT.liftF(paymentCalculations(declarationGoods.goods, destination))
-    } yield ThresholdAllowance(declarationGoods, calculation, destination)
+      totalGoods       <- addGoods(journeyType, declarationId, declarationGoods.goods)
+      calculation      <- OptionT.liftF(paymentCalculations(totalGoods, destination))
+    } yield ThresholdAllowance(DeclarationGoods(totalGoods), calculation, destination)
 
   def thresholdAllowance(declaration: Declaration)(implicit hc: HeaderCarrier): Future[ThresholdAllowance] = {
     import declaration._
-    paymentCalculations(declarationGoods.goods, goodsDestination).map(calculation =>
+    paymentCalculations(allGoods(declaration), goodsDestination).map(calculation =>
       ThresholdAllowance(declarationGoods, calculation, goodsDestination))
   }
+
+  private[service] def addGoods(journeyType: JourneyType, declarationId: DeclarationId, goods: Seq[Goods])(
+    implicit hc: HeaderCarrier): OptionT[Future, Seq[Goods]] =
+    journeyType match {
+      case New => OptionT.pure(goods)
+      case Amend =>
+        OptionT(findDeclaration(declarationId)).map { declaration =>
+          goods ++ allGoods(declaration)
+        }
+    }
 
   private def withLogging(response: CalculationResponse): CalculationResponse = {
     response.results.calculationResults.foreach(result =>

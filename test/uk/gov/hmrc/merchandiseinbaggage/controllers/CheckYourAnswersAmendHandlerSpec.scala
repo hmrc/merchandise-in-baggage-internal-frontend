@@ -66,6 +66,12 @@ class CheckYourAnswersAmendHandlerSpec
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
+        (mockCalculationService
+          .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
+          .expects(*, *, *)
+          .returning(Future.successful(CalculationResponse(aCalculationResults, WithinThreshold)))
+          .once()
+
         if (importOrExport == Import)(mockCalculationService
           .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
@@ -97,6 +103,12 @@ class CheckYourAnswersAmendHandlerSpec
             goodsEntries = overThresholdGoods(importOrExport))
 
         val amendment = completedAmendment(importOrExport)
+
+        (mockCalculationService
+          .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
+          .expects(*, *, *)
+          .returning(Future.successful(CalculationResponse(aCalculationResults, OverThreshold)))
+          .once()
 
         if (importOrExport == Import)(mockCalculationService
           .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
