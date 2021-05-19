@@ -50,7 +50,7 @@ class ReviewGoodsController @Inject()(
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
     calculationService
-      .thresholdAllowance(maybeGoodsDestination, goodsEntries)
+      .thresholdAllowance(maybeGoodsDestination, goodsEntries, journeyType, declarationId)
       .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { allowance =>
         Ok(view(form, allowance, backButtonUrl, declarationType, journeyType))
       }
@@ -59,7 +59,7 @@ class ReviewGoodsController @Inject()(
   val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
     calculationService
-      .thresholdAllowance(maybeGoodsDestination, goodsEntries)
+      .thresholdAllowance(maybeGoodsDestination, goodsEntries, journeyType, declarationId)
       .foldF(actionProvider.invalidRequestF(goodsDeclarationIncompleteMessage)) { thresholdAllowance =>
         form
           .bindFromRequest()

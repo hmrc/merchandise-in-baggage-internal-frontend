@@ -20,7 +20,7 @@ import org.openqa.selenium.{By, WebElement}
 import org.scalatest.Assertion
 import uk.gov.hmrc.merchandiseinbaggage.CoreTestData
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.{Amend, New}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.OverThreshold
+import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{OverThreshold, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.smoketests.pages.ReviewGoodsPage
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support.PropertyBaseTables
@@ -45,6 +45,13 @@ class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with Prop
     elementText(findByTagName("button")) mustBe "Continue"
   }
 
+  s"render different title&header for amending an existing declaration" in {
+    givenAJourneyWithSession(Amend)
+    givenAPaymentCalculation(aCalculationResult, WithinThreshold)
+    givenPersistedDeclarationIsFound()
+    goToReviewGoodsPagePage(Amend)
+  }
+
   s"render contents when over threshold" in {
     givenAJourneyWithSession()
     givenAPaymentCalculation(aCalculationResultOverThousand, OverThreshold)
@@ -52,12 +59,6 @@ class ReviewGoodsContentSpec extends ReviewGoodsPage with CoreTestData with Prop
 
     elementText(findByTagName("h2")) must not include messages("reviewGoods.h2")
     findByClassName("govuk-inset-text").getText mustBe messages("reviewGoods.allowance.over")
-  }
-
-  s"render different title&header for amending an existing declaration" in {
-    givenAJourneyWithSession(Amend)
-    givenAPaymentCalculation(aCalculationResult)
-    goToReviewGoodsPagePage(Amend)
   }
 
   private def rowTest(rowNumber: Int, key: String, value: String, changeLink: String): Assertion = {

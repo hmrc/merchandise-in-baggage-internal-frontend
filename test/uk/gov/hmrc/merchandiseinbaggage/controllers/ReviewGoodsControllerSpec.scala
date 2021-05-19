@@ -17,23 +17,23 @@
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
 import cats.data.OptionT
-import com.softwaremill.quicklens._
 import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{CheckYourAnswersController, GoodsTypeController, PaymentCalculationController, ReviewGoodsController}
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.DeclarationType.{Export, Import}
-import uk.gov.hmrc.merchandiseinbaggage.model.api.GoodsDestination
+import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationId, GoodsDestination, JourneyType}
 import uk.gov.hmrc.merchandiseinbaggage.model.api.JourneyTypes.Amend
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, CalculationResults, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
-import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
+import uk.gov.hmrc.merchandiseinbaggage.navigation._
 import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
-import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import com.softwaremill.quicklens._
+import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 
 class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
@@ -62,8 +62,8 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
           if (importOrExport == Export) aThresholdAllowance.modify(_.goods).setTo(entries.declarationGoodsIfComplete.get)
           else aThresholdAllowance
         (mockCalculationService
-          .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-          .expects(*, *, *)
+          .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries, _: JourneyType, _: DeclarationId)(_: HeaderCarrier))
+          .expects(*, *, *, *, *)
           .returning(OptionT.pure[Future](allowance))
           .once()
 
@@ -85,8 +85,8 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
           .withFormUrlEncodedBody("value" -> "Yes")
 
         (mockCalculationService
-          .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-          .expects(*, *, *)
+          .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries, _: JourneyType, _: DeclarationId)(_: HeaderCarrier))
+          .expects(*, *, *, *, *)
           .returning(OptionT.pure[Future](aThresholdAllowance))
           .once()
 
@@ -105,8 +105,8 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
         .withFormUrlEncodedBody("value" -> "in valid")
 
       (mockCalculationService
-        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-        .expects(*, *, *)
+        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries, _: JourneyType, _: DeclarationId)(_: HeaderCarrier))
+        .expects(*, *, *, *, *)
         .returning(OptionT.pure[Future](aThresholdAllowance))
         .once()
 
@@ -137,8 +137,8 @@ class ReviewGoodsControllerSpec extends DeclarationJourneyControllerSpec with Mo
           injector.instanceOf[Navigator])
 
       (mockCalculationService
-        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries)(_: HeaderCarrier))
-        .expects(*, *, *)
+        .thresholdAllowance(_: Option[GoodsDestination], _: GoodsEntries, _: JourneyType, _: DeclarationId)(_: HeaderCarrier))
+        .expects(*, *, *, *, *)
         .returning(OptionT.pure[Future](aThresholdAllowance))
         .once()
 
