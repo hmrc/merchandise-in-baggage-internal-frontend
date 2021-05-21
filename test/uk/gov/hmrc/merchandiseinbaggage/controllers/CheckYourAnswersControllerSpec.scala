@@ -97,7 +97,6 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
         result must include(messages("checkYourAnswers.journeyDetails.travellingByVehicle"))
         result must include(messages("checkYourAnswers.journeyDetails.vehicleRegistrationNumber"))
         result must include(messages("checkYourAnswers.sendDeclaration.acknowledgement"))
-        result must include(messages(s"checkYourAnswers.sendDeclaration.$importOrExport.acknowledgement.1"))
         result must include(messages("checkYourAnswers.sendDeclaration.confirm"))
         result must include(messages("checkYourAnswers.sendDeclaration.warning"))
         result must include(messages(s"checkYourAnswers.sendDeclaration.warning.$importOrExport.message"))
