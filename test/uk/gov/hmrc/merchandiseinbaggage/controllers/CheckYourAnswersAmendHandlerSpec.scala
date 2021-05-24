@@ -85,7 +85,7 @@ class CheckYourAnswersAmendHandlerSpec
             .once()
 
         val amendment = completedAmendment(importOrExport)
-        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment)
+        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment, YesNo.No)
 
         status(eventualResult) mustBe OK
         contentAsString(eventualResult) must include(messageApi("checkYourAnswers.amend.title"))
@@ -122,7 +122,7 @@ class CheckYourAnswersAmendHandlerSpec
             .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
             .once()
 
-        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment)
+        val eventualResult = handler.onPageLoad(journey.copy(declarationType = importOrExport), amendment, YesNo.No)
 
         status(eventualResult) mustBe 303
         redirectLocation(eventualResult) mustBe Some(routes.GoodsOverThresholdController.onPageLoad().url)
