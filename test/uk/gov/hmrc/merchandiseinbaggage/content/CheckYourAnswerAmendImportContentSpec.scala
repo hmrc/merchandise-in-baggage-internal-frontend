@@ -35,7 +35,7 @@ class CheckYourAnswerAmendImportContentSpec extends CheckYourAnswersPage with Co
     setUp(aCalculationResultOverThousand, WithinThreshold) { bulletPoints =>
       bulletPoints.size mustBe 4
       elementText(bulletPoints(0)) mustBe s"${messages("checkYourAnswers.amend.sendDeclaration.acknowledgement.1")}"
-      elementText(bulletPoints(1)) mustBe s"${messages("checkYourAnswers.sendDeclaration.acknowledgement.EU.over.thousand")}"
+      elementText(bulletPoints(1)) mustBe s"${messages("checkYourAnswers.sendDeclaration.acknowledgement.trader.EU.over.thousand")}"
       elementText(bulletPoints(2)) mustBe s"${messages("checkYourAnswers.sendDeclaration.Import.trader.acknowledgement.1")}"
       elementText(bulletPoints(3)) mustBe s"${messages("checkYourAnswers.sendDeclaration.Import.trader.acknowledgement.2")}"
       elementText(findByTagName("button")) mustBe s"${messages("checkYourAnswers.payButton")}"
