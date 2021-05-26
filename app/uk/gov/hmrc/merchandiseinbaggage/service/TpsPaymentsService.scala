@@ -24,14 +24,19 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.Declaration
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.CalculationResults
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.{PaymentSpecificData, TpsId, TpsPaymentsItem, TpsPaymentsRequest}
 import uk.gov.hmrc.merchandiseinbaggage.utils.DataModelEnriched._
-
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.i18n.MessagesApi
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 @Singleton
-class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector)(implicit ec: ExecutionContext, appConfig: AppConfig) {
+class TpsPaymentsService @Inject()(connector: TpsPaymentsBackendConnector, val auditConnector: AuditConnector, val messagesApi: MessagesApi)(
+  implicit ec: ExecutionContext,
+  appConfig: AppConfig)
+    extends Auditor {
 
   def createTpsPayments(pid: String, amendmentRef: Option[Int], declaration: Declaration, paymentDue: CalculationResults)(
     implicit hc: HeaderCarrier): Future[TpsId] = {
+    auditDeclaration(declaration)
     val request = TpsPaymentsRequest(
       pid = pid,
       payments = Seq(
