@@ -42,13 +42,13 @@ class CheckYourAnswersController @Inject()(
       case New =>
         declarationIfRequiredAndComplete
           .fold(actionProvider.invalidRequestF(incompleteMessage)) { declaration =>
-            newHandler.onPageLoad(declaration, maybeCustomsAgent.fold(No: YesNo)(_ => Yes))
+            newHandler.onPageLoad(declaration, maybeIsACustomsAgent.fold(No: YesNo)(value => value))
           }
       case Amend =>
         amendmentIfRequiredAndComplete
           .fold(actionProvider.invalidRequestF(incompleteMessage)) { amendment =>
             amendHandler
-              .onPageLoad(request.declarationJourney, amendment, maybeCustomsAgent.fold(No: YesNo)(_ => Yes))
+              .onPageLoad(request.declarationJourney, amendment, maybeIsACustomsAgent.fold(No: YesNo)(value => value))
           }
     }
   }
