@@ -50,7 +50,6 @@ class RetrieveDeclarationControllerSpec
 
   val journey: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
-  //TODO create UI test for content
   forAll(declarationTypesTable) { importOrExport: DeclarationType =>
     val journey: DeclarationJourney = DeclarationJourney(aSessionId, importOrExport)
     "onPageLoad" should {

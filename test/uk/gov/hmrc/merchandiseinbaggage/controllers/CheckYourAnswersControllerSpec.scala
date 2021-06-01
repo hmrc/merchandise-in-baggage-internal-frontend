@@ -24,7 +24,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRespon
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, Goods, GoodsDestination}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
+import uk.gov.hmrc.merchandiseinbaggage.service.{MibService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenDeclarationIsPersistedInBackend
 import uk.gov.hmrc.merchandiseinbaggage.support.TpsPaymentsBackendStub._
 import uk.gov.hmrc.merchandiseinbaggage.support._
@@ -43,9 +43,8 @@ class CheckYourAnswersControllerSpec extends DeclarationJourneyControllerSpec wi
   private lazy val amendImportView = injector.instanceOf[CheckYourAnswersAmendImportView]
   private lazy val amendExportView = injector.instanceOf[CheckYourAnswersAmendExportView]
 
-  //TODO replace with a mock for consistency
-  private lazy val stubbedCalculation: CalculationResponse => CalculationService = calculationResponse =>
-    new CalculationService(mibConnector) {
+  private lazy val stubbedCalculation: CalculationResponse => MibService = calculationResponse =>
+    new MibService(mibConnector) {
       override def paymentCalculations(goods: Seq[Goods], destination: GoodsDestination)(
         implicit hc: HeaderCarrier): Future[CalculationResponse] =
         Future.successful(calculationResponse)

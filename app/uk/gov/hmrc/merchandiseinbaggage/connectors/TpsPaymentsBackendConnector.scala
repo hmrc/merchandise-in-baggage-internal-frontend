@@ -33,8 +33,7 @@ class TpsPaymentsBackendConnector @Inject()(httpClient: HttpClient, @Named("tpsB
     httpClient.POST[TpsPaymentsRequest, HttpResponse](s"$baseUrl/tps-payments-backend/tps-payments", requestBody).map { response =>
       response.status match {
         case Status.CREATED => response.json.as[TpsId]
-        case other: Int     =>
-          //TODO: PagerDuty
+        case other: Int =>
           throw TpsPaymentsException(
             s"unexpected status from tps-payments-backend for reference: ${requestBody.payments.head.chargeReference}, status: $other")
       }

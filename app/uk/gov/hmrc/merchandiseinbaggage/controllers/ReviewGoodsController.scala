@@ -29,7 +29,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRespon
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.navigation.ReviewGoodsRequest
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggage.service.MibService
 import uk.gov.hmrc.merchandiseinbaggage.views.html.ReviewGoodsView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,7 +40,7 @@ class ReviewGoodsController @Inject()(
   actionProvider: DeclarationJourneyActionProvider,
   override val repo: DeclarationJourneyRepository,
   view: ReviewGoodsView,
-  calculationService: CalculationService,
+  mibService: MibService,
   navigator: Navigator)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends DeclarationJourneyUpdateController {
 
@@ -49,7 +49,7 @@ class ReviewGoodsController @Inject()(
 
   val onPageLoad: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    calculationService
+    mibService
       .thresholdAllowance(maybeGoodsDestination, goodsEntries, journeyType, declarationId)
       .fold(actionProvider.invalidRequest(goodsDeclarationIncompleteMessage)) { allowance =>
         Ok(view(form, allowance, backButtonUrl, declarationType, journeyType))
@@ -58,7 +58,7 @@ class ReviewGoodsController @Inject()(
 
   val onSubmit: Action[AnyContent] = actionProvider.journeyAction.async { implicit request =>
     import request.declarationJourney._
-    calculationService
+    mibService
       .thresholdAllowance(maybeGoodsDestination, goodsEntries, journeyType, declarationId)
       .foldF(actionProvider.invalidRequestF(goodsDeclarationIncompleteMessage)) { thresholdAllowance =>
         form
@@ -89,6 +89,6 @@ class ReviewGoodsController @Inject()(
     implicit hc: HeaderCarrier): OptionT[Future, CalculationResponse] =
     declarationJourney.amendmentIfRequiredAndComplete
       .fold(OptionT.pure[Future](CalculationResponse(CalculationResults(Seq.empty), WithinThreshold))) { _ =>
-        calculationService.amendPlusOriginalCalculations(declarationJourney)
+        mibService.amendPlusOriginalCalculations(declarationJourney)
       }
 }

@@ -23,7 +23,7 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{GoodsOverThresholdCo
 import uk.gov.hmrc.merchandiseinbaggage.model.api._
 import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationResponse, OverThreshold, ThresholdCheck, WithinThreshold}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.{DeclarationJourney, GoodsEntries}
-import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggage.service.MibService
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PaymentCalculationView
 import uk.gov.hmrc.merchandiseinbaggage.wiremock.WireMockSupport
@@ -35,8 +35,8 @@ import scala.concurrent.Future
 class PaymentCalculationControllerSpec extends DeclarationJourneyControllerSpec with CoreTestData with WireMockSupport {
 
   private val view = app.injector.instanceOf[PaymentCalculationView]
-  private lazy val stubbedCalculation: CalculationResponse => CalculationService = response =>
-    new CalculationService(mibConnector) {
+  private lazy val stubbedCalculation: CalculationResponse => MibService = response =>
+    new MibService(mibConnector) {
       override def paymentCalculations(goods: Seq[Goods], destination: GoodsDestination)(
         implicit hc: HeaderCarrier): Future[CalculationResponse] =
         Future.successful(response)

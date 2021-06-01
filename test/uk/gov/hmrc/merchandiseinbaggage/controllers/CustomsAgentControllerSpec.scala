@@ -16,19 +16,24 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.controllers
 
+import org.scalamock.scalatest.MockFactory
 import play.api.test.Helpers._
+import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.{AgentDetailsController, EoriNumberController}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
+import uk.gov.hmrc.merchandiseinbaggage.navigation.CustomsAgentRequest
 import uk.gov.hmrc.merchandiseinbaggage.support._
 import uk.gov.hmrc.merchandiseinbaggage.views.html.CustomsAgentView
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
+class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec with MockFactory {
 
   val view = app.injector.instanceOf[CustomsAgentView]
+  val mockNavigator = mock[Navigator]
   val controller: DeclarationJourney => CustomsAgentController =
     declarationJourney =>
-      new CustomsAgentController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), view)
+      new CustomsAgentController(controllerComponents, stubProvider(declarationJourney), stubRepo(declarationJourney), mockNavigator, view)
 
   private val journey: DeclarationJourney = startedImportJourney
 
@@ -69,16 +74,35 @@ class CustomsAgentControllerSpec extends DeclarationJourneyControllerSpec {
     }
   }
 
-  forAll(customAgentYesOrNoAnswer) { (yesOrNo, redirectTo) =>
-    "onSubmit" should {
-      s"redirect to $redirectTo on submit if answer is $yesOrNo" in {
-        val request = buildGet(routes.CustomsAgentController.onSubmit().url)
-          .withFormUrlEncodedBody("value" -> yesOrNo.toString)
+  "onSubmit" should {
+    s"redirect to ${routes.AgentDetailsController.onPageLoad()} on submit if answer is Yes" in {
+      val request = buildGet(routes.CustomsAgentController.onSubmit().url)
+        .withFormUrlEncodedBody("value" -> "Yes")
 
-        val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
-        status(eventualResult) mustBe 303
-        redirectLocation(eventualResult) mustBe Some(redirectTo)
-      }
+      (mockNavigator
+        .nextPage(_: CustomsAgentRequest)(_: ExecutionContext))
+        .expects(*, *)
+        .returning(Future successful AgentDetailsController.onPageLoad())
+        .once()
+
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe Some(AgentDetailsController.onPageLoad().url)
+    }
+
+    s"redirect to ${routes.EoriNumberController.onPageLoad()} on submit if answer is No" in {
+      val request = buildGet(routes.CustomsAgentController.onSubmit().url)
+        .withFormUrlEncodedBody("value" -> "No")
+
+      (mockNavigator
+        .nextPage(_: CustomsAgentRequest)(_: ExecutionContext))
+        .expects(*, *)
+        .returning(Future successful EoriNumberController.onPageLoad())
+        .once()
+
+      val eventualResult = controller(givenADeclarationJourneyIsPersistedWithStub(journey)).onSubmit(request)
+      status(eventualResult) mustBe 303
+      redirectLocation(eventualResult) mustBe Some(EoriNumberController.onPageLoad().url)
     }
   }
 }
