@@ -31,7 +31,7 @@ import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyActionProv
 import uk.gov.hmrc.merchandiseinbaggage.model.api.SessionId
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.repositories.DeclarationJourneyRepository
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
+import uk.gov.hmrc.merchandiseinbaggage.service.{MibService, TpsPaymentsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,7 +46,7 @@ trait DeclarationJourneyControllerSpec extends BaseSpecWithApplication with Prop
   lazy val defaultBuilder = injector.instanceOf[DefaultActionBuilder]
   lazy val actionProvider = injector.instanceOf[DeclarationJourneyActionProvider]
   lazy val addressLookupConnector = injector.instanceOf[AddressLookupFrontendConnector]
-  lazy val calculationService = injector.instanceOf[CalculationService]
+  lazy val mibService = injector.instanceOf[MibService]
   lazy val tpsPaymentsService = injector.instanceOf[TpsPaymentsService]
   lazy val mibConnector = injector.instanceOf[MibConnector]
 

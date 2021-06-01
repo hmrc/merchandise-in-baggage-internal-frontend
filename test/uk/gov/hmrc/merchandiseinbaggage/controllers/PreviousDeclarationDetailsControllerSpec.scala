@@ -25,7 +25,7 @@ import uk.gov.hmrc.merchandiseinbaggage.config.MibConfiguration
 import uk.gov.hmrc.merchandiseinbaggage.controllers.routes.PreviousDeclarationDetailsController
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{Declaration, DeclarationType, Paid, SessionId}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
-import uk.gov.hmrc.merchandiseinbaggage.service.CalculationService
+import uk.gov.hmrc.merchandiseinbaggage.service.MibService
 import uk.gov.hmrc.merchandiseinbaggage.stubs.MibBackendStub.givenPersistedDeclarationIsFound
 import uk.gov.hmrc.merchandiseinbaggage.support.DeclarationJourneyControllerSpec
 import uk.gov.hmrc.merchandiseinbaggage.views.html.PreviousDeclarationDetailsView
@@ -39,7 +39,7 @@ class PreviousDeclarationDetailsControllerSpec
 
   val mockNavigator: Navigator = mock[Navigator]
   val view = app.injector.instanceOf[PreviousDeclarationDetailsView]
-  private val mockCalculationService = mock[CalculationService]
+  private val mockMibService = mock[MibService]
 
   val controller =
     new PreviousDeclarationDetailsController(
@@ -48,12 +48,12 @@ class PreviousDeclarationDetailsControllerSpec
       declarationJourneyRepository,
       mibConnector,
       mockNavigator,
-      mockCalculationService,
+      mockMibService,
       view)
 
   "creating a page" should {
     "return 200 if declaration exists" in {
-      (mockCalculationService
+      (mockMibService
         .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
         .expects(*, *)
         .returning(Future.successful(aThresholdAllowance))
@@ -101,7 +101,7 @@ class PreviousDeclarationDetailsControllerSpec
     }
 
     "return 200 if import declaration with amendment exists " in {
-      (mockCalculationService
+      (mockMibService
         .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
         .expects(*, *)
         .returning(Future.successful(aThresholdAllowance))
@@ -133,7 +133,7 @@ class PreviousDeclarationDetailsControllerSpec
     }
 
     "return 200 if export declaration with amendment exists " in {
-      (mockCalculationService
+      (mockMibService
         .thresholdAllowance(_: Declaration)(_: HeaderCarrier))
         .expects(*, *)
         .returning(Future.successful(aThresholdAllowance))

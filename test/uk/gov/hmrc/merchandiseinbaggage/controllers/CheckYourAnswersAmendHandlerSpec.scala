@@ -30,7 +30,7 @@ import uk.gov.hmrc.merchandiseinbaggage.model.api.calculation.{CalculationRespon
 import uk.gov.hmrc.merchandiseinbaggage.model.api.{DeclarationId, _}
 import uk.gov.hmrc.merchandiseinbaggage.model.core.DeclarationJourney
 import uk.gov.hmrc.merchandiseinbaggage.model.tpspayments.TpsId
-import uk.gov.hmrc.merchandiseinbaggage.service.{CalculationService, TpsPaymentsService}
+import uk.gov.hmrc.merchandiseinbaggage.service.{MibService, TpsPaymentsService}
 import uk.gov.hmrc.merchandiseinbaggage.support.{DeclarationJourneyControllerSpec, PropertyBaseTables}
 import uk.gov.hmrc.merchandiseinbaggage.views.html.{CheckYourAnswersAmendExportView, CheckYourAnswersAmendImportView}
 
@@ -45,14 +45,14 @@ class CheckYourAnswersAmendHandlerSpec
   private lazy val importView = injector.instanceOf[CheckYourAnswersAmendImportView]
   private lazy val exportView = injector.instanceOf[CheckYourAnswersAmendExportView]
   private lazy val mockTpsPaymentsService = mock[TpsPaymentsService]
-  private lazy val mockCalculationService = mock[CalculationService]
+  private lazy val mockMibService = mock[MibService]
   implicit val hc: HeaderCarrier = HeaderCarrier()
   private val sessionId = SessionId()
   implicit val request: Request[_] = buildGet(routes.CheckYourAnswersController.onPageLoad().url, sessionId)
 
   val handler = new CheckYourAnswersAmendHandler(
     actionBuilder,
-    mockCalculationService,
+    mockMibService,
     mockTpsPaymentsService,
     importView,
     exportView,
@@ -66,19 +66,19 @@ class CheckYourAnswersAmendHandlerSpec
         val journey: DeclarationJourney = completedDeclarationJourney
           .copy(sessionId = sessionId, declarationType = importOrExport, createdAt = created, declarationId = id)
 
-        (mockCalculationService
+        (mockMibService
           .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
           .expects(*, *, *)
           .returning(Future.successful(CalculationResponse(aCalculationResults, WithinThreshold)))
           .once()
 
-        if (importOrExport == Import)(mockCalculationService
+        if (importOrExport == Import)(mockMibService
           .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
           .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
           .once()
         else
-          (mockCalculationService
+          (mockMibService
             .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
             .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, WithinThreshold)))
@@ -104,19 +104,19 @@ class CheckYourAnswersAmendHandlerSpec
 
         val amendment = completedAmendment(importOrExport)
 
-        (mockCalculationService
+        (mockMibService
           .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
           .expects(*, *, *)
           .returning(Future.successful(CalculationResponse(aCalculationResults, OverThreshold)))
           .once()
 
-        if (importOrExport == Import)(mockCalculationService
+        if (importOrExport == Import)(mockMibService
           .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
           .expects(*, *)
           .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
           .once()
         else
-          (mockCalculationService
+          (mockMibService
             .amendPlusOriginalCalculations(_: DeclarationJourney)(_: HeaderCarrier))
             .expects(*, *)
             .returning(OptionT.pure[Future](CalculationResponse(aCalculationResults, OverThreshold)))
@@ -137,19 +137,19 @@ class CheckYourAnswersAmendHandlerSpec
       val importJourney: DeclarationJourney = completedDeclarationJourney
         .copy(sessionId = sessionId, journeyType = Amend, declarationType = Import, createdAt = created, declarationId = id)
 
-      (mockCalculationService
+      (mockMibService
         .findDeclaration(_: DeclarationId)(_: HeaderCarrier))
         .expects(id, *)
         .returning(Future.successful(Some(declaration.copy(declarationType = Import, declarationId = id))))
         .once()
 
-      (mockCalculationService
+      (mockMibService
         .paymentCalculations(_: Seq[ImportGoods], _: GoodsDestination)(_: HeaderCarrier))
         .expects(*, *, *)
         .returning(Future.successful(CalculationResponse(aCalculationResults, WithinThreshold)))
         .once()
 
-      (mockCalculationService
+      (mockMibService
         .amendDeclaration(_: Declaration)(_: HeaderCarrier))
         .expects(*, *)
         .returning(Future.successful(id))

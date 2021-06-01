@@ -33,11 +33,11 @@ import com.softwaremill.quicklens._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CalculationServiceSpec extends BaseSpecWithApplication with CoreTestData with MockFactory {
+class MibServiceSpec extends BaseSpecWithApplication with CoreTestData with MockFactory {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val mockConnector = mock[MibConnector]
-  private val service = new CalculationService(mockConnector)
+  private val service = new MibService(mockConnector)
 
   "retrieve payment calculations from mib backend" in {
     val stubbedResult =

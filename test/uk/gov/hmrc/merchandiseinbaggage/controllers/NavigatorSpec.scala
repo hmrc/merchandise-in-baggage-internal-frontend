@@ -238,7 +238,7 @@ class NavigatorSpec extends DeclarationJourneyControllerSpec with PropertyBaseTa
         .onPageLoad()} for $newOrAmend & $importOrExport updating goods entries" in new Navigator {
         val detailsInput: PurchaseDetailsInput = PurchaseDetailsInput("123", "EUR")
         val stubUpsert: DeclarationJourney => Future[DeclarationJourney] =
-          _ => Future.successful(completedDeclarationJourney) //TODO make it work with mockFunction
+          _ => Future.successful(completedDeclarationJourney)
 
         val result = nextPage(
           PurchaseDetailsRequest(

@@ -315,7 +315,6 @@ object NavigatorMapping {
     val updatedDeclarationJourney =
       declarationJourney.copy(goodsEntries = declarationJourney.goodsEntries.patch(index, updatedGoodsEntry))
 
-    //TODO improve these Boolean
     upsert(updatedDeclarationJourney).map { _ =>
       val goodsCycleComplete = updatedDeclarationJourney.goodsEntries.entries(index - 1).isComplete
       if (goodsCycleComplete) {

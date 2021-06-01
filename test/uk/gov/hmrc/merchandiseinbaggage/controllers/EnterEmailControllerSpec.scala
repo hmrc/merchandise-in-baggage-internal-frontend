@@ -38,7 +38,6 @@ class EnterEmailControllerSpec extends DeclarationJourneyControllerSpec with Moc
 
   val journey: DeclarationJourney = DeclarationJourney(aSessionId, Import)
 
-  //TODO move content test in UI
   "onPageLoad" should {
     s"return 200 with correct content" in {
       val request = buildGet(EnterEmailController.onPageLoad().url, aSessionId)
