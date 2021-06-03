@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.merchandiseinbaggage.auth
 
-import controllers.Assets.Unauthorized
 import org.slf4j.LoggerFactory.getLogger
-import play.api.mvc.Results.Forbidden
+import play.api.mvc.Results.{Forbidden, Unauthorized}
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
@@ -27,7 +26,7 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.config.AppConfig
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import javax.inject.Inject
@@ -48,7 +47,7 @@ class StrideAuthAction @Inject()(override val authConnector: AuthConnector, appC
   private val logger = getLogger(getClass)
 
   override def invokeBlock[A](request: Request[A], block: AuthRequest[A] => Future[Result]): Future[Result] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     def redirectToStrideLogin(message: String) = {
       logger.warn(s"user is not authenticated - redirecting user to login: $message")
