@@ -22,7 +22,7 @@ import play.api.mvc.{Request, RequestHeader}
 import uk.gov.hmrc.http.CookieNames.deviceID
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.merchandiseinbaggage.controllers.DeclarationJourneyRequest
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import Obfuscate._
 
@@ -52,7 +52,7 @@ object DeclarationJourneyLogger {
   private def sessionId(implicit r: RequestHeader) = {
     val hc = r match {
       case r: Request[_] => headerCarrier(r)
-      case r             => HeaderCarrierConverter.fromHeadersAndSession(r.headers)
+      case r             => HeaderCarrierConverter.fromRequest(r)
     }
     s"sessionId: [${hc.sessionId.map(_.value).getOrElse("")}]"
   }
